@@ -13,7 +13,7 @@
 
 Building Ortho from scratch using ASES workflows. Every task follows: `.ases/workflows/feature.md` → 6 gates, 10 artifacts, human approval at each stage.
 
-**Current Status:** PLANNING (task-001 plan + spec + rollback ready for human review)
+**Current Status:** ARCH-REVIEW (task-001 architecture-review + ADRs ready for human approval GATE 2)
 
 ---
 
@@ -62,25 +62,29 @@ Building Ortho from scratch using ASES workflows. Every task follows: `.ases/wor
 
 ### task-001: Shared Foundation
 
-**State:** READY-FOR-PLANNER-REVIEW  
+**State:** READY-FOR-GATE-2-APPROVAL  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-06-30
 
-**Artifacts Created:**
-- `.ases/tasks/task-001-shared-foundation/plan.md` ✓ (9 atomic tasks, dependencies, risks, notes)
-- `.ases/tasks/task-001-shared-foundation/spec.md` ✓ (files, contracts, acceptance criteria)
-- `.ases/tasks/task-001-shared-foundation/rollback-plan.md` ✓ (triggers, procedures, verification)
+**Artifacts Completed:**
+- ✅ `.ases/tasks/task-001-shared-foundation/plan.md` (GATE 1: approved)
+- ✅ `.ases/tasks/task-001-shared-foundation/spec.md` (GATE 1: approved)
+- ✅ `.ases/tasks/task-001-shared-foundation/rollback-plan.md` (GATE 1: approved)
+- ✅ `.ases/tasks/task-001-shared-foundation/architecture-review.md` (ARCHITECT complete, GATE 2: approval pending)
+- ✅ `.ases/architecture/adrs/ADR-004-storage-strategy-sqlite-local-first.md` (PROPOSED status)
+- ✅ `.ases/architecture/adrs/ADR-005-language-adapter-plugin-model.md` (PROPOSED status)
 
-**Next Step:** Human reviews all 3 artifacts at GATE 1 (Plan Approval). Check:
-- [ ] Feature summary is clear
-- [ ] 9 atomic tasks are testable and ordered correctly
-- [ ] Acceptance criteria are binary (not vague)
-- [ ] Files to create/modify are explicit
-- [ ] Input/output contracts defined
-- [ ] Rollback procedure is repeatable
+**Next Step:** Human reviews architecture-review.md + ADRs at GATE 2 (Architecture Approval). Check:
+- [ ] Module boundaries clear and coherent?
+- [ ] Dependencies acyclic (no circular deps)?
+- [ ] All APIs defined with input/output contracts?
+- [ ] Data flow reviewed (validation at right layer)?
+- [ ] Security/scalability/extensibility risks addressed?
+- [ ] ADR-004 (SQLite strategy) justified?
+- [ ] ADR-005 (adapter plugin model) justified?
 - [ ] **Decision:** APPROVED / SEND BACK / REJECTED
 
-**After Approval:** Proceed to ARCHITECT role (GATE 2: Architecture Review)
+**After Approval:** Proceed to BUILDER role (implement 9 atomic tasks, produce implementation-notes.md)
 
 ---
 
@@ -266,5 +270,9 @@ This means:
 - Mark intentional shortcuts with `# ponytail:` comments
 
 ---
+
+---
+
+*Last updated: 2026-06-30 11:45 UTC by ARCHITECT (architecture review complete, awaiting GATE 2 approval)*
 
 *End of CLAUDE.md*
