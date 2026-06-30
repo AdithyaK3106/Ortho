@@ -64,12 +64,13 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-task-003 | Week 5–6 Call Graph + Incremental | ARCH-REVIEW → READY-TO-BUILD (GATE 2: awaiting human approval)
+task-003 | Week 5–6 Call Graph + Incremental | IMPLEMENTED → TESTS-WRITTEN (GATE 3: awaiting scope review)
 - Plan: `.ases/tasks/task-003-call-graph-incremental/plan.md` ✓
 - Spec: `.ases/tasks/task-003-call-graph-incremental/spec.md` ✓
 - Rollback: `.ases/tasks/task-003-call-graph-incremental/rollback-plan.md` ✓
 - Architecture: `.ases/tasks/task-003-call-graph-incremental/architecture-review.md` ✓ (APPROVED)
-- Status: ARCHITECT complete (no new ADRs required), GATE 2 ready for human approval
+- Implementation: `.ases/tasks/task-003-call-graph-incremental/implementation-notes.md` ✓ (5/5 tasks complete)
+- Status: BUILDER complete (all 5 atomic tasks implemented), GATE 3 ready for scope review
 
 ---
 
