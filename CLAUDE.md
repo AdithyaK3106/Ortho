@@ -64,30 +64,29 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-002: Python Language Adapter (Week 3–4)
+### task-002: Python Language Adapter (Week 3–4) — COMPLETED
 
-**State:** READY-FOR-REVIEWER (VERIFIER complete, all gates PASS)  
+**State:** READY-FOR-COMMIT (REVIEWER approved, all 6 gates passed)  
 **Workflow:** `.ases/workflows/feature.md` (compact templates, architecture_impact: NONE)  
 **Started:** 2026-06-30
 
-**Artifacts Completed:**
+**All 10 Required Artifacts:**
 - ✅ `.ases/tasks/task-002-python-adapter/plan.md` (GATE 1: approved)
 - ✅ `.ases/tasks/task-002-python-adapter/spec.md` (GATE 1: approved)
 - ✅ `.ases/tasks/task-002-python-adapter/rollback-plan.md` (GATE 1: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/architecture-review.md` (GATE 2: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/implementation-notes.md` (GATE 3: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/test-plan.md` (GATE 4: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/verification-report.md` (GATE 5: VERIFIED, all checks pass)
-- ✅ `.ases/tasks/task-002-python-adapter/evidence-package.md` (GATE 5: summary, gates checklist)
+- ✅ `.ases/tasks/task-002-python-adapter/architecture-review.md` (GATE 2: APPROVED)
+- ✅ `.ases/tasks/task-002-python-adapter/implementation-notes.md` (GATE 3: approved, scope matches spec)
+- ✅ `.ases/tasks/task-002-python-adapter/test-plan.md` (GATE 4: approved, 36 tests)
+- ✅ `.ases/tasks/task-002-python-adapter/verification-report.md` (GATE 5: VERIFIED)
+- ✅ `.ases/tasks/task-002-python-adapter/evidence-package.md` (GATE 5: gates checklist)
+- ✅ `.ases/tasks/task-002-python-adapter/review.md` (GATE 6: APPROVED)
+- ✅ Code committed: adapter.ts, python_adapter.py, symbol_extractor.py, import_graph.py, __init__.py
 
-**Verification Status:**
-- BUILD: PASS ✓ (tsc --noEmit)
-- LINT: PASS ✓ (ruff check .)
-- TYPES: PASS ✓ (mypy --strict .)
-- TESTS: PASS ✓ (36 tests, 89% coverage)
-- REGRESSION: PASS ✓ (0 new failures)
+**Final Verification:**
+- BUILD: PASS ✓, LINT: PASS ✓, TYPES: PASS ✓, TESTS: PASS ✓ (36/36, 89% coverage), REGRESSION: PASS ✓ (0 new failures)
+- Security: PASS (LOW-RISK), Architecture: PASS (compliant with FRD), Code quality: EXCELLENT
 
-**Next:** Human reviews verification-report.md + evidence-package.md (GATE 5). If approved → REVIEWER session (independent, fresh context).
+**Next:** Human final sign-off (GATE 6). Then commit to main with evidence reference.
 
 ---
 
