@@ -1,12 +1,22 @@
 """Layer detection from import patterns."""
 
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
+from pathlib import Path
 
 import networkx as nx
 
-from shared.storage import OrthoDatabase
-from .graph_utils import FileGraph
+# Add shared storage to path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
+
+from database import OrthoDatabase
+
+try:
+    from .graph_utils import FileGraph
+except (ImportError, ValueError):
+    from graph_utils import FileGraph
 
 
 @dataclass

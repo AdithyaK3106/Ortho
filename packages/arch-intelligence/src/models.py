@@ -1,10 +1,16 @@
 """Architecture model persistence."""
 
 import json
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-from shared.storage import OrthoDatabase
+# Add shared storage to path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
+
+from database import OrthoDatabase
 
 if TYPE_CHECKING:
     from shared.types import ArchitectureModel

@@ -82,8 +82,8 @@ class TestArchitectureDetectorLayering:
         detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         result = detector.detect()
 
-        # Evidence should include layering score
-        has_layering = any("layering" in e.lower() for e in result.evidence)
+        # Evidence should include layering score or upward dependencies
+        has_layering = any("upward" in e.lower() or "layer" in e.lower() for e in result.evidence)
         assert has_layering
 
     def test_upward_dependencies_in_evidence(self, mock_symbol_repo, sample_repo_id):

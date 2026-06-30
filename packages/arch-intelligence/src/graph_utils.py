@@ -1,10 +1,17 @@
 """Graph utilities for architecture analysis."""
 
+import sys
 from collections import defaultdict, deque
+from pathlib import Path
 from typing import Dict, List, Set, Tuple
+
 import networkx as nx
 
-from shared.storage import OrthoDatabase
+# Add shared storage to path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
+
+from database import OrthoDatabase
 
 
 class FileGraph:

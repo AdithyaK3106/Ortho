@@ -1,11 +1,22 @@
 """Architecture style detector."""
 
+import sys
 from dataclasses import replace
+from pathlib import Path
 from typing import Dict
 
-from shared.storage import OrthoDatabase
-from .graph_utils import FileGraph, MetricsCalculator
-from .types import ArchStyle, DetectionMetrics, DetectionResult
+# Add shared storage to path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
+
+from database import OrthoDatabase
+
+try:
+    from .graph_utils import FileGraph, MetricsCalculator, CallGraph
+    from .detection_types import ArchStyle, DetectionMetrics, DetectionResult
+except (ImportError, ValueError, SystemError):
+    from graph_utils import FileGraph, MetricsCalculator, CallGraph
+    from detection_types import ArchStyle, DetectionMetrics, DetectionResult
 
 
 class ArchitectureDetector:
@@ -15,7 +26,6 @@ class ArchitectureDetector:
         self.db = db
         self.repo_id = repo_id
         self.file_graph = FileGraph(db, repo_id)
-        from .graph_utils import CallGraph
         self.metrics_calc = MetricsCalculator(self.file_graph, CallGraph(db, repo_id))
 
     def detect(self) -> DetectionResult:
