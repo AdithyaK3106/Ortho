@@ -66,7 +66,7 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ### task-002: Python Language Adapter (Week 3–4)
 
-**State:** READY-FOR-TEST-DESIGNER (BUILDER complete, awaiting GATE 3 approval)  
+**State:** READY-FOR-VERIFIER (TEST-DESIGNER complete, awaiting GATE 4 approval)  
 **Workflow:** `.ases/workflows/feature.md` (compact templates, architecture_impact: NONE)  
 **Started:** 2026-06-30
 
@@ -75,10 +75,10 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 - ✅ `.ases/tasks/task-002-python-adapter/spec.md` (GATE 1: approved)
 - ✅ `.ases/tasks/task-002-python-adapter/rollback-plan.md` (GATE 1: approved)
 - ✅ `.ases/tasks/task-002-python-adapter/architecture-review.md` (GATE 2: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/implementation-notes.md` (BUILDER complete, scope matches spec)
-- ✅ Code committed: adapter.ts interface, python_adapter.py (tree-sitter), symbol_extractor.py, import_graph.py
+- ✅ `.ases/tasks/task-002-python-adapter/implementation-notes.md` (GATE 3: approved)
+- ✅ `.ases/tasks/task-002-python-adapter/test-plan.md` (TEST-DESIGNER complete, 36+ tests, all criteria covered)
 
-**Next:** Human reviews implementation-notes.md (GATE 3: scope check). If approved → TEST-DESIGNER session.
+**Next:** Human reviews test-plan.md (GATE 4: test coverage check). If approved → VERIFIER session.
 
 ---
 
