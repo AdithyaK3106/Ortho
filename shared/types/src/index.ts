@@ -6,3 +6,6 @@ export * from "./workflow";
 export * from "./context";
 export * from "./llm";
 export * from "./adapter";
+export * from "./call-graph";
+export * from "./dependency-graph";
+export * from "./module";

@@ -7,6 +7,7 @@ Language-specific code analysis adapters and symbol extraction.
 from .adapters.python_adapter import PythonAdapter
 from .symbol_extractor import SymbolExtractor, Symbol
 from .import_graph import ImportGraphBuilder, ImportEdge
+from .call_graph import CallGraphBuilder, CallEdge, CallGraphError
 
 __all__ = [
     "PythonAdapter",
@@ -14,4 +15,7 @@ __all__ = [
     "Symbol",
     "ImportGraphBuilder",
     "ImportEdge",
+    "CallGraphBuilder",
+    "CallEdge",
+    "CallGraphError",
 ]
