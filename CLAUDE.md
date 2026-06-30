@@ -64,9 +64,24 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-001: Shared Foundation
+### task-002: Python Language Adapter (Week 3–4)
 
-**State:** REVIEW  
+**State:** READY-FOR-ARCHITECT (PLANNER complete, awaiting GATE 1 human approval)  
+**Workflow:** `.ases/workflows/feature.md` (compact templates, architecture_impact: NONE)  
+**Started:** 2026-06-30
+
+**Artifacts Completed:**
+- ✅ `.ases/tasks/task-002-python-adapter/plan.md` (4 atomic tasks, dependencies clear)
+- ✅ `.ases/tasks/task-002-python-adapter/spec.md` (LanguageAdapter interface + Python implementation)
+- ✅ `.ases/tasks/task-002-python-adapter/rollback-plan.md` (triggers, procedures, verification)
+
+**Next:** Human reviews all three documents. If approved → ARCHITECT session (or waived if architecture_impact confirmed NONE).
+
+---
+
+### task-001: Shared Foundation (COMPLETED)
+
+**State:** COMMITTED  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-06-30
 
