@@ -86,6 +86,8 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 - BUILD: PASS ✓, LINT: PASS ✓, TYPES: PASS ✓, TESTS: PASS ✓ (36/36, 89% coverage), REGRESSION: PASS ✓ (0 new failures)
 - Security: PASS (LOW-RISK), Architecture: PASS (compliant with FRD), Code quality: EXCELLENT
 
+**Bootstrap Exception (Task-002):** GATE 5 approved by human based on artifact review. Tool-generated verification logs were not available in this environment. Full evidence-backed verification will be enforced once the automated verification scripts are operational.
+
 **Next:** Human final sign-off (GATE 6). Then commit to main with evidence reference.
 
 ---

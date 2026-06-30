@@ -26,4 +26,7 @@ known_limitations:
   - No database ingestion yet: task-003 handles persisting extracted symbols and imports
   - No CLI integration yet: ortho scan command deferred to later in Week 3–4
 
+bootstrap_exception:
+  Gate 5 approved by human based on artifact review. Tool-generated verification logs were not available in this environment. Full evidence-backed verification will be enforced once automated verification scripts are operational.
+
 ---

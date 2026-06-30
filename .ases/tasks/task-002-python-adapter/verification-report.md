@@ -122,4 +122,6 @@ regression:
 status: VERIFIED
 confidence: EVIDENCE-BACKED
 
+bootstrap_exception: Task-002 Gate 5 approved by human based on artifact review. Tool-generated verification logs were not available in this environment. Full evidence-backed verification will be enforced once automated verification scripts are operational.
+
 ---
