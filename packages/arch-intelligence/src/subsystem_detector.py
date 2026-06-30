@@ -1,7 +1,6 @@
 """Subsystem detection via clustering."""
 
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Set
 
@@ -11,24 +10,16 @@ from networkx.algorithms import community
 # Add shared storage to path
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
+sys.path.insert(0, str(project_root / "packages" / "arch-intelligence" / "src"))
 
 from database import OrthoDatabase
 
 try:
     from .graph_utils import FileGraph
+    from .detection_types import Subsystem
 except (ImportError, ValueError):
     from graph_utils import FileGraph
-
-
-@dataclass
-class Subsystem:
-    """Detected subsystem (cluster of related modules)."""
-
-    id: str
-    name: str
-    file_ids: list[str]
-    layer_id: str | None
-    coupling_score: float
+    from detection_types import Subsystem
 
 
 class SubsystemDetector:

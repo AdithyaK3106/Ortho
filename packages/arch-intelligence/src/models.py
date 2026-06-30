@@ -4,16 +4,14 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 # Add shared storage to path
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
+sys.path.insert(0, str(project_root / "packages" / "arch-intelligence" / "src"))
 
 from database import OrthoDatabase
-
-if TYPE_CHECKING:
-    from shared.types import ArchitectureModel
+from detection_types import ArchitectureModel, Layer, Subsystem, ServiceBoundary
 
 
 class ArchitectureModelStore:
@@ -115,12 +113,10 @@ class ArchitectureModelStore:
         model.style_evidence = evidence
         return model
 
-    def _detection_result_to_model(self, result) -> "ArchitectureModel":
+    def _detection_result_to_model(self, result) -> ArchitectureModel:
         """Convert DetectionResult to ArchitectureModel."""
-        from shared.types import ArchitectureModel as SharedArchModel
-
         # Create empty layers and subsystems
-        return SharedArchModel(
+        return ArchitectureModel(
             repo_id=self.repo_id,
             style=result.style,
             style_confidence=result.confidence,
@@ -130,14 +126,14 @@ class ArchitectureModelStore:
             detected_at=datetime.now(timezone.utc),
         )
 
-    def _compute_id(self, model: "ArchitectureModel") -> str:
+    def _compute_id(self, model: ArchitectureModel) -> str:
         """Generate stable ID for model."""
         import hashlib
 
         key = f"{self.repo_id}:{model.style}".encode()
         return hashlib.sha256(key).hexdigest()[:16]
 
-    def _to_dict(self, model: "ArchitectureModel") -> dict:
+    def _to_dict(self, model: ArchitectureModel) -> dict:
         """Convert model to JSON-serializable dict."""
         return {
             "repo_id": model.repo_id,
@@ -163,16 +159,18 @@ class ArchitectureModelStore:
                 }
                 for subsys in model.subsystems
             ],
-            "service_boundaries": model.service_boundaries if hasattr(model, "service_boundaries") else [],
+            "service_boundaries": [
+                {
+                    "id": sb.id,
+                    "name": sb.name,
+                    "modules": sb.modules,
+                }
+                for sb in model.service_boundaries
+            ],
         }
 
-    def _from_dict(self, model_dict: dict) -> "ArchitectureModel":
+    def _from_dict(self, model_dict: dict) -> ArchitectureModel:
         """Reconstruct model from dict."""
-        # Import here to avoid circular
-        from shared.types import ArchitectureModel as SharedArchModel
-        from .layer_detector import Layer
-        from .subsystem_detector import Subsystem
-
         layers = [
             Layer(
                 id=l["id"],
@@ -195,12 +193,21 @@ class ArchitectureModelStore:
             for s in model_dict.get("subsystems", [])
         ]
 
-        return SharedArchModel(
+        service_boundaries = [
+            ServiceBoundary(
+                id=sb["id"],
+                name=sb["name"],
+                modules=sb["modules"],
+            )
+            for sb in model_dict.get("service_boundaries", [])
+        ]
+
+        return ArchitectureModel(
             repo_id=model_dict["repo_id"],
             style=model_dict["style"],
             style_confidence=model_dict["style_confidence"],
             layers=layers,
             subsystems=subsystems,
-            service_boundaries=model_dict.get("service_boundaries", []),
+            service_boundaries=service_boundaries,
             detected_at=datetime.now(timezone.utc),
         )

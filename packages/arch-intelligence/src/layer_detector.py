@@ -2,7 +2,6 @@
 
 import sys
 from collections import defaultdict
-from dataclasses import dataclass
 from pathlib import Path
 
 import networkx as nx
@@ -10,24 +9,16 @@ import networkx as nx
 # Add shared storage to path
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
+sys.path.insert(0, str(project_root / "packages" / "arch-intelligence" / "src"))
 
 from database import OrthoDatabase
 
 try:
     from .graph_utils import FileGraph
+    from .detection_types import Layer
 except (ImportError, ValueError):
     from graph_utils import FileGraph
-
-
-@dataclass
-class Layer:
-    """Detected architectural layer."""
-
-    id: str
-    name: str
-    file_ids: list[str]
-    depends_on: list[str]
-    confidence: float
+    from detection_types import Layer
 
 
 class LayerDetector:
