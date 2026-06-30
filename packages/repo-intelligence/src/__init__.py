@@ -8,6 +8,7 @@ from .adapters.python_adapter import PythonAdapter
 from .symbol_extractor import SymbolExtractor, Symbol
 from .import_graph import ImportGraphBuilder, ImportEdge
 from .call_graph import CallGraphBuilder, CallEdge, CallGraphError
+from .dependency_graph import DependencyGraphBuilder, DependencyEdge
 
 __all__ = [
     "PythonAdapter",
@@ -18,4 +19,6 @@ __all__ = [
     "CallGraphBuilder",
     "CallEdge",
     "CallGraphError",
+    "DependencyGraphBuilder",
+    "DependencyEdge",
 ]
