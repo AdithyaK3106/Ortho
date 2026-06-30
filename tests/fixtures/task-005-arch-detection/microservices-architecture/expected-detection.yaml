@@ -1,0 +1,8 @@
+expected_style: microservices
+min_confidence: 0.70
+max_confidence: 0.90
+
+layer_count: 1
+subsystem_count: 3
+cycles: 0
+warnings: []

@@ -1,0 +1,37 @@
+expected_style: layered
+min_confidence: 0.80
+max_confidence: 0.95
+
+layer_count: 3
+subsystem_count: 5
+
+layers:
+  - name: presentation
+    expected_file_count: 3
+    confidence: 0.90
+  - name: business
+    expected_file_count: 4
+    confidence: 0.85
+  - name: data
+    expected_file_count: 3
+    confidence: 0.95
+
+subsystems:
+  - name: auth
+    expected_file_count: 2
+    coupling: 0.85
+  - name: user
+    expected_file_count: 2
+    coupling: 0.80
+  - name: order
+    expected_file_count: 2
+    coupling: 0.75
+  - name: payment
+    expected_file_count: 2
+    coupling: 0.70
+  - name: util
+    expected_file_count: 1
+    coupling: 0.10
+
+cycles: 0
+warnings: []

@@ -1,0 +1,8 @@
+expected_style: hexagonal
+min_confidence: 0.65
+max_confidence: 0.85
+
+layer_count: 2
+subsystem_count: 3
+cycles: 0
+warnings: []

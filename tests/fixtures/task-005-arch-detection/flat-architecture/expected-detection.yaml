@@ -1,0 +1,7 @@
+expected_style: flat
+min_confidence: 0.30
+max_confidence: 0.70
+layer_count: 1
+subsystem_count: 1
+cycles: 0
+warnings: []

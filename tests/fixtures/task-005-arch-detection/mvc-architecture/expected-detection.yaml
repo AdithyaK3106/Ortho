@@ -1,0 +1,8 @@
+expected_style: mvc
+min_confidence: 0.70
+max_confidence: 0.85
+
+layer_count: 3
+subsystem_count: 1
+cycles: 0
+warnings: []
