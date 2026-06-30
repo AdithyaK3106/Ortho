@@ -73,7 +73,7 @@
 
 | Task ID | Name | Status | Workflow | Commit | Date |
 |---------|------|--------|----------|--------|------|
-| task-004 | ContextHub (Week 7–8) | GATE-1-PENDING | feature.md | d51d65d | 2026-06-30 |
+| task-004 | ContextHub (Week 7–8) | GATE-2-PENDING-ARCHITECT | feature.md | 5ca6452 | 2026-06-30 |
 
 ---
 
@@ -120,7 +120,7 @@ None.
 - Task-002: 5b8f8a2 (2026-06-30)
 - Task-003: 286dd23 (2026-06-30)
 
-**In Progress:** Task-004 (GATE-1 PENDING)
+**In Progress:** Task-004 (GATE-2 PENDING: ARCHITECT review)
 
 **Remaining:** Task-005 (Week 7–8)
 
