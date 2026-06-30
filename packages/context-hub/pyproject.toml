@@ -1,11 +1,22 @@
 [tool.poetry]
-name = "ortho-context-hub"
+name = "context-hub"
 version = "0.1.0"
-description = "Engineering artifact store and retrieval"
-authors = ["urbra <urbrain369@gmail.com>"]
+description = "ContextHub: Pillar 2 — Persistent knowledge layer for Ortho"
+authors = ["Ortho Team"]
+license = "MIT"
+packages = [
+    { include = "context_hub", from = "src" }
+]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
+gitpython = "^3.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+pytest-cov = "^4.0.0"
+mypy = "^1.0.0"
+ruff = "^0.0.200"
 
 [build-system]
 requires = ["poetry-core"]
