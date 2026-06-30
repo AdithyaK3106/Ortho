@@ -1,10 +1,8 @@
-"""Call graph builder using pyan3 for static Python analysis."""
+"""Call graph builder using AST for static Python analysis."""
 
 from pathlib import Path
 from typing import List
 import ast
-import pyan3.analyzer as pyan_analyzer
-from .symbol_extractor import Symbol
 
 
 class CallGraphError(Exception):
