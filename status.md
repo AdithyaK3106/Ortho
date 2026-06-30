@@ -19,7 +19,7 @@
 - [ ] ADR: Storage strategy (SQLite + sqlite-vec)
 - [ ] ADR: Language adapter plugin model
 
-**Status:** NOT STARTED
+**Status:** PLANNER-COMPLETE → READY-FOR-HUMAN-APPROVAL-GATE-1
 
 ---
 
@@ -63,7 +63,7 @@
 
 | Task ID | Name | Workflow | State | CLAUDE.md Ref |
 |---------|------|----------|-------|---------------|
-| — | None yet | — | — | — |
+| task-001 | Shared Foundation (Week 1–2) | feature.md | READY-FOR-PLAN-APPROVAL | Line 43–46 |
 
 ---
 
@@ -99,4 +99,4 @@ None.
 
 ---
 
-*Last updated: 2026-06-30 by system initialization*
+*Last updated: 2026-06-30 by PLANNER (planning phase complete)*
