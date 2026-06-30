@@ -3,7 +3,7 @@ title: Week 3–4 — Python Language Adapter
 owner: Solo Developer
 created: 2026-06-30
 status: DRAFT
-architecture_impact: NONE (fits existing LanguageAdapter pattern from ADR-005, no new modules beyond repo-intelligence)
+architecture_impact: NONE (implements existing LanguageAdapter pattern, no new architecture decisions)
 
 objective: Implement LanguageAdapter interface for Python using tree-sitter AST parsing; extract symbols and build import graph.
 
@@ -25,41 +25,42 @@ files_forbid:
 
 contract_in: 
   - File path (string)
-  - File content (string or Path object)
+  - File content (string or bytes)
 
 contract_out:
-  - Symbol: {name, qualified_name, type (function|class|method), lineno, docstring}
-  - ImportEdge: {source_module, target_module, import_type (from|import|relative), lineno}
-  - LanguageAdapter interface methods: parse(), extract_symbols(), analyze_dependencies()
+  - parse() returns AST tree object (tree-sitter Tree type, used for querying)
+  - extract_symbols() returns list of Symbol dataclass objects: {name, qualified_name, type (function|class|method), lineno, docstring}
+  - analyze_dependencies() returns list of ImportEdge dataclass objects: {source_module, target_module, import_type (from|import|relative), lineno}
 
 acceptance:
   - LanguageAdapter interface defined and exported — evidence: tsc --noEmit
-  - PythonAdapter loads tree-sitter Python grammar — evidence: unit test instantiation
-  - parse(file_path) parses Python file and returns AST — evidence: unit test with sample .py file
-  - extract_symbols() returns list of Symbol objects with all required fields — evidence: unit test assertions
-  - All Symbol objects serializable to JSON (via dataclass) — evidence: json.dumps() test passes
-  - import_graph.py builds ImportEdge list from file — evidence: unit test with import statements
-  - Circular imports detected (no infinite loop) — evidence: test with circular import file
+  - PythonAdapter implements LanguageAdapter, loads tree-sitter Python grammar — evidence: unit test
+  - parse(file_path) parses Python file and returns tree-sitter AST object — evidence: unit test with .py file
+  - extract_symbols() returns Symbol list with all required fields — evidence: unit test assertions
+  - Symbol objects include functions, classes, methods, nested classes — evidence: test with representative Python examples
+  - All Symbol objects serializable to JSON — evidence: json.dumps() test
+  - analyze_dependencies() extracts import statements (from/import/relative) — evidence: unit test with import patterns
+  - Circular imports handled without infinite loops — evidence: test with circular import file
   - All Python code passes mypy --strict — evidence: mypy exit code 0
   - All TypeScript code passes tsc --noEmit — evidence: tsc exit code 0
-  - All code passes linting (ruff, eslint) — evidence: linter exit codes 0
-  - 100+ tests cover all acceptance criteria — evidence: test count from test-plan.md
+  - All code passes linting (ruff check, eslint) — evidence: linter exit codes 0
+  - Every acceptance criterion has at least one corresponding test — evidence: test-plan.md
 
-dependencies: task-001 (shared types, monorepo structure must exist)
+dependencies: task-001 (shared types and monorepo structure)
 
-risk: MEDIUM — tree-sitter grammar availability, circular import handling, performance on large files
+risk: MEDIUM — tree-sitter grammar installation, circular import handling, performance with large files
 
 verification_commands: |
-  tsc --noEmit shared/types/src/adapter.ts
-  ruff check packages/repo-intelligence/src/
-  mypy --strict packages/repo-intelligence/src/
-  pytest packages/repo-intelligence/tests/ -v --tb=short
+  tsc --noEmit
+  ruff check .
+  mypy --strict .
+  pytest
 
 change_impact:
-  modules: repo-intelligence (new package, first LanguageAdapter implementation)
-  apis: None (this is internal API, not CLI/HTTP)
+  modules: repo-intelligence (new package, implements existing LanguageAdapter pattern)
+  apis: None (internal API, not CLI/HTTP)
   regression_candidates: None (new feature, no existing tests affected)
 
-notes_for_builder: Keep Symbol and ImportEdge as dataclasses. Use tree-sitter QueryCursor for efficient AST traversal. Handle edge cases: decorators, async functions, nested classes. No database writes — this is analysis only. Type hints mandatory everywhere. Code should be readable for future Kotlin/Go adapters to follow pattern.
+notes_for_builder: Implement Symbol and ImportEdge as dataclasses. Use tree-sitter QueryCursor for AST traversal. Handle edge cases: decorators, async functions, nested classes, empty files. No database writes — this is analysis only. Type hints required everywhere. Code should be clear and extensible for future language adapters (Kotlin, Go, etc.).
 
 ---

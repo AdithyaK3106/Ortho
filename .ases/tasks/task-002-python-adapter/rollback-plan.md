@@ -25,8 +25,8 @@ procedure: |
 
 affected_components:
   - repo-intelligence package removed (in development only)
-  - LanguageAdapter interface removed from shared/types
-  - Python parsing capability unavailable (affects task-003 call graph builder)
+  - LanguageAdapter interface not exported from shared/types
+  - Python parsing capability unavailable during rollback (affects task-003)
   - No data loss (no database writes in this task)
 
 verification_after_rollback: |
