@@ -1,0 +1,26 @@
+[project]
+name = "ortho-project"
+root = "."
+primary_language = "python"
+
+[indexing]
+languages = ["python", "typescript"]
+exclude_patterns = ["**/node_modules/**", "**/__pycache__/**", "**/dist/**"]
+incremental = true
+
+[context_hub]
+embedding_model = "text-embedding-3-small"
+embedding_provider = "openai"
+
+[llm]
+default_model = "claude-sonnet-4-6"
+fallback_model = "claude-haiku-4-5-20251001"
+max_tokens = 8192
+
+[orchestration]
+human_approval = true
+approval_timeout_seconds = 300
+
+[token_optimizer]
+default_budget = 16000
+compression_threshold = 0.6
