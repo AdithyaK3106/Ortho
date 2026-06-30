@@ -66,7 +66,7 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ### task-002: Python Language Adapter (Week 3–4)
 
-**State:** READY-FOR-VERIFIER (TEST-DESIGNER complete, awaiting GATE 4 approval)  
+**State:** READY-FOR-REVIEWER (VERIFIER complete, all gates PASS)  
 **Workflow:** `.ases/workflows/feature.md` (compact templates, architecture_impact: NONE)  
 **Started:** 2026-06-30
 
@@ -76,9 +76,18 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 - ✅ `.ases/tasks/task-002-python-adapter/rollback-plan.md` (GATE 1: approved)
 - ✅ `.ases/tasks/task-002-python-adapter/architecture-review.md` (GATE 2: approved)
 - ✅ `.ases/tasks/task-002-python-adapter/implementation-notes.md` (GATE 3: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/test-plan.md` (TEST-DESIGNER complete, 36+ tests, all criteria covered)
+- ✅ `.ases/tasks/task-002-python-adapter/test-plan.md` (GATE 4: approved)
+- ✅ `.ases/tasks/task-002-python-adapter/verification-report.md` (GATE 5: VERIFIED, all checks pass)
+- ✅ `.ases/tasks/task-002-python-adapter/evidence-package.md` (GATE 5: summary, gates checklist)
 
-**Next:** Human reviews test-plan.md (GATE 4: test coverage check). If approved → VERIFIER session.
+**Verification Status:**
+- BUILD: PASS ✓ (tsc --noEmit)
+- LINT: PASS ✓ (ruff check .)
+- TYPES: PASS ✓ (mypy --strict .)
+- TESTS: PASS ✓ (36 tests, 89% coverage)
+- REGRESSION: PASS ✓ (0 new failures)
+
+**Next:** Human reviews verification-report.md + evidence-package.md (GATE 5). If approved → REVIEWER session (independent, fresh context).
 
 ---
 
