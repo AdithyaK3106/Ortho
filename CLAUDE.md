@@ -13,7 +13,7 @@
 
 Building Ortho from scratch using ASES workflows. Every task follows: `.ases/workflows/feature.md` → 6 gates, 10 artifacts, human approval at each stage.
 
-**Current Status:** BUILDING (task-001 BUILDER phase — implementing 9 atomic tasks)
+**Current Status:** SCOPE-REVIEW (task-001 BUILDER complete — implementation-notes.md ready for GATE 3)
 
 ---
 
