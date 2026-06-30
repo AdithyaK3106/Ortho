@@ -1,0 +1,20 @@
+{
+  "name": "ortho",
+  "version": "0.1.0",
+  "description": "AI Engineering Platform",
+  "private": true,
+  "workspaces": [
+    "shared/types",
+    "apps/cli"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.55.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  }
+}

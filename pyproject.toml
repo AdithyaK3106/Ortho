@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "ortho"
+version = "0.1.0"
+description = "AI Engineering Platform"
+authors = ["urbra <urbrain369@gmail.com>"]
+readme = "ortho-v3-frd.md"
+packages = [
+    { include = "packages/repo-intelligence", from = "." },
+    { include = "packages/context-hub", from = "." },
+    { include = "packages/arch-intelligence", from = "." },
+    { include = "packages/orchestration", from = "." },
+    { include = "packages/token-optimizer", from = "." },
+    { include = "shared/storage", from = "." },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

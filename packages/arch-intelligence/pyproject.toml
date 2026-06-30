@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "ortho-arch-intelligence"
+version = "0.1.0"
+description = "Architecture analysis and detection"
+authors = ["urbra <urbrain369@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

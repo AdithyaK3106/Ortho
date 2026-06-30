@@ -13,7 +13,7 @@
 
 Building Ortho from scratch using ASES workflows. Every task follows: `.ases/workflows/feature.md` → 6 gates, 10 artifacts, human approval at each stage.
 
-**Current Status:** ARCH-REVIEW (task-001 architecture-review + ADRs ready for human approval GATE 2)
+**Current Status:** BUILDING (task-001 BUILDER phase — implementing 9 atomic tasks)
 
 ---
 
@@ -74,17 +74,24 @@ Building Ortho from scratch using ASES workflows. Every task follows: `.ases/wor
 - ✅ `.ases/architecture/adrs/ADR-004-storage-strategy-sqlite-local-first.md` (PROPOSED status)
 - ✅ `.ases/architecture/adrs/ADR-005-language-adapter-plugin-model.md` (PROPOSED status)
 
-**Next Step:** Human reviews architecture-review.md + ADRs at GATE 2 (Architecture Approval). Check:
-- [ ] Module boundaries clear and coherent?
-- [ ] Dependencies acyclic (no circular deps)?
-- [ ] All APIs defined with input/output contracts?
-- [ ] Data flow reviewed (validation at right layer)?
-- [ ] Security/scalability/extensibility risks addressed?
-- [ ] ADR-004 (SQLite strategy) justified?
-- [ ] ADR-005 (adapter plugin model) justified?
-- [ ] **Decision:** APPROVED / SEND BACK / REJECTED
+**GATE 2: APPROVED** ✅ (2026-06-30 12:00 UTC)
 
-**After Approval:** Proceed to BUILDER role (implement 9 atomic tasks, produce implementation-notes.md)
+ADRs status updated:
+- ADR-004: ACCEPTED (Storage Strategy)
+- ADR-005: ACCEPTED (Language Adapter Plugin Model)
+
+**Next Step:** BUILDER implements 9 atomic tasks in order:
+1. Monorepo structure + Poetry setup
+2. Shared types (TypeScript)
+3. SQLite storage layer (Python)
+4. SQLite schema + migrations
+5. OrthoConfig + .ortho/ directory
+6. CLI skeleton + `ortho init`
+7. FastAPI server skeleton
+8. ADR-001 (storage strategy) — already written
+9. ADR-002 (language adapter) — already written
+
+**After implementation:** BUILDER produces implementation-notes.md documenting what was built, deviations, scope violations (if any)
 
 ---
 
