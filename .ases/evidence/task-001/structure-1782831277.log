@@ -1,0 +1,16 @@
+apps/:
+api-server
+cli
+
+packages/:
+arch-intelligence
+context-hub
+orchestration
+repo-intelligence
+token-optimizer
+
+shared/:
+storage
+types
+utils
+✓ All directories exist
