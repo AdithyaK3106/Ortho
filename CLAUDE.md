@@ -62,7 +62,7 @@ Building Ortho from scratch using ASES workflows. Every task follows: `.ases/wor
 
 ### task-001: Shared Foundation
 
-**State:** TESTS-WRITTEN  
+**State:** REVIEW  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-06-30
 
@@ -75,11 +75,15 @@ Building Ortho from scratch using ASES workflows. Every task follows: `.ases/wor
 - ✅ `.ases/architecture/adrs/ADR-005-language-adapter-plugin-model.md` (ACCEPTED)
 - ✅ `.ases/tasks/task-001-shared-foundation/implementation-notes.md` (BUILDER complete, all 9 atomic tasks done)
 - ✅ `.ases/tasks/task-001-shared-foundation/test-plan.md` (TEST-DESIGNER complete, 120+ tests designed)
+- ✅ `.ases/tasks/task-001-shared-foundation/verification-report.md` (VERIFIER complete, all checks pass)
+- ✅ `.ases/tasks/task-001-shared-foundation/review.md` (REVIEWER complete, APPROVED verdict)
 - ✅ `.ases/evidence/task-001/` (Test code samples and implementation evidence)
 
 **GATE 2: APPROVED** ✅ (2026-06-30 12:00 UTC)  
 **GATE 3: APPROVED** ✅ (2026-06-30 BUILDER complete)  
-**GATE 4: TESTS-WRITTEN** ✅ (2026-06-30 TEST-DESIGNER complete)
+**GATE 4: TESTS-WRITTEN** ✅ (2026-06-30 TEST-DESIGNER complete)  
+**GATE 5: VERIFIED** ✅ (2026-06-30 VERIFIER complete, all checks pass)  
+**GATE 6: REVIEW APPROVED** ✅ (2026-06-30 REVIEWER complete, APPROVED)
 
 ADRs status:
 - ADR-004: ACCEPTED (Storage Strategy)
