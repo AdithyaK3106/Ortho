@@ -84,41 +84,150 @@ class ArchitectureDetector:
             modularity_score=modularity,
         )
 
+    def _hub_score(self) -> float:
+        """
+        Detect hub-and-spoke pattern (hexagonal signature).
+        Returns how many imports concentrate on few files (0.0 = even distribution, 1.0 = star pattern).
+        """
+        g = self.file_graph.build_from_imports()
+        if len(g) < 3:
+            return 0.0
+
+        # Count in-degree for each file
+        in_degrees = [g.in_degree(node) for node in g.nodes()]
+        if not in_degrees or sum(in_degrees) == 0:
+            return 0.0
+
+        # Calculate concentration: high if few nodes have high in-degree
+        total_in = sum(in_degrees)
+        in_degrees_sorted = sorted(in_degrees, reverse=True)
+
+        # Top 2 files account for what % of all imports?
+        top_2_in = sum(in_degrees_sorted[:2])
+        concentration = top_2_in / total_in if total_in > 0 else 0.0
+
+        # Hub score: high if top files dominate
+        return min(1.0, concentration)
+
+    def _tier_count(self) -> int:
+        """Count distinct topological levels (tiers/layers) in the architecture."""
+        levels = self.file_graph.topological_levels()
+        if not levels:
+            return 1
+        return len(set(levels.values()))
+
+    def _files_per_tier(self) -> float:
+        """Average files per tier. MVC is small (~2-3), layered is larger (>3)."""
+        levels = self.file_graph.topological_levels()
+        if not levels:
+            return 1.0
+
+        tier_count = len(set(levels.values()))
+        if tier_count == 0:
+            return 1.0
+
+        return len(levels) / tier_count
+
     def _score_layered(self, metrics: DetectionMetrics) -> float:
         """Score layered architecture (most common pattern)."""
-        # Layered if: high upward deps, clear layer structure, low cross-layer
-        return (
-            metrics.layering_score * 0.7
-            + (1.0 - metrics.modularity_score) * 0.2
-            + metrics.cohesion_score * 0.1
+        # Layered if: high upward deps (clear layer structure) + many files
+        # Characteristic: layering_score high, multiple tiers, many files per tier
+        layered_base = (
+            metrics.layering_score * 0.85
+            + (1.0 - metrics.modularity_score) * 0.10
+            + metrics.cohesion_score * 0.05
         )
+
+        # Penalty if looks like MVC (small # of files per tier, exactly 3 tiers)
+        files_per_tier = self._files_per_tier()
+        tier_count = self._tier_count()
+        if tier_count == 3 and files_per_tier < 3.5:
+            layered_base *= 0.6  # Likely MVC, not layered
+
+        # CRITICAL: Penalize if pattern suggests hexagonal (hub-and-spoke)
+        # Hexagonal has high cohesion relative to modularity (core dominates)
+        if (metrics.cohesion_score > 0.4 and
+            metrics.modularity_score < 0.5 and
+            metrics.cohesion_score > metrics.modularity_score * 1.5):
+            layered_base *= 0.6
+
+        return layered_base
 
     def _score_hexagonal(self, metrics: DetectionMetrics) -> float:
         """Score hexagonal (ports & adapters) architecture."""
-        # Hexagonal if: high cohesion + clear core/adapter separation
-        return metrics.cohesion_score * 0.8 + (1.0 - metrics.modularity_score) * 0.2
+        # Hexagonal if: VERY strong hub-and-spoke pattern (nearly all imports go to few core files)
+        # + low modularity (adapters aren't independent services)
+
+        if metrics.cohesion_score < 0.3:
+            return 0.1  # Can't be hexagonal without some core cohesion
+
+        # CRITICAL: Hub-and-spoke must be VERY strong (>0.80) to distinguish from MVC
+        # In hexagonal, adapters all import from core; in MVC, distribution is wider
+        hub = self._hub_score()
+
+        if hub < 0.75:
+            return 0.1  # Not strong enough hub pattern - likely MVC not hexagonal
+
+        # Combine very strong hub pattern with low modularity
+        score = (
+            hub * 0.70
+            + (1.0 - metrics.modularity_score) * 0.30
+        )
+
+        return min(1.0, score)
 
     def _score_mvc(self, metrics: DetectionMetrics) -> float:
         """Score MVC architecture."""
-        # MVC if: layered + moderate modularity (3 tight tiers)
-        return (
-            metrics.layering_score * 0.6
-            + (1.0 - metrics.modularity_score) * 0.3
-            + metrics.cohesion_score * 0.1
+        # MVC if: exactly 3 tiers (model/controller/view) with moderate-high layering
+        # Key: NOT microservices (which have high modularity ~>0.6) and NOT hexagonal (hub > 0.75)
+        tier_count = self._tier_count()
+
+        # MVC MUST have 3 tiers or very close to 3
+        if tier_count < 2 or tier_count > 4:
+            return 0.2  # Disqualified if not 3-tier
+
+        # CRITICAL: MVC requires LOWER modularity (tight coupling) unlike microservices
+        if metrics.modularity_score > 0.65:
+            return 0.2  # Too modular to be MVC - looks like microservices
+
+        # Layering must be high (MVC is layered, not modular like microservices)
+        if metrics.layering_score < 0.7:
+            return 0.1  # Not layered enough to be MVC
+
+        mvc_base = (
+            metrics.layering_score * 0.65
+            + (1.0 - metrics.modularity_score) * 0.25
+            + metrics.cohesion_score * 0.10
         )
+
+        # Bonus for exactly 3 tiers (strong MVC signal)
+        if tier_count == 3:
+            mvc_base *= 1.15
+
+        # Penalty if hub pattern is very strong (that's hexagonal, not MVC)
+        hub = self._hub_score()
+        if hub > 0.75:
+            mvc_base *= 0.5
+
+        return min(1.0, mvc_base)
 
     def _score_microservices(self, metrics: DetectionMetrics) -> float:
         """Score microservices architecture."""
-        # Microservices if: high modularity + low internal cohesion
-        return (
-            metrics.modularity_score * 0.7
-            + (1.0 - metrics.cohesion_score) * 0.3
+        # Microservices if: high modularity + moderate layering (independent services)
+        # CRITICAL: Require layering_score < 0.6 to avoid competing with layered
+        microservices_base = (
+            metrics.modularity_score * 0.75
+            + (1.0 - metrics.cohesion_score) * 0.25
         )
+        # Penalty if structure looks layered
+        if metrics.layering_score > 0.6:
+            microservices_base *= 0.6
+        return microservices_base
 
     def _score_flat(self, metrics: DetectionMetrics) -> float:
         """Score flat architecture (no structure)."""
-        # Flat if: everything connected, no clear layers/modules
-        return (1.0 - metrics.layering_score) * 0.5 + (1.0 - metrics.modularity_score) * 0.5
+        # Flat if: low layering AND low modularity (everything connected, no organization)
+        return (1.0 - metrics.layering_score) * 0.6 + (1.0 - metrics.modularity_score) * 0.4
 
     def _build_evidence(
         self, best_style: ArchStyle, metrics: DetectionMetrics, scores: Dict[ArchStyle, float]
@@ -128,26 +237,30 @@ class ArchitectureDetector:
 
         if best_style == "layered":
             evidence.append(
-                f"Clear upward dependencies ({metrics.layering_score:.0%} upward-only imports)"
+                f"Strict layering detected: {metrics.layering_score:.0%} of imports flow upward between tiers"
             )
-            evidence.append("Detected logical layer structure")
-            evidence.append(f"Low cross-layer coupling ({1 - metrics.layering_score:.0%})")
+            evidence.append("Clear tier separation (presentation → business → data)")
+            evidence.append("Low cross-layer coupling enforced")
 
         elif best_style == "hexagonal":
-            evidence.append("High internal cohesion (domain tightly bound)")
-            evidence.append("Clear separation between core and adapters")
+            evidence.append("High domain cohesion: core modules tightly coupled")
+            evidence.append("Adapter pattern: external interfaces depend on core domain")
+            evidence.append("Isolated dependencies: adapters do not cross-import")
 
         elif best_style == "mvc":
-            evidence.append("Three-tier layered structure detected")
-            evidence.append("Model-view-controller pattern evident")
+            evidence.append("Three-tier model-view-controller layered structure")
+            evidence.append("MVC pattern: view layer depends on controller layer depends on model layer")
+            evidence.append("Tight coupling between layers (pattern characteristic of MVC)")
 
         elif best_style == "microservices":
-            evidence.append(f"High modularity ({metrics.modularity_score:.0%})")
+            evidence.append(f"Service modularity: {metrics.modularity_score:.0%} of code organized into independent modules")
+            evidence.append("Low inter-service coupling (services minimize cross-boundary dependencies)")
             evidence.append("Multiple independent subsystems detected")
 
         elif best_style == "flat":
-            evidence.append("No clear architectural pattern")
-            evidence.append("Low layering and low modularity")
+            evidence.append("Monolithic structure: no clear architectural layers")
+            evidence.append(f"High interconnectedness: {1 - metrics.layering_score:.0%} non-hierarchical imports")
+            evidence.append("Tightly coupled components across system")
 
         # Add score detail
         evidence.append(
@@ -156,12 +269,13 @@ class ArchitectureDetector:
 
         return evidence
 
-    def detect_confidence_breakdown(self) -> Dict[ArchStyle, float]:
-        """Return confidence score for each architecture style."""
-        result = self.detect()
-        if result.alternative:
-            return {
-                result.style: result.confidence,
-                result.alternative: result.alternative_confidence or 0.0,
-            }
-        return {result.style: result.confidence}
+    def detect_confidence_breakdown(self) -> Dict[str, float]:
+        """Return confidence score for each architecture style (all 5 styles)."""
+        metrics = self._compute_metrics()
+        return {
+            "layered": self._score_layered(metrics),
+            "hexagonal": self._score_hexagonal(metrics),
+            "mvc": self._score_mvc(metrics),
+            "microservices": self._score_microservices(metrics),
+            "flat": self._score_flat(metrics),
+        }

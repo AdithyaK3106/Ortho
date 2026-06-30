@@ -68,19 +68,29 @@ class FileGraph:
 
     def topological_levels(self) -> Dict[str, int]:
         """
-        Compute topological level for each file.
-        Level = 1 + max(level of dependencies).
-        Files with no outgoing deps are at level 0.
+        Compute topological level for each file in the dependency DAG.
+        Level = 1 + max(level of all files this file depends on).
+        Files with no dependencies (sources) are at level 0.
+        Files that depend on level 0 are at level 1, etc.
+
+        Graph edges: importer → imported (u imports v)
+        So: level(u) = 1 + max(level(v) for v in g.successors(u))
         """
         g = self.build_from_imports()
         levels = {}
 
-        # Find nodes with no outgoing edges (sinks = level 0)
+        # Find nodes with no incoming edges (sources = level 0)
+        # In import graph, in_degree = 0 means nothing imports from this file
+        # We want nodes with NO dependencies (out_degree = 0 in reverse graph)
+        # Actually: files with out_degree 0 have NO successors in import graph
+        # = they don't depend on anything = they should be level 0
         for node in g.nodes():
             if g.out_degree(node) == 0:
                 levels[node] = 0
 
-        # Iteratively compute levels for nodes with deps
+        # Iteratively compute levels for nodes with dependencies
+        # For each node, level = 1 + max(level of dependencies)
+        # Dependencies = successors in the import graph
         changed = True
         while changed:
             changed = False
@@ -88,12 +98,15 @@ class FileGraph:
                 if node in levels:
                     continue
 
-                deps = list(g.predecessors(node))
+                # Get files this node depends on (imports from)
+                deps = list(g.successors(node))
+
+                # If all dependencies have been assigned levels
                 if all(dep in levels for dep in deps):
                     levels[node] = 1 + max((levels[dep] for dep in deps), default=-1)
                     changed = True
 
-        # Handle any remaining nodes (isolated)
+        # Handle any remaining nodes (shouldn't happen if graph is acyclic)
         for node in g.nodes():
             if node not in levels:
                 levels[node] = 0
@@ -233,6 +246,10 @@ class MetricsCalculator:
         High if: mostly upward dependencies (clean layers).
         Low if: many cross-layer or downward deps.
 
+        Topological levels: level 0 = no deps (deepest), level N = depends on level N-1 (highest)
+        Upward edge: u (higher level) imports v (lower level) = level_u > level_v
+        Downward edge: u (lower level) imports v (higher level) = level_u < level_v
+
         Returns 0.0 (flat) to 1.0 (perfect layers).
         """
         g = self.file_graph.build_from_imports()
@@ -242,24 +259,25 @@ class MetricsCalculator:
 
         levels = self.file_graph.topological_levels()
 
-        # Count upward (good) vs cross-layer (bad) edges
+        # Count upward (good) vs downward/cross-layer (bad) edges
         upward_edges = 0
-        cross_edges = 0
+        downward_edges = 0
 
         for u, v in g.edges():
             level_u = levels.get(u, 0)
             level_v = levels.get(v, 0)
 
-            if level_v < level_u:
+            # CRITICAL FIX: Upward means u is at higher level and imports v at lower level
+            if level_u > level_v:
                 upward_edges += 1
             else:
-                cross_edges += 1
+                downward_edges += 1
 
-        total = upward_edges + cross_edges
+        total = upward_edges + downward_edges
         if total == 0:
             return 0.5
 
-        # Score: high if mostly upward
+        # Score: high if mostly upward (correct dependency direction)
         return upward_edges / total
 
     def cohesion_score(self) -> float:

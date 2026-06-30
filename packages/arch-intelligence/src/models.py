@@ -23,11 +23,21 @@ class ArchitectureModelStore:
         self.db = db
         self.repo_id = repo_id
 
-    def save(self, model: "ArchitectureModel") -> str:
+    def save(self, model) -> str:
         """
         Insert/update architecture model.
+        Accepts either ArchitectureModel or DetectionResult.
         Returns model_id.
         """
+        # Handle DetectionResult: convert to minimal ArchitectureModel
+        # DetectionResult has 'evidence' field, not 'style_evidence'
+        evidence_from_input = None
+        if hasattr(model, 'style') and not hasattr(model, 'repo_id'):
+            # This is a DetectionResult, extract evidence before wrapping
+            evidence_from_input = model.evidence if hasattr(model, 'evidence') else []
+            model = self._detection_result_to_model(model)
+            model.style_evidence = evidence_from_input
+
         model_id = self._compute_id(model)
         conn = self.db.connection()
 
@@ -63,7 +73,7 @@ class ArchitectureModelStore:
         conn = self.db.connection()
 
         row = conn.execute(
-            "SELECT model_json FROM architecture_models WHERE id = ? AND repo_id = ?",
+            "SELECT model_json, evidence FROM architecture_models WHERE id = ? AND repo_id = ?",
             (model_id, self.repo_id),
         ).fetchone()
 
@@ -73,7 +83,11 @@ class ArchitectureModelStore:
             return None
 
         model_dict = json.loads(row[0])
-        return self._from_dict(model_dict)
+        evidence = json.loads(row[1]) if row[1] else []
+        model = self._from_dict(model_dict)
+        # Store evidence on model for test compatibility
+        model.style_evidence = evidence
+        return model
 
     def load_latest(self) -> "ArchitectureModel | None":
         """Retrieve most recent architecture model for repo."""
@@ -81,7 +95,7 @@ class ArchitectureModelStore:
 
         row = conn.execute(
             """
-            SELECT model_json FROM architecture_models
+            SELECT model_json, evidence FROM architecture_models
             WHERE repo_id = ?
             ORDER BY detected_at DESC
             LIMIT 1
@@ -95,7 +109,26 @@ class ArchitectureModelStore:
             return None
 
         model_dict = json.loads(row[0])
-        return self._from_dict(model_dict)
+        evidence = json.loads(row[1]) if row[1] else []
+        model = self._from_dict(model_dict)
+        # Store evidence on model for test compatibility
+        model.style_evidence = evidence
+        return model
+
+    def _detection_result_to_model(self, result) -> "ArchitectureModel":
+        """Convert DetectionResult to ArchitectureModel."""
+        from shared.types import ArchitectureModel as SharedArchModel
+
+        # Create empty layers and subsystems
+        return SharedArchModel(
+            repo_id=self.repo_id,
+            style=result.style,
+            style_confidence=result.confidence,
+            layers=[],
+            subsystems=[],
+            service_boundaries=[],
+            detected_at=datetime.now(timezone.utc),
+        )
 
     def _compute_id(self, model: "ArchitectureModel") -> str:
         """Generate stable ID for model."""

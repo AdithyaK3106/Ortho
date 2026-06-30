@@ -24,6 +24,14 @@ def temp_db():
         db = OrthoDatabase(project_root)
         db.migrate()
         yield db
+        # CRITICAL: Explicitly close all connections before cleanup
+        # On Windows, SQLite locks persist if connections aren't closed,
+        # preventing tempfile cleanup
+        try:
+            # Close all open connections from the pool
+            db.close()
+        except Exception:
+            pass
 
 
 @pytest.fixture

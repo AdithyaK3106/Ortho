@@ -114,24 +114,32 @@ class LayerDetector:
         Highest level (most general) → presentation/api.
         Middle → business/domain.
         Lowest (most specific) → data/storage.
+
+        CRITICAL: Levels are sorted ascending, so:
+        - First level (sorted[0]) = lowest topological level = most independent = data layer
+        - Last level (sorted[-1]) = highest topological level = most dependent = presentation layer
         """
         names = {}
         num_levels = len(levels_with_files)
 
         for i, (level, files) in enumerate(levels_with_files):
-            position = i  # 0 = top, n-1 = bottom
+            # REVERSE position: higher index = higher in dependency graph = presentation
+            position_from_top = num_levels - 1 - i
 
-            # Heuristic: infer from file paths
+            # Heuristic: infer from file paths first
             inferred = self._infer_layer_name(files)
             if inferred:
                 names[level] = inferred
             else:
-                # Fallback: generic names by position
-                if position == 0:
+                # Fallback: assign by reverse position (highest imports from lowest)
+                if position_from_top == num_levels - 1:
+                    # Top tier (highest dependency, imports from all)
                     names[level] = "presentation"
-                elif position == num_levels - 1:
+                elif position_from_top == 0:
+                    # Bottom tier (lowest dependency, imports from none)
                     names[level] = "data"
                 else:
+                    # Middle tier(s)
                     names[level] = "business"
 
         return names
