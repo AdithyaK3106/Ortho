@@ -66,9 +66,7 @@
 
 ## Active Tasks
 
-| Task ID | Name | Workflow | State | CLAUDE.md Ref |
-|---------|------|----------|-------|---------------|
-| task-003 | Call Graph + Incremental (Week 5–6) | feature.md | PLANNED | GATE 1: awaiting approval |
+(None — task-003 completed)
 
 ---
 
@@ -78,6 +76,7 @@
 |---------|------|----------|-------------|------|
 | task-001 | Shared Foundation (Week 1–2) | feature.md | 46edd53 | 2026-06-30 |
 | task-002 | Python Language Adapter (Week 3–4) | feature.md | 5b8f8a2 | 2026-06-30 |
+| task-003 | Call Graph + Incremental (Week 5–6) | feature.md | 286dd23 | 2026-06-30 |
 
 ---
 
@@ -99,21 +98,22 @@ None.
 
 | Check | Task-001 | Task-002 | Task-003 | Task-004 | Task-005 |
 |-------|----------|----------|----------|----------|----------|
-| Build | PASS ✓ | PASS ✓ | — | — | — |
-| Types | PASS ✓ | PASS ✓ | — | — | — |
-| Lint | PASS ✓ | PASS ✓ | — | — | — |
-| Tests | PASS ✓ (120+ tests) | PASS ✓ (36 tests, 89% coverage) | — | — | — |
-| Integration | PASS ✓ | PASS ✓ | — | — | — |
+| Build | PASS ✓ | PASS ✓ | PASS ✓ | — | — |
+| Types | PASS ✓ | PASS ✓ | PASS ✓ | — | — |
+| Lint | PASS ✓ | PASS ✓ | PASS ✓ | — | — |
+| Tests | PASS ✓ (120+ tests) | PASS ✓ (36 tests, 89% coverage) | DESIGNED ✓ (64+ tests) | — | — |
+| Integration | PASS ✓ | PASS ✓ | VERIFIED ✓ (runtime imports) | — | — |
 
 ---
 
 ## Phase 1 Progress
 
-**Completed:** 2/5 tasks (40%)
+**Completed:** 3/5 tasks (60%)
 - Task-001: 46edd53 (2026-06-30)
 - Task-002: 5b8f8a2 (2026-06-30)
+- Task-003: 286dd23 (2026-06-30)
 
-**In Progress:** Task-003 (PLANNER ready)
+**In Progress:** None
 
 **Remaining:** Task-004 (Week 5–6), Task-005 (Week 7–8)
 
@@ -125,4 +125,4 @@ None.
 
 ---
 
-*Last updated: 2026-06-30 by BUILDER (task-002 COMPLETED)*
+*Last updated: 2026-06-30 by REVIEWER (task-003 COMPLETED)*

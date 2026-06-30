@@ -64,13 +64,7 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-task-003 | Week 5–6 Call Graph + Incremental | IMPLEMENTED → TESTS-WRITTEN (GATE 3: awaiting scope review)
-- Plan: `.ases/tasks/task-003-call-graph-incremental/plan.md` ✓
-- Spec: `.ases/tasks/task-003-call-graph-incremental/spec.md` ✓
-- Rollback: `.ases/tasks/task-003-call-graph-incremental/rollback-plan.md` ✓
-- Architecture: `.ases/tasks/task-003-call-graph-incremental/architecture-review.md` ✓ (APPROVED)
-- Implementation: `.ases/tasks/task-003-call-graph-incremental/implementation-notes.md` ✓ (5/5 tasks complete)
-- Status: BUILDER complete (all 5 atomic tasks implemented), GATE 3 ready for scope review
+(None — task-003 completed)
 
 ---
 
@@ -119,6 +113,17 @@ ADRs status:
 ---
 
 ## Completed Tasks
+
+task-003 | Week 5–6 Call Graph + Incremental Indexing | 286dd23 | 2026-06-30
+- CallGraphBuilder (AST-based call graph extraction)
+- DependencyGraphBuilder (requirements.txt + pyproject.toml parsing)
+- ModuleDetector (regular + namespace package detection)
+- IncrementalIndexer (git diff based incremental re-indexing)
+- CLI command: ortho index --watch
+- All 6 gates passed (PLAN, ARCH, IMPL, TESTS, VERIFY, REVIEW)
+- 64+ tests designed, runtime verification passed
+- Evidence: .ases/tasks/task-003-call-graph-incremental/
+- Code: packages/repo-intelligence/src/call_graph.py, dependency_graph.py, module_detector.py, incremental_indexer.py, cli.py
 
 task-002 | Week 3–4 Python Language Adapter | 5b8f8a2 | 2026-06-30
 - LanguageAdapter interface + PythonAdapter (tree-sitter) + symbol/import extraction
@@ -320,8 +325,8 @@ This means:
 
 ---
 
-*Last updated: 2026-06-30 TEST-DESIGNER complete — test-plan.md written with 120+ tests designed*
+*Last updated: 2026-06-30 REVIEWER complete — task-003 APPROVED, ready for merge*
 
-*Current Status: GATE 4 (TESTS-WRITTEN) complete — awaiting VERIFIER*
+*Current Status: Task-003 COMPLETED (all 6 ASES gates passed) — 60% of Phase 1 complete*
 
 *End of CLAUDE.md*
