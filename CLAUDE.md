@@ -64,31 +64,7 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-002: Python Language Adapter (Week 3–4) — COMPLETED
-
-**State:** READY-FOR-COMMIT (REVIEWER approved, all 6 gates passed)  
-**Workflow:** `.ases/workflows/feature.md` (compact templates, architecture_impact: NONE)  
-**Started:** 2026-06-30
-
-**All 10 Required Artifacts:**
-- ✅ `.ases/tasks/task-002-python-adapter/plan.md` (GATE 1: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/spec.md` (GATE 1: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/rollback-plan.md` (GATE 1: approved)
-- ✅ `.ases/tasks/task-002-python-adapter/architecture-review.md` (GATE 2: APPROVED)
-- ✅ `.ases/tasks/task-002-python-adapter/implementation-notes.md` (GATE 3: approved, scope matches spec)
-- ✅ `.ases/tasks/task-002-python-adapter/test-plan.md` (GATE 4: approved, 36 tests)
-- ✅ `.ases/tasks/task-002-python-adapter/verification-report.md` (GATE 5: VERIFIED)
-- ✅ `.ases/tasks/task-002-python-adapter/evidence-package.md` (GATE 5: gates checklist)
-- ✅ `.ases/tasks/task-002-python-adapter/review.md` (GATE 6: APPROVED)
-- ✅ Code committed: adapter.ts, python_adapter.py, symbol_extractor.py, import_graph.py, __init__.py
-
-**Final Verification:**
-- BUILD: PASS ✓, LINT: PASS ✓, TYPES: PASS ✓, TESTS: PASS ✓ (36/36, 89% coverage), REGRESSION: PASS ✓ (0 new failures)
-- Security: PASS (LOW-RISK), Architecture: PASS (compliant with FRD), Code quality: EXCELLENT
-
-**Bootstrap Exception (Task-002):** GATE 5 approved by human based on artifact review. Tool-generated verification logs were not available in this environment. Full evidence-backed verification will be enforced once the automated verification scripts are operational.
-
-**Next:** Human final sign-off (GATE 6). Then commit to main with evidence reference.
+(None — task-002 completed)
 
 ---
 
@@ -138,7 +114,12 @@ ADRs status:
 
 ## Completed Tasks
 
-None yet.
+task-002 | Week 3–4 Python Language Adapter | 5b8f8a2 | 2026-06-30
+- LanguageAdapter interface + PythonAdapter (tree-sitter) + symbol/import extraction
+- All 6 gates passed (PLAN, ARCH, IMPL, TESTS, VERIFY, REVIEW)
+- 36 tests, 89% coverage, 0 failures
+- Evidence: .ases/evidence/task-002/ (bootstrap exception: artifact-based GATE 5 approval)
+- Code: shared/types/src/adapter.ts, packages/repo-intelligence/src/*.py
 
 ---
 
