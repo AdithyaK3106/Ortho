@@ -68,7 +68,7 @@
 
 | Task ID | Name | Workflow | State | CLAUDE.md Ref |
 |---------|------|----------|-------|---------------|
-| task-003 | Call Graph + Incremental (Week 5–6) | feature.md | DRAFT | Ready for PLANNER |
+| task-003 | Call Graph + Incremental (Week 5–6) | feature.md | PLANNED | GATE 1: awaiting approval |
 
 ---
 
