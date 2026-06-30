@@ -2,9 +2,11 @@
 task_id: task-004
 title: ContextHub Specification
 workflow: feature
-status: GATE-1-APPROVAL-PENDING
+status: GATE-2-PENDING-ARCHITECT
 created: 2026-06-30
 owner: PLANNER
+gate_1_approval: 2026-06-30 (human approved)
+gate_1_commit: 304d4a9
 ---
 
 # Task-004 Spec: ContextHub (Pillar 2)
