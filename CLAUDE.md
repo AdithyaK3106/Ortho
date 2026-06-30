@@ -66,16 +66,17 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ### task-002: Python Language Adapter (Week 3–4)
 
-**State:** READY-FOR-ARCHITECT (PLANNER complete, awaiting GATE 1 human approval)  
+**State:** READY-FOR-BUILDER (PLANNER approved, ARCHITECT approved)  
 **Workflow:** `.ases/workflows/feature.md` (compact templates, architecture_impact: NONE)  
 **Started:** 2026-06-30
 
 **Artifacts Completed:**
-- ✅ `.ases/tasks/task-002-python-adapter/plan.md` (4 atomic tasks, dependencies clear)
-- ✅ `.ases/tasks/task-002-python-adapter/spec.md` (LanguageAdapter interface + Python implementation)
-- ✅ `.ases/tasks/task-002-python-adapter/rollback-plan.md` (triggers, procedures, verification)
+- ✅ `.ases/tasks/task-002-python-adapter/plan.md` (GATE 1: approved)
+- ✅ `.ases/tasks/task-002-python-adapter/spec.md` (GATE 1: approved)
+- ✅ `.ases/tasks/task-002-python-adapter/rollback-plan.md` (GATE 1: approved)
+- ✅ `.ases/tasks/task-002-python-adapter/architecture-review.md` (GATE 2: APPROVED, verdict: APPROVED)
 
-**Next:** Human reviews all three documents. If approved → ARCHITECT session (or waived if architecture_impact confirmed NONE).
+**Next:** Human approves ARCHITECT review (GATE 2). If approved → BUILDER session.
 
 ---
 
