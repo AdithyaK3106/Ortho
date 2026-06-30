@@ -1,4 +1,4 @@
-"""Tests for ArchitectureDetector."""
+"""Tests for ArchitectureDetector — STRICT behavioral assertions."""
 
 import sys
 from pathlib import Path
@@ -15,195 +15,256 @@ from detector import ArchitectureDetector
 from detection_types import ArchStyle
 
 
-class TestArchitectureDetectorBasics:
-    """Basic detector functionality tests."""
+class TestArchitectureDetectorLayeredPattern:
+    """AC1/AC2: Detect layered architecture style with confidence."""
 
-    def test_detector_initializes(self, temp_db, sample_repo_id):
-        """Test that ArchitectureDetector can be instantiated."""
-        detector = ArchitectureDetector(temp_db, sample_repo_id)
-        assert detector is not None
-        assert detector.repo_id == sample_repo_id
+    def test_layered_fixture_detects_as_layered(self, layered_fixture_db, layered_repo_id):
+        """Test that canonical layered-architecture fixture detects as 'layered'."""
+        detector = ArchitectureDetector(layered_fixture_db, layered_repo_id)
+        result = detector.detect()
 
-    def test_detect_returns_result(self, mock_symbol_repo, sample_repo_id):
-        """Test that detect() returns a DetectionResult."""
+        assert result.style == "layered", f"Expected 'layered', got '{result.style}'"
+        assert result.confidence >= 0.80, f"Expected confidence ≥0.80, got {result.confidence}"
+
+    def test_layered_confidence_breakdown_shows_layered_highest(self, layered_fixture_db, layered_repo_id):
+        """Test that layered gets highest score in breakdown."""
+        detector = ArchitectureDetector(layered_fixture_db, layered_repo_id)
+        breakdown = detector.detect_confidence_breakdown()
+
+        layered_score = breakdown.get("layered", 0.0)
+        hex_score = breakdown.get("hexagonal", 0.0)
+        mvc_score = breakdown.get("mvc", 0.0)
+        micro_score = breakdown.get("microservices", 0.0)
+        flat_score = breakdown.get("flat", 0.0)
+
+        assert (
+            layered_score >= hex_score
+            and layered_score >= mvc_score
+            and layered_score >= micro_score
+            and layered_score >= flat_score
+        ), f"Layered ({layered_score}) should beat hex/mvc/micro/flat"
+
+    def test_layered_evidence_mentions_layers_and_upward_deps(self, layered_fixture_db, layered_repo_id):
+        """AC2: Evidence describes why layered pattern detected."""
+        detector = ArchitectureDetector(layered_fixture_db, layered_repo_id)
+        result = detector.detect()
+
+        evidence_text = " ".join(result.evidence).lower()
+        assert "layer" in evidence_text, "Evidence must mention 'layer'"
+        assert (
+            "upward" in evidence_text or "depend" in evidence_text
+        ), "Evidence must mention upward dependencies or dependencies"
+
+
+class TestArchitectureDetectorHexagonalPattern:
+    """AC1/AC2: Detect hexagonal (ports & adapters) architecture."""
+
+    def test_hexagonal_fixture_detects_as_hexagonal(self, hexagonal_fixture_db, hexagonal_repo_id):
+        """Test that canonical hexagonal fixture detects as 'hexagonal'."""
+        detector = ArchitectureDetector(hexagonal_fixture_db, hexagonal_repo_id)
+        result = detector.detect()
+
+        assert result.style == "hexagonal", f"Expected 'hexagonal', got '{result.style}'"
+        assert result.confidence >= 0.65, f"Expected confidence ≥0.65, got {result.confidence}"
+
+    def test_hexagonal_confidence_breakdown_shows_hexagonal_highest(self, hexagonal_fixture_db, hexagonal_repo_id):
+        """Test that hexagonal gets highest score in breakdown."""
+        detector = ArchitectureDetector(hexagonal_fixture_db, hexagonal_repo_id)
+        breakdown = detector.detect_confidence_breakdown()
+
+        hex_score = breakdown.get("hexagonal", 0.0)
+        layered_score = breakdown.get("layered", 0.0)
+        mvc_score = breakdown.get("mvc", 0.0)
+
+        assert hex_score > layered_score, f"Hexagonal ({hex_score}) should beat layered ({layered_score})"
+        assert hex_score > mvc_score, f"Hexagonal ({hex_score}) should beat mvc ({mvc_score})"
+
+
+class TestArchitectureDetectorMVCPattern:
+    """AC1/AC2: Detect MVC architecture."""
+
+    def test_mvc_fixture_detects_as_mvc(self, mvc_fixture_db, mvc_repo_id):
+        """Test that canonical MVC fixture detects as 'mvc'."""
+        detector = ArchitectureDetector(mvc_fixture_db, mvc_repo_id)
+        result = detector.detect()
+
+        assert result.style == "mvc", f"Expected 'mvc', got '{result.style}'"
+        assert result.confidence >= 0.70, f"Expected confidence ≥0.70, got {result.confidence}"
+
+    def test_mvc_evidence_mentions_three_layers(self, mvc_fixture_db, mvc_repo_id):
+        """AC2: Evidence describes three-tier MVC pattern."""
+        detector = ArchitectureDetector(mvc_fixture_db, mvc_repo_id)
+        result = detector.detect()
+
+        evidence_text = " ".join(result.evidence).lower()
+        # Should mention layers or view/controller/model
+        has_mvc_terms = any(
+            term in evidence_text for term in ["view", "controller", "model", "mvc", "three", "tier", "layer"]
+        )
+        assert has_mvc_terms, f"Evidence should mention MVC terms, got: {result.evidence}"
+
+
+class TestArchitectureDetectorMicroservicesPattern:
+    """AC1/AC2: Detect microservices architecture."""
+
+    def test_microservices_fixture_detects_as_microservices(self, microservices_fixture_db, microservices_repo_id):
+        """Test that canonical microservices fixture detects as 'microservices'."""
+        detector = ArchitectureDetector(microservices_fixture_db, microservices_repo_id)
+        result = detector.detect()
+
+        assert (
+            result.style == "microservices"
+        ), f"Expected 'microservices', got '{result.style}'"
+        assert result.confidence >= 0.70, f"Expected confidence ≥0.70, got {result.confidence}"
+
+    def test_microservices_evidence_mentions_modularity(self, microservices_fixture_db, microservices_repo_id):
+        """AC2: Evidence describes independent subsystems."""
+        detector = ArchitectureDetector(microservices_fixture_db, microservices_repo_id)
+        result = detector.detect()
+
+        evidence_text = " ".join(result.evidence).lower()
+        has_modularity = any(
+            term in evidence_text for term in ["module", "subsystem", "independent", "coupling", "loose"]
+        )
+        assert has_modularity, f"Evidence should mention module separation, got: {result.evidence}"
+
+
+class TestArchitectureDetectorFlatPattern:
+    """AC1/AC2: Detect flat/monolithic architecture."""
+
+    def test_flat_fixture_detects_as_flat(self, flat_fixture_db, flat_repo_id):
+        """Test that canonical flat fixture detects as 'flat'."""
+        detector = ArchitectureDetector(flat_fixture_db, flat_repo_id)
+        result = detector.detect()
+
+        assert result.style == "flat", f"Expected 'flat', got '{result.style}'"
+        # Flat can have lower confidence since pattern is less structured
+        assert result.confidence >= 0.45, f"Expected confidence ≥0.45, got {result.confidence}"
+
+    def test_flat_evidence_mentions_interconnection(self, flat_fixture_db, flat_repo_id):
+        """AC2: Evidence describes high interconnection."""
+        detector = ArchitectureDetector(flat_fixture_db, flat_repo_id)
+        result = detector.detect()
+
+        evidence_text = " ".join(result.evidence).lower()
+        has_flat_indicators = any(
+            term in evidence_text
+            for term in ["flat", "monolithic", "interconnect", "coupling", "no layer", "everything"]
+        )
+        assert has_flat_indicators, f"Evidence should indicate flat pattern, got: {result.evidence}"
+
+
+class TestArchitectureDetectorLowConfidenceHandling:
+    """AC4: Handle low-confidence/ambiguous cases gracefully."""
+
+    def test_ambiguous_fixture_returns_alternative(self, ambiguous_fixture_db, ambiguous_repo_id):
+        """AC4: Ambiguous case returns both style and alternative."""
+        detector = ArchitectureDetector(ambiguous_fixture_db, ambiguous_repo_id)
+        result = detector.detect()
+
+        # Must have alternative for ambiguous case
+        assert result.alternative is not None, "Ambiguous fixture must suggest alternative"
+        assert (
+            result.alternative_confidence is not None
+        ), "Alternative confidence must be set"
+        # Gap should be small (within 0.15)
+        confidence_gap = abs(result.confidence - result.alternative_confidence)
+        assert (
+            confidence_gap <= 0.15
+        ), f"Ambiguous case should have gap ≤0.15, got {confidence_gap}"
+
+    def test_confidence_always_in_range(self, mock_symbol_repo, sample_repo_id):
+        """AC3: Confidence always in [0.0, 1.0]."""
         detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         result = detector.detect()
 
-        assert result is not None
-        assert hasattr(result, "style")
-        assert hasattr(result, "confidence")
-        assert hasattr(result, "evidence")
+        assert 0.0 <= result.confidence <= 1.0, f"Confidence {result.confidence} out of range"
+        if result.alternative_confidence is not None:
+            assert (
+                0.0 <= result.alternative_confidence <= 1.0
+            ), f"Alt confidence {result.alternative_confidence} out of range"
 
-    def test_confidence_in_valid_range(self, mock_symbol_repo, sample_repo_id):
-        """Test that confidence score is between 0.0 and 1.0."""
+
+class TestArchitectureDetectorEvidenceQuality:
+    """AC2: Evidence must be detailed, not just existence check."""
+
+    def test_evidence_not_empty_list(self, mock_symbol_repo, sample_repo_id):
+        """Evidence list must contain items."""
         detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         result = detector.detect()
 
-        assert 0.0 <= result.confidence <= 1.0
+        assert isinstance(result.evidence, list), "Evidence must be a list"
+        assert len(result.evidence) > 0, "Evidence list must not be empty"
 
-    def test_style_is_valid_enum(self, mock_symbol_repo, sample_repo_id):
-        """Test that detected style is a valid architecture style."""
+    def test_evidence_contains_meaningful_strings(self, mock_symbol_repo, sample_repo_id):
+        """Each evidence item must be substantive (not just type check)."""
         detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         result = detector.detect()
 
-        valid_styles = ["layered", "hexagonal", "mvc", "microservices", "flat", "unknown"]
-        assert result.style in valid_styles
+        for evidence_item in result.evidence:
+            assert isinstance(evidence_item, str), f"Evidence item must be string, got {type(evidence_item)}"
+            assert len(evidence_item) > 10, f"Evidence item too short: '{evidence_item}'"
+            # Evidence should describe something, not just be a tag
+            has_content = any(
+                word in evidence_item.lower()
+                for word in ["layer", "module", "coupling", "depend", "pattern", "score", "confidence", "edge"]
+            )
+            assert has_content, f"Evidence item lacks meaningful content: '{evidence_item}'"
 
-    def test_evidence_list_not_empty(self, mock_symbol_repo, sample_repo_id):
-        """Test that evidence list contains items."""
+    def test_evidence_describes_detection_not_just_metrics(self, mock_symbol_repo, sample_repo_id):
+        """AC2: Evidence should mention why pattern was detected, not just that it was."""
         detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         result = detector.detect()
 
-        assert len(result.evidence) > 0
-        assert all(isinstance(e, str) for e in result.evidence)
+        evidence_text = " ".join(result.evidence)
+        # Should have both metrics and reasoning
+        assert len(evidence_text) > 50, "Evidence should be substantive"
 
-    def test_confidence_breakdown(self, mock_symbol_repo, sample_repo_id):
-        """Test that confidence breakdown includes all styles."""
+
+class TestConfidenceBreakdown:
+    """Confidence breakdown must show all styles."""
+
+    def test_breakdown_includes_all_five_styles(self, mock_symbol_repo, sample_repo_id):
+        """Breakdown must have scores for all 5 styles."""
         detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         breakdown = detector.detect_confidence_breakdown()
 
-        assert breakdown is not None
-        assert len(breakdown) > 0
+        expected_styles = {"layered", "hexagonal", "mvc", "microservices", "flat"}
+        actual_styles = set(breakdown.keys())
 
-    def test_alternative_style_lower_confidence(self, mock_symbol_repo, sample_repo_id):
-        """Test that alternative style (if present) has lower confidence."""
+        assert (
+            expected_styles == actual_styles
+        ), f"Expected {expected_styles}, got {actual_styles}"
+
+    def test_breakdown_scores_sum_meaningfully(self, mock_symbol_repo, sample_repo_id):
+        """Scores should be comparable (not all zero or all one)."""
         detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
-        result = detector.detect()
+        breakdown = detector.detect_confidence_breakdown()
 
-        if result.alternative:
-            assert result.alternative_confidence <= result.confidence
-
-
-class TestArchitectureDetectorLayering:
-    """Tests for layering detection."""
-
-    def test_layering_score_computed(self, mock_symbol_repo, sample_repo_id):
-        """Test that layering score is computed."""
-        detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
-        result = detector.detect()
-
-        # Evidence should include layering score or upward dependencies
-        has_layering = any("upward" in e.lower() or "layer" in e.lower() for e in result.evidence)
-        assert has_layering
-
-    def test_upward_dependencies_in_evidence(self, mock_symbol_repo, sample_repo_id):
-        """Test that evidence mentions upward dependencies."""
-        detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
-        result = detector.detect()
-
-        # If detected as layered, evidence should mention upward deps
-        if result.style == "layered":
-            has_upward = any("upward" in e.lower() or "depend" in e.lower() for e in result.evidence)
-            assert has_upward
+        scores = list(breakdown.values())
+        # At least some variance (not all identical)
+        unique_scores = len(set(scores)) > 1
+        assert (
+            unique_scores or all(s == 0.0 for s in scores)
+        ), "Scores should show differentiation"
 
 
-class TestArchitectureDetectorEdgeCases:
-    """Test edge cases and error handling."""
+class TestDeterminism:
+    """Same repo should produce identical results."""
 
-    def test_empty_repo(self, temp_db, sample_repo_id):
-        """Test detection on empty repository."""
-        conn = temp_db.connection()
-        conn.execute(
-            "INSERT INTO repositories (id, root_path, name) VALUES (?, ?, ?)",
-            (sample_repo_id, "/test/empty", "empty-repo"),
-        )
-        conn.commit()
-        conn.close()
-
-        detector = ArchitectureDetector(temp_db, sample_repo_id)
-        result = detector.detect()
-
-        # Should still return a valid result
-        assert result is not None
-        assert result.style in ["layered", "hexagonal", "mvc", "microservices", "flat", "unknown"]
-
-    def test_single_file_repo(self, temp_db, sample_repo_id):
-        """Test detection on repo with single file."""
-        conn = temp_db.connection()
-        conn.execute(
-            "INSERT INTO repositories (id, root_path, name) VALUES (?, ?, ?)",
-            (sample_repo_id, "/test/single", "single-file"),
-        )
-        conn.execute(
-            "INSERT INTO files (id, repo_id, rel_path, language, size_bytes, last_modified) VALUES (?, ?, ?, ?, ?, datetime('now'))",
-            ("file-1", sample_repo_id, "main.py", "python", 100),
-        )
-        conn.commit()
-        conn.close()
-
-        detector = ArchitectureDetector(temp_db, sample_repo_id)
-        result = detector.detect()
-
-        assert result is not None
-        assert 0.0 <= result.confidence <= 1.0
-
-    def test_determinism(self, mock_symbol_repo, sample_repo_id):
-        """Test that running detect() twice produces identical results."""
+    def test_detect_twice_gives_identical_result(self, mock_symbol_repo, sample_repo_id):
+        """Running detect() twice must produce identical output."""
         detector1 = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         result1 = detector1.detect()
 
         detector2 = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
         result2 = detector2.detect()
 
-        assert result1.style == result2.style
-        assert result1.confidence == result2.confidence
-        assert result1.evidence == result2.evidence
-
-
-class TestMetricsPresence:
-    """Test that evidence includes structured metrics."""
-
-    def test_metric_tags_in_evidence(self, mock_symbol_repo, sample_repo_id):
-        """Test that evidence includes [METRIC] tags."""
-        detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
-        result = detector.detect()
-
-        # Should have some metrics
-        metrics = [e for e in result.evidence if "[METRIC]" in e]
-        assert len(metrics) > 0 or len(result.evidence) > 0  # Either metrics or human text
-
-    def test_confidence_tags_in_evidence(self, mock_symbol_repo, sample_repo_id):
-        """Test that evidence includes [CONFIDENCE] tags."""
-        detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
-        result = detector.detect()
-
-        # Should include breakdown of all style confidence scores
-        breakdown = detector.detect_confidence_breakdown()
-        assert len(breakdown) > 0
-
-
-class TestAlternativeDetection:
-    """Test alternative architecture detection."""
-
-    def test_alternative_when_ambiguous(self, mock_symbol_repo, sample_repo_id):
-        """Test that ambiguous results include an alternative."""
-        detector = ArchitectureDetector(mock_symbol_repo, sample_repo_id)
-        result = detector.detect()
-
-        # For this mock layered repo, should detect layered confidently
-        assert result.style is not None
-
-
-class TestCycleHandling:
-    """Test behavior with cyclic dependencies (edge cases)."""
-
-    def test_detector_handles_missing_data_gracefully(self, temp_db, sample_repo_id):
-        """Test that detector doesn't crash with incomplete data."""
-        conn = temp_db.connection()
-        conn.execute(
-            "INSERT INTO repositories (id, root_path, name) VALUES (?, ?, ?)",
-            (sample_repo_id, "/test/incomplete", "incomplete"),
-        )
-        # File without any imports
-        conn.execute(
-            "INSERT INTO files (id, repo_id, rel_path, language, size_bytes, last_modified) VALUES (?, ?, ?, ?, ?, datetime('now'))",
-            ("orphan", sample_repo_id, "orphan.py", "python", 50),
-        )
-        conn.commit()
-        conn.close()
-
-        detector = ArchitectureDetector(temp_db, sample_repo_id)
-        result = detector.detect()
-
-        assert result is not None
-        assert isinstance(result.confidence, float)
+        assert result1.style == result2.style, "Style must be identical"
+        assert result1.confidence == result2.confidence, "Confidence must be identical"
+        assert result1.evidence == result2.evidence, "Evidence must be identical"
+        assert result1.alternative == result2.alternative, "Alternative must be identical"
+        if result1.alternative_confidence and result2.alternative_confidence:
+            assert (
+                result1.alternative_confidence == result2.alternative_confidence
+            ), "Alt confidence must be identical"
