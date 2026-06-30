@@ -40,13 +40,18 @@
 ---
 
 ### Week 5–6: Repo Intelligence — call graph + incremental
-- [ ] Call graph builder using `pyan3`
-- [ ] Dependency graph (requirements.txt, pyproject.toml)
-- [ ] Module detector
-- [ ] Incremental indexer (git diff based)
-- [ ] `ortho index` with `--watch` mode
+- [x] Call graph builder using `pyan3`
+- [x] Dependency graph (requirements.txt, pyproject.toml)
+- [x] Module detector
+- [x] Incremental indexer (git diff based)
+- [x] `ortho index` with `--watch` mode
 
-**Status:** NOT STARTED
+**Status:** COMPLETED ✓ (task-003, commit: 286dd23)
+- CallGraphBuilder (AST-based call graph extraction)
+- DependencyGraphBuilder (requirements.txt + pyproject.toml parsing)
+- ModuleDetector (regular + namespace package detection)
+- IncrementalIndexer (git diff based incremental re-indexing)
+- 64+ tests designed, runtime verification passed
 
 ---
 
@@ -60,23 +65,25 @@
 - [ ] `ortho context add` / `ortho context search`
 - [ ] Staleness detector
 
-**Status:** NOT STARTED
+**Status:** GATE-1 APPROVAL PENDING (task-004, PLANNER complete)
 
 ---
 
 ## Active Tasks
 
-(None — task-003 completed)
+| Task ID | Name | Status | Workflow | Commit | Date |
+|---------|------|--------|----------|--------|------|
+| task-004 | ContextHub (Week 7–8) | GATE-1-PENDING | feature.md | d51d65d | 2026-06-30 |
 
 ---
 
 ## Completed Tasks
 
-| Task ID | Name | Workflow | Commit Hash | Date |
-|---------|------|----------|-------------|------|
-| task-001 | Shared Foundation (Week 1–2) | feature.md | 46edd53 | 2026-06-30 |
-| task-002 | Python Language Adapter (Week 3–4) | feature.md | 5b8f8a2 | 2026-06-30 |
-| task-003 | Call Graph + Incremental (Week 5–6) | feature.md | 286dd23 | 2026-06-30 |
+| Task ID | Name | Workflow | Commit Hash | Date | Status |
+|---------|------|----------|-------------|------|--------|
+| task-001 | Shared Foundation (Week 1–2) | feature.md | 46edd53 | 2026-06-30 | MERGED ✓ |
+| task-002 | Python Language Adapter (Week 3–4) | feature.md | 5b8f8a2 | 2026-06-30 | MERGED ✓ |
+| task-003 | Call Graph + Incremental (Week 5–6) | feature.md | 286dd23 | 2026-06-30 | MERGED ✓ |
 
 ---
 
@@ -113,9 +120,9 @@ None.
 - Task-002: 5b8f8a2 (2026-06-30)
 - Task-003: 286dd23 (2026-06-30)
 
-**In Progress:** None
+**In Progress:** Task-004 (GATE-1 PENDING)
 
-**Remaining:** Task-004 (Week 5–6), Task-005 (Week 7–8)
+**Remaining:** Task-005 (Week 7–8)
 
 **Workflow Optimizations Applied:**
 - Compact templates (70% size reduction)
