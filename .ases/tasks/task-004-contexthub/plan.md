@@ -4,11 +4,14 @@ title: ContextHub (Week 7–8)
 phase: 1
 week: 7-8
 workflow: feature
-status: GATE-2-PENDING-ARCHITECT
+status: GATE-3-PENDING-BUILDER
 created: 2026-06-30
 owner: PLANNER
 gate_1_approval: 2026-06-30 (human approved)
 gate_1_commit: 304d4a9
+gate_2_approval: 2026-06-30 (ARCHITECT approved)
+gate_2_commit: 64fdfdf
+gate_2_adrs: ADR-006, ADR-007, ADR-008
 ---
 
 # Task-004 Plan: ContextHub (Pillar 2)

@@ -73,7 +73,7 @@
 
 | Task ID | Name | Status | Workflow | Commit | Date |
 |---------|------|--------|----------|--------|------|
-| task-004 | ContextHub (Week 7–8) | GATE-2-PENDING-ARCHITECT | feature.md | 5ca6452 | 2026-06-30 |
+| task-004 | ContextHub (Week 7–8) | GATE-3-PENDING-BUILDER | feature.md | 64fdfdf | 2026-06-30 |
 
 ---
 
@@ -95,9 +95,13 @@ None.
 
 ## Architecture Decisions (ADRs)
 
-| ADR | Title | Status | Reference |
-|-----|-------|--------|-----------|
-| — | — | — | — |
+| ADR | Title | Status | Task | Date |
+|-----|-------|--------|------|------|
+| ADR-001 | Storage Strategy (SQLite + sqlite-vec) | ACCEPTED | task-001 | 2026-06-30 |
+| ADR-002 | Language Adapter Plugin Model | ACCEPTED | task-001 | 2026-06-30 |
+| ADR-006 | EmbeddingProvider Abstraction | ACCEPTED | task-004 | 2026-06-30 |
+| ADR-007 | FTS5 Triggers Synchronization | ACCEPTED | task-004 | 2026-06-30 |
+| ADR-008 | Artifact Versioning (Phase 1) | ACCEPTED | task-004 | 2026-06-30 |
 
 ---
 
@@ -120,7 +124,7 @@ None.
 - Task-002: 5b8f8a2 (2026-06-30)
 - Task-003: 286dd23 (2026-06-30)
 
-**In Progress:** Task-004 (GATE-2 PENDING: ARCHITECT review)
+**In Progress:** Task-004 (GATE-3 PENDING: BUILDER implementation)
 
 **Remaining:** Task-005 (Week 7–8)
 
