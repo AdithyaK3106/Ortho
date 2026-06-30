@@ -1,27 +1,19 @@
-# Code Review
+task: [task-id]
+title: [task-title]
+reviewer: REVIEWER
+review_date: [YYYY-MM-DD]
 
-**Task ID:** [task-id]  
-**Feature:** [feature name]  
-**Reviewer:** REVIEWER  
-**Review Date:** [YYYY-MM-DD]  
+verdict: APPROVED | CHANGES REQUIRED
 
----
+summary: [1-2 sentences: what changed, does it work, any blockers?]
 
-## Verdict
+specification_compliance: [PASS | issues: file:line — specific issue, file:line — issue, ...]
+code_quality: [PASS | EXCELLENT | GOOD | OK | issues: ...]
+security_assessment: [PASS | LOW-RISK | MEDIUM-RISK | HIGH-RISK] — [specific findings or "none"]
+architecture_compliance: [PASS | references: ADR-N, ADR-M | issues: ...]
+evidence_completeness: [COMPLETE | gaps: describe]
 
-**APPROVED** ✓ or **CHANGES REQUIRED** ✗
-
----
-
-## Summary
-
-[1-2 sentence overview of the change and verdict]
-
-Code adds category management (CRUD) to expense system. Implementation matches specification exactly. All verification gates passed. Code quality high. No security issues. Architecture compliant with existing ADRs. Ready for merge.
-
----
-
-## Specification Compliance
+issues_found:
 
 [Does code match spec? Any deviations? Missing features?]
 

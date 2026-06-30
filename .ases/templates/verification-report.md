@@ -1,30 +1,19 @@
-# Verification Report
+task: [task-id]
+title: [task-title]
+verified: [YYYY-MM-DD HH:MM:SS UTC]
+tier: ITERATION | COMMIT-GATE
+evidence_source: CLAUDE-CLI | HUMAN-TERMINAL | CI-CD
 
-**Task ID:** [task-id]  
-**Feature:** [feature name]  
-**Verified:** [YYYY-MM-DD HH:MM:SS UTC]
+summary:
+  build: PASS | FAIL | NOT-RUN — [log file reference]
+  lint: PASS | FAIL | NOT-RUN — [log file reference]
+  types: PASS | FAIL | NOT-RUN — [log file reference]
+  unit_tests: PASS | FAIL | NOT-RUN — [X/Y passed] — [log file reference]
+  coverage: [percentage] | NOT-MEASURED
+  regression: PASS | FAIL | NOT-RUN — [X new failures] — [log file reference]
+  android_ui: NOT-APPLICABLE | MANUAL-REQUIRED | [status]
 
----
-
-## Evidence Summary
-
-```
-TASK:           [task-id]
-TIMESTAMP:      [datetime from evidence files]
-EVIDENCE-SOURCE: CLAUDE-CLI | HUMAN-TERMINAL | CI-CD
-
-BUILD:          PASS | FAIL | NOT-RUN — [log file reference]
-LINT:           PASS | FAIL | NOT-RUN — [log file reference]
-TYPE-CHECK:     PASS | FAIL | NOT-RUN — [log file reference]
-UNIT-TESTS:     PASS | FAIL | NOT-RUN — [X passed, Y failed] — [log file reference]
-COVERAGE:       [percentage] | NOT-MEASURED
-REGRESSION:     PASS | FAIL | NOT-RUN — [X new failures] — [log file reference]
-ANDROID-UI:     NOT-APPLICABLE (requires emulator) | MANUAL-REQUIRED
-```
-
----
-
-## Detailed Results
+detailed_results:
 
 ### BUILD: PASS ✓
 

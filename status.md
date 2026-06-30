@@ -1,9 +1,10 @@
 # Ortho v3 — Phase 1 Progress Tracker
 
-**Version:** 1.0  
+**Version:** 1.1 — ASES v1.2 Optimized  
 **Started:** 2026-06-30  
 **Current Phase:** Phase 1 — Foundation (Weeks 1–8)  
-**Goal:** CLI that scans a Python repo and makes its contents searchable. No AI yet.
+**Goal:** CLI that scans a Python repo and makes its contents searchable. No AI yet.  
+**Optimization:** Task-001 complete (full v1.1 workflow). Weeks 3–8 tasks use FRD Part 17: compact templates, PLANNER+ARCHITECT fast path (if no structural change), tiered verification. Same 6 gates, same rigor, ~40% faster artifact production per task.
 
 ---
 

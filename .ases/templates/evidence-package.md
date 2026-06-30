@@ -1,22 +1,25 @@
-# Evidence Package
+task: [task-id]
+title: [task-title]
+completed: [YYYY-MM-DD HH:MM:SS UTC]
 
-**Task ID:** [task-id]  
-**Feature:** [feature name]  
-**Completed:** [YYYY-MM-DD HH:MM:SS UTC]
+summary: [Brief: what was built, does it meet spec? verdict: PASS | FAIL]
 
----
+gates:
+  gate1_plan: ✓ [2026-06-27 23:00 UTC] | ✗ MISSING
+  gate2_architecture: ✓ [2026-06-27 23:15 UTC] | ✗ MISSING | (waived: reason)
+  gate3_implementation: ✓ [spec match confirmed] | ✗ drift detected
+  gate4_tests: ✓ [coverage > 80%] | ✗ MISSING
+  gate5_verification: ✓ [BUILD/LINT/TYPES/TESTS/REGRESSION all pass] | ✗ failures exist
+  gate6_review: [pending this artifact]
 
-## Summary
+evidence_files:
+  - build-[ts].log: [exit code or status]
+  - lint-[ts].log: [exit code or status]
+  - types-[ts].log: [exit code or status]
+  - test-[ts].log: [exit code or status]
+  - regression-[ts].log: [exit code or status]
 
-[Brief description of what was built and whether it met all requirements.]
-
-This feature adds category management (CRUD) to the expense system. Category service layer, API endpoints, and database table created. All specification requirements met. All verification gates passed with zero failures.
-
----
-
-## Gates Passed
-
-✓/✗ indicates whether gate passed (✓) or failed (✗)
+known_limitations:
 
 ```
 ✓ Plan approved by human           [2026-06-27 23:00:00 UTC]

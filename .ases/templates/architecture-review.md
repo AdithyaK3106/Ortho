@@ -1,153 +1,30 @@
-# Architecture Review
+task: [task-id]
+title: [task-title]
+architect: ARCHITECT
+created: [YYYY-MM-DD]
+status: DRAFT | PROPOSED | APPROVED | REJECTED
 
-**Task ID:** [task-id]  
-**Feature:** [feature name]  
-**Reviewer:** ARCHITECT  
-**Created:** [YYYY-MM-DD]  
-**Status:** DRAFT | PROPOSED | APPROVED | REJECTED
+module_boundaries:
+  new_modules: [module1 (responsibility), module2, ...]
+  modified_modules: [module1, module2, ...]
+  assessment: [PASS | issues: specific concern, specific concern, ...]
 
----
+dependency_analysis:
+  graph: [text visualization or "none — no new dependencies"]
+  circular_deps: [PASS | found: cycle description]
+  assessment: [PASS | issues: dependency X is questionable because ...]
 
-## Module Boundary Evaluation
+api_contracts:
+  new_endpoints: [POST /path (input/output), GET /path, ...]
+  consistency: [PASS | issues: endpoint X diverges from pattern Y]
+  assessment: [PASS | issues: ...]
 
-[Evaluate: Are modules clear? Does this feature fit existing boundaries? Are new modules coherent?]
+data_flow:
+  validation_layers: [boundary, business logic, database] ✓
+  data_integrity: [constraints present, cascades handled] ✓
+  assessment: [PASS | issues: ...]
 
-### Current Module Structure
-[Describe existing modules]
-- Existing modules and their responsibilities
-- What changed with this feature?
-
-### New Modules (if any)
-[If introducing new module, evaluate:]
-- **Module Name:** [e.g., CategoryService]
-- **Responsibility:** [Single responsibility — what is this module's reason to change?]
-- **Dependencies:** [What does it depend on?]
-- **Dependents:** [What depends on it?]
-
-### Boundary Assessment
-- [ ] Module responsibilities are clear and single-purpose
-- [ ] No module has more than one reason to change
-- [ ] Boundaries are clear and not blurred
-- [ ] Public vs. private interface is defined
-
----
-
-## Dependency Analysis
-
-[Visualize: What depends on what? Are there cycles?]
-
-### Dependency Graph
-
-```
-ExpenseController
-    ↓
-ExpenseService
-    ↓
-CategoryService (new)
-    ↓
-Database
-```
-
-### Circular Dependency Check
-- [ ] No circular dependencies detected
-- [ ] Dependencies are one-way (no bidirectional)
-- [ ] All dependencies are intentional and documented
-
-### Dependency Assessment
-[List each dependency and assess if it's necessary]
-- CategoryService depends on Database — ✓ Necessary (needs to query categories)
-- ExpenseService depends on CategoryService — ✓ Necessary (validates category exists)
-- Controllers depend on Services — ✓ Necessary (call business logic)
-
----
-
-## API Contract Definitions
-
-[New APIs must be clear and consistent.]
-
-### New APIs
-[For each new API: method, path, input, output, errors]
-
-#### POST /categories
-- **Purpose:** Create a new expense category
-- **Input:** `{ name: string; description?: string }`
-- **Output:** `{ id: string; name: string; created_at: ISO8601 }`
-- **Errors:** 400 INVALID_NAME, 409 CATEGORY_EXISTS
-- **Consistency:** Follows existing POST /expenses pattern ✓
-
-#### GET /categories
-- **Purpose:** List all categories
-- **Input:** Query params (limit, offset)
-- **Output:** Array of category objects
-- **Errors:** 400 INVALID_LIMIT
-- **Consistency:** Follows existing GET /expenses pattern ✓
-
-#### GET /categories/:id
-- **Purpose:** Get specific category
-- **Input:** Category ID in URL
-- **Output:** Single category object
-- **Errors:** 404 CATEGORY_NOT_FOUND
-- **Consistency:** Follows existing pattern ✓
-
-#### PUT /categories/:id
-- **Purpose:** Update category
-- **Input:** `{ name?: string; description?: string }`
-- **Output:** Updated category object
-- **Errors:** 404 CATEGORY_NOT_FOUND, 409 CATEGORY_EXISTS
-- **Consistency:** Follows existing pattern ✓
-
-#### DELETE /categories/:id
-- **Purpose:** Delete category
-- **Input:** Category ID in URL
-- **Output:** 204 No Content
-- **Errors:** 404 CATEGORY_NOT_FOUND, 409 CATEGORY_HAS_EXPENSES
-- **Consistency:** Follows existing pattern ✓
-
-### API Consistency
-- [ ] All new APIs follow existing naming conventions
-- [ ] All new APIs use consistent error format
-- [ ] All new APIs return consistent status codes
-- [ ] Response shapes are consistent with existing APIs
-
----
-
-## Data Flow Review
-
-[Where does data come from? Where does validation happen?]
-
-```
-API Request
-    ↓
-Controller (validate input, return 400 if invalid)
-    ↓
-Service (apply business logic, throw if invalid)
-    ↓
-Database (store data)
-    ↓
-Service (return result)
-    ↓
-Controller (format response, return 200/201)
-    ↓
-Client
-```
-
-### Validation Layer
-- [ ] Input validation at API boundary (400 errors)
-- [ ] Business logic validation in service (domain rules)
-- [ ] Database constraints (unique, not null, foreign keys)
-- [ ] No validation gaps identified
-
-### Data Integrity
-- [ ] Foreign key constraints on category_id
-- [ ] Unique constraint on category name
-- [ ] Updated_at timestamp on every update
-- [ ] No orphaned records possible (cascade delete or prevent delete)
-
----
-
-## Risk Flags
-
-[Identify and assess risks.]
+risk_flags:
 
 ### Security
 - **Input Validation** ✓ — Name and description validated for length and format

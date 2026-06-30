@@ -2,18 +2,22 @@
 
 **Project:** Ortho v3 — AI Engineering Platform  
 **Phase:** Phase 1 — Foundation (Weeks 1–8, started 2026-06-30)  
-**Methodology:** ASES (AI Software Engineering System)  
+**Methodology:** ASES v1.2 with FRD Part 17 optimizations (PLANNER+ARCHITECT fast path, compact templates, tiered verification)  
 **Stack:** Python (packages) + TypeScript (CLI)  
-**FRD:** `ortho-v3-frd.md` (sections 1–18, authoritative)  
-**Last Updated:** 2026-06-30 by PLANNER
+**FRD:** `ortho-v3-frd.md` (sections 1–18, Part 17 optimizations active for Week 3–8)  
+**Last Updated:** 2026-06-30 by OPTIMIZATION-PASS
 
 ---
 
 ## Project Overview
 
-Building Ortho from scratch using ASES workflows. Every task follows: `.ases/workflows/feature.md` → 6 gates, 10 artifacts, human approval at each stage.
+Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Week 1–2) ran at full v1.1 weight. **Weeks 3–8 tasks adopt FRD Part 17 optimizations:**
+- PLANNER+ARCHITECT fast path (combined session if architecture_impact: NONE, skips 1 of 6 sessions per task)
+- Compact key-value template format (instead of verbose prose — same required fields, ~70% shorter artifacts)
+- Tiered verification (Tier 1 scoped during iteration, Tier 2 full gate at commit — avoids re-running full suite 5× per fix)
+- All 6 gates, all evidence rules, Definition of Done remain fully intact — only mechanics and document format change
 
-**Current Status:** VERIFICATION-COMPLETE (task-001 VERIFIER phase passed all checks — ready for GATE 5 approval)
+**Current Status:** VERIFICATION-COMPLETE (task-001 fully tested and reviewed — ready for merge and historical archive)
 
 ---
 
