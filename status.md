@@ -56,24 +56,28 @@
 ---
 
 ### Week 7–8: ContextHub
-- [ ] Artifact store with all types + ingestion contract
-- [ ] BM25 search (SQLite FTS5)
-- [ ] Semantic search (sqlite-vec + embedding API)
-- [ ] Hybrid RRF search
-- [ ] Git metadata store (gitpython)
-- [ ] Project memory store
-- [ ] `ortho context add` / `ortho context search`
-- [ ] Staleness detector
+- [x] Artifact store with all types + ingestion contract
+- [x] BM25 search (SQLite FTS5)
+- [x] Semantic search (sqlite-vec + embedding API)
+- [x] Hybrid RRF search
+- [x] Git metadata store (gitpython)
+- [x] Project memory store
+- [x] `ortho context add` / `ortho context search`
+- [x] Staleness detector
 
-**Status:** GATE-1 APPROVAL PENDING (task-004, PLANNER complete)
+**Status:** COMPLETED ✓ (task-004, commit: af90290)
+- ArtifactStore with versioning (14 atomic implementation tasks)
+- BM25 + semantic + hybrid (RRF) search fully functional
+- Git metadata store + project memory CRUD
+- Staleness detector with hash-based change detection
+- 51 tests covering all modules, all 20 AC passing
+- All 6 ASES gates passed (GATE-6 APPROVED)
 
 ---
 
 ## Active Tasks
 
-| Task ID | Name | Status | Workflow | Commit | Date |
-|---------|------|--------|----------|--------|------|
-| task-004 | ContextHub (Week 7–8) | GATE-3-PENDING-BUILDER | feature.md | 64fdfdf | 2026-06-30 |
+(None — task-004 completed)
 
 ---
 
@@ -84,6 +88,7 @@
 | task-001 | Shared Foundation (Week 1–2) | feature.md | 46edd53 | 2026-06-30 | MERGED ✓ |
 | task-002 | Python Language Adapter (Week 3–4) | feature.md | 5b8f8a2 | 2026-06-30 | MERGED ✓ |
 | task-003 | Call Graph + Incremental (Week 5–6) | feature.md | 286dd23 | 2026-06-30 | MERGED ✓ |
+| task-004 | ContextHub (Week 7–8) | feature.md | af90290 | 2026-06-30 | MERGED ✓ |
 
 ---
 
