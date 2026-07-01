@@ -9,6 +9,7 @@ from repo_intelligence.file_discoverer import FileDiscoverer
 from repo_intelligence.symbol_extractor import SymbolExtractor
 from repo_intelligence.import_graph import ImportGraphBuilder
 from repo_intelligence.call_graph import CallGraphBuilder
+from repo_intelligence.file_watcher import FileWatcher
 
 
 logger = logging.getLogger(__name__)
@@ -196,3 +197,70 @@ class Indexer:
             True if success rate >= error_threshold, False otherwise
         """
         return result.success_rate >= (self.error_threshold * 100)
+
+    def watch(self) -> None:
+        """
+        Enter watch mode: monitor for file changes and re-index.
+
+        Watches for Python file changes (added, modified, deleted) and re-indexes
+        changed files only. Blocks until interrupted (Ctrl+C).
+
+        Process:
+            1. Start file watcher
+            2. On file change, re-index changed file only
+            3. Report results
+            4. Stop on KeyboardInterrupt or error
+        """
+        try:
+            watcher = FileWatcher(self.repo_root, on_change=self._on_file_change)
+            watcher.start()
+
+            logger.info("Watch mode started. Press Ctrl+C to stop.")
+
+            # Block indefinitely until interrupted
+            import time
+            try:
+                while watcher.is_running():
+                    time.sleep(0.1)
+            except KeyboardInterrupt:
+                logger.info("Watch mode interrupted by user")
+
+            watcher.stop()
+
+        except ImportError as e:
+            logger.error(f"Cannot start watch mode: {e}")
+            raise
+
+    def _on_file_change(self, file_path: Path, action: str) -> None:
+        """
+        Callback when a file changes in watch mode.
+
+        Args:
+            file_path: Path to changed file
+            action: 'added', 'modified', or 'deleted'
+        """
+        try:
+            if action == 'deleted':
+                logger.info(f"Deleted: {file_path.name}")
+                return
+
+            if file_path.suffix != '.py':
+                return
+
+            logger.info(f"Changed ({action}): {file_path.relative_to(self.repo_root)}")
+
+            # Re-index just this file
+            result = self.index_files([file_path])
+
+            if result.error_count > 0:
+                for error in result.errors:
+                    logger.warning(error)
+            else:
+                logger.info(
+                    f"✓ {result.total_symbols} symbols, "
+                    f"{result.total_imports} imports, "
+                    f"{result.total_calls} calls"
+                )
+
+        except Exception as e:
+            logger.error(f"Error processing change: {e}")
