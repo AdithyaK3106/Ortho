@@ -1,0 +1,119 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\repo-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 13 items
+
+packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_python_adapter FAILED [  7%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_symbol_extractor PASSED [ 15%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_import_graph_builder PASSED [ 23%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_call_graph_builder FAILED [ 30%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_module_detector FAILED [ 38%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestAdapterInterface::test_adapter_has_required_methods FAILED [ 46%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestAdapterInterface::test_parse_simple_file FAILED [ 53%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestAdapterInterface::test_parse_handles_missing_file FAILED [ 61%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestSymbolExtractorInterface::test_extractor_has_extract_method PASSED [ 69%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestImportGraphInterface::test_builder_can_analyze_simple_imports PASSED [ 76%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestCallGraphInterface::test_builder_initialization FAILED [ 84%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestModuleDetectorInterface::test_detector_initialization FAILED [ 92%]
+packages\repo-intelligence\tests\test_basic_integration.py::TestModuleDetectorInterface::test_detector_can_scan_directory FAILED [100%]
+
+================================== FAILURES ===================================
+___________________ TestImports.test_import_python_adapter ____________________
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:31: in __init__
+    self.language: Language = get_language("python")
+                              ^^^^^^^^^^^^^^^^^^^^^^
+tree_sitter_languages\\core.pyx:14: in tree_sitter_languages.core.get_language
+    ???
+E   TypeError: __init__() takes exactly 1 argument (2 given)
+
+During handling of the above exception, another exception occurred:
+packages\repo-intelligence\tests\test_basic_integration.py:17: in test_import_python_adapter
+    adapter = PythonAdapter()
+              ^^^^^^^^^^^^^^^
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:33: in __init__
+    raise RuntimeError(f"Failed to load Python grammar: {e}")
+E   RuntimeError: Failed to load Python grammar: __init__() takes exactly 1 argument (2 given)
+_________________ TestImports.test_import_call_graph_builder __________________
+packages\repo-intelligence\tests\test_basic_integration.py:32: in test_import_call_graph_builder
+    builder = CallGraphBuilder()
+              ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+___________________ TestImports.test_import_module_detector ___________________
+packages\repo-intelligence\tests\test_basic_integration.py:37: in test_import_module_detector
+    detector = ModuleDetector()
+               ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+___________ TestAdapterInterface.test_adapter_has_required_methods ____________
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:31: in __init__
+    self.language: Language = get_language("python")
+                              ^^^^^^^^^^^^^^^^^^^^^^
+tree_sitter_languages\\core.pyx:14: in tree_sitter_languages.core.get_language
+    ???
+E   TypeError: __init__() takes exactly 1 argument (2 given)
+
+During handling of the above exception, another exception occurred:
+packages\repo-intelligence\tests\test_basic_integration.py:46: in test_adapter_has_required_methods
+    adapter = PythonAdapter()
+              ^^^^^^^^^^^^^^^
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:33: in __init__
+    raise RuntimeError(f"Failed to load Python grammar: {e}")
+E   RuntimeError: Failed to load Python grammar: __init__() takes exactly 1 argument (2 given)
+_________________ TestAdapterInterface.test_parse_simple_file _________________
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:31: in __init__
+    self.language: Language = get_language("python")
+                              ^^^^^^^^^^^^^^^^^^^^^^
+tree_sitter_languages\\core.pyx:14: in tree_sitter_languages.core.get_language
+    ???
+E   TypeError: __init__() takes exactly 1 argument (2 given)
+
+During handling of the above exception, another exception occurred:
+packages\repo-intelligence\tests\test_basic_integration.py:54: in test_parse_simple_file
+    adapter = PythonAdapter()
+              ^^^^^^^^^^^^^^^
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:33: in __init__
+    raise RuntimeError(f"Failed to load Python grammar: {e}")
+E   RuntimeError: Failed to load Python grammar: __init__() takes exactly 1 argument (2 given)
+____________ TestAdapterInterface.test_parse_handles_missing_file _____________
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:31: in __init__
+    self.language: Language = get_language("python")
+                              ^^^^^^^^^^^^^^^^^^^^^^
+tree_sitter_languages\\core.pyx:14: in tree_sitter_languages.core.get_language
+    ???
+E   TypeError: __init__() takes exactly 1 argument (2 given)
+
+During handling of the above exception, another exception occurred:
+packages\repo-intelligence\tests\test_basic_integration.py:64: in test_parse_handles_missing_file
+    adapter = PythonAdapter()
+              ^^^^^^^^^^^^^^^
+packages\repo-intelligence\src\repo_intelligence\adapters\python_adapter.py:33: in __init__
+    raise RuntimeError(f"Failed to load Python grammar: {e}")
+E   RuntimeError: Failed to load Python grammar: __init__() takes exactly 1 argument (2 given)
+_____________ TestCallGraphInterface.test_builder_initialization ______________
+packages\repo-intelligence\tests\test_basic_integration.py:104: in test_builder_initialization
+    builder = CallGraphBuilder()
+              ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+__________ TestModuleDetectorInterface.test_detector_initialization ___________
+packages\repo-intelligence\tests\test_basic_integration.py:113: in test_detector_initialization
+    detector = ModuleDetector()
+               ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+________ TestModuleDetectorInterface.test_detector_can_scan_directory _________
+packages\repo-intelligence\tests\test_basic_integration.py:124: in test_detector_can_scan_directory
+    detector = ModuleDetector()
+               ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+=========================== short test summary info ===========================
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_python_adapter
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_call_graph_builder
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestImports::test_import_module_detector
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestAdapterInterface::test_adapter_has_required_methods
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestAdapterInterface::test_parse_simple_file
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestAdapterInterface::test_parse_handles_missing_file
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestCallGraphInterface::test_builder_initialization
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestModuleDetectorInterface::test_detector_initialization
+FAILED packages\repo-intelligence\tests\test_basic_integration.py::TestModuleDetectorInterface::test_detector_can_scan_directory
+========================= 9 failed, 4 passed in 0.21s =========================

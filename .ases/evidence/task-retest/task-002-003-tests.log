@@ -1,0 +1,482 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\repo-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 68 items
+
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_extract_simple_call ERROR [  1%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_extract_method_calls ERROR [  2%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_call_from_method ERROR [  4%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_call_line_numbers ERROR [  5%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_empty_file_no_calls ERROR [  7%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_file_with_only_definitions ERROR [  8%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_syntax_error_handling ERROR [ 10%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_nonexistent_file ERROR [ 11%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallEdgeProperties::test_edge_has_required_fields ERROR [ 13%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallEdgeProperties::test_caller_not_empty ERROR [ 14%]
+packages\repo-intelligence\tests\test_call_graph.py::TestCallEdgeProperties::test_callee_not_empty ERROR [ 16%]
+packages\repo-intelligence\tests\test_call_graph.py::TestNestedCalls::test_detect_nested_calls ERROR [ 17%]
+packages\repo-intelligence\tests\test_call_graph.py::TestNestedCalls::test_multiple_calls_same_function ERROR [ 19%]
+packages\repo-intelligence\tests\test_call_graph.py::TestBuiltinCalls::test_builtin_calls ERROR [ 20%]
+packages\repo-intelligence\tests\test_call_graph.py::TestMethodCalls::test_self_method_calls ERROR [ 22%]
+packages\repo-intelligence\tests\test_call_graph.py::TestMethodCalls::test_instance_method_calls ERROR [ 23%]
+packages\repo-intelligence\tests\test_call_graph.py::TestAsyncCalls::test_async_function_calls ERROR [ 25%]
+packages\repo-intelligence\tests\test_call_graph.py::TestAsyncCalls::test_await_calls ERROR [ 26%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_simple_import FAILED [ 27%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_from_import FAILED [ 29%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_relative_imports FAILED [ 30%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_external_imports FAILED [ 32%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_import_line_numbers FAILED [ 33%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_empty_file_no_imports FAILED [ 35%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_file_with_no_imports FAILED [ 36%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_syntax_error_handling PASSED [ 38%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_nonexistent_file FAILED [ 39%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportTypes::test_standard_library_classification FAILED [ 41%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportTypes::test_relative_import_prefix FAILED [ 42%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportEdgeProperties::test_edge_has_required_fields FAILED [ 44%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportEdgeProperties::test_edge_source_module FAILED [ 45%]
+packages\repo-intelligence\tests\test_import_graph.py::TestImportEdgeProperties::test_edge_target_module_not_empty FAILED [ 47%]
+packages\repo-intelligence\tests\test_import_graph.py::TestMultipleImports::test_multiple_from_import FAILED [ 48%]
+packages\repo-intelligence\tests\test_import_graph.py::TestMultipleImports::test_import_with_alias FAILED [ 50%]
+packages\repo-intelligence\tests\test_import_graph.py::TestMultipleImports::test_multiline_import FAILED [ 51%]
+packages\repo-intelligence\tests\test_import_graph.py::TestCircularImports::test_detect_circular_import_pattern FAILED [ 52%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_detect_regular_package ERROR [ 54%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_detect_subpackage ERROR [ 55%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_detect_namespace_package ERROR [ 57%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_module_properties ERROR [ 58%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_regular_package_flag ERROR [ 60%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_single_module_detection ERROR [ 61%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_pycache_ignored ERROR [ 63%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_empty_directory ERROR [ 64%]
+packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_no_python_files ERROR [ 66%]
+packages\repo-intelligence\tests\test_module_detector.py::TestModuleStructure::test_module_path_absolute ERROR [ 67%]
+packages\repo-intelligence\tests\test_module_detector.py::TestModuleStructure::test_module_path_exists ERROR [ 69%]
+packages\repo-intelligence\tests\test_module_detector.py::TestModuleStructure::test_submodule_names ERROR [ 70%]
+packages\repo-intelligence\tests\test_module_detector.py::TestComplexHierarchy::test_deep_nesting ERROR [ 72%]
+packages\repo-intelligence\tests\test_module_detector.py::TestComplexHierarchy::test_mixed_packages_and_modules ERROR [ 73%]
+packages\repo-intelligence\tests\test_module_detector.py::TestEdgeCases::test_symlink_handling ERROR [ 75%]
+packages\repo-intelligence\tests\test_module_detector.py::TestEdgeCases::test_hidden_modules ERROR [ 76%]
+packages\repo-intelligence\tests\test_module_detector.py::TestEdgeCases::test_permission_denied ERROR [ 77%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_extract_function_symbol FAILED [ 79%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_extract_class_symbol FAILED [ 80%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_extract_method_symbol FAILED [ 82%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_symbol_has_qualified_name FAILED [ 83%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_symbol_line_numbers FAILED [ 85%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_empty_file FAILED [ 86%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_file_with_syntax_error PASSED [ 88%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_nonexistent_file FAILED [ 89%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_symbol_docstring FAILED [ 91%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolTypes::test_property_detection FAILED [ 92%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolTypes::test_staticmethod_detection FAILED [ 94%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolTypes::test_classmethod_detection FAILED [ 95%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestLargeFile::test_large_file_performance FAILED [ 97%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestUnicodePath::test_unicode_filename FAILED [ 98%]
+packages\repo-intelligence\tests\test_symbol_extractor.py::TestUnicodePath::test_unicode_content FAILED [100%]
+
+=================================== ERRORS ====================================
+________ ERROR at setup of TestCallExtraction.test_extract_simple_call ________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_______ ERROR at setup of TestCallExtraction.test_extract_method_calls ________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_________ ERROR at setup of TestCallExtraction.test_call_from_method __________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_________ ERROR at setup of TestCallExtraction.test_call_line_numbers _________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+________ ERROR at setup of TestCallExtraction.test_empty_file_no_calls ________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+____ ERROR at setup of TestCallExtraction.test_file_with_only_definitions _____
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_______ ERROR at setup of TestCallExtraction.test_syntax_error_handling _______
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_________ ERROR at setup of TestCallExtraction.test_nonexistent_file __________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+___ ERROR at setup of TestCallEdgeProperties.test_edge_has_required_fields ____
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_______ ERROR at setup of TestCallEdgeProperties.test_caller_not_empty ________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_______ ERROR at setup of TestCallEdgeProperties.test_callee_not_empty ________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_________ ERROR at setup of TestNestedCalls.test_detect_nested_calls __________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_____ ERROR at setup of TestNestedCalls.test_multiple_calls_same_function _____
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+____________ ERROR at setup of TestBuiltinCalls.test_builtin_calls ____________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+__________ ERROR at setup of TestMethodCalls.test_self_method_calls ___________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+________ ERROR at setup of TestMethodCalls.test_instance_method_calls _________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_________ ERROR at setup of TestAsyncCalls.test_async_function_calls __________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+______________ ERROR at setup of TestAsyncCalls.test_await_calls ______________
+packages\repo-intelligence\tests\test_call_graph.py:10: in builder
+    return CallGraphBuilder()
+           ^^^^^^^^^^^^^^^^^^
+E   TypeError: CallGraphBuilder.__init__() missing 2 required positional arguments: 'repo_root' and 'python_files'
+_____ ERROR at setup of TestPackageDetection.test_detect_regular_package ______
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+________ ERROR at setup of TestPackageDetection.test_detect_subpackage ________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+____ ERROR at setup of TestPackageDetection.test_detect_namespace_package _____
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+________ ERROR at setup of TestPackageDetection.test_module_properties ________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+______ ERROR at setup of TestPackageDetection.test_regular_package_flag _______
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+_____ ERROR at setup of TestPackageDetection.test_single_module_detection _____
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+_________ ERROR at setup of TestPackageDetection.test_pycache_ignored _________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+_________ ERROR at setup of TestPackageDetection.test_empty_directory _________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+_________ ERROR at setup of TestPackageDetection.test_no_python_files _________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+_______ ERROR at setup of TestModuleStructure.test_module_path_absolute _______
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+________ ERROR at setup of TestModuleStructure.test_module_path_exists ________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+_________ ERROR at setup of TestModuleStructure.test_submodule_names __________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+__________ ERROR at setup of TestComplexHierarchy.test_deep_nesting ___________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+___ ERROR at setup of TestComplexHierarchy.test_mixed_packages_and_modules ____
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+____________ ERROR at setup of TestEdgeCases.test_symlink_handling ____________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+_____________ ERROR at setup of TestEdgeCases.test_hidden_modules _____________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+___________ ERROR at setup of TestEdgeCases.test_permission_denied ____________
+packages\repo-intelligence\tests\test_module_detector.py:11: in detector
+    return ModuleDetector()
+           ^^^^^^^^^^^^^^^^
+E   TypeError: ModuleDetector.__init__() missing 1 required positional argument: 'repo_root'
+================================== FAILURES ===================================
+_______________ TestImportExtraction.test_extract_simple_import _______________
+packages\repo-intelligence\tests\test_import_graph.py:46: in test_extract_simple_import
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+________________ TestImportExtraction.test_extract_from_import ________________
+packages\repo-intelligence\tests\test_import_graph.py:55: in test_extract_from_import
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_____________ TestImportExtraction.test_extract_relative_imports ______________
+packages\repo-intelligence\tests\test_import_graph.py:62: in test_extract_relative_imports
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_____________ TestImportExtraction.test_extract_external_imports ______________
+packages\repo-intelligence\tests\test_import_graph.py:71: in test_extract_external_imports
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+________________ TestImportExtraction.test_import_line_numbers ________________
+packages\repo-intelligence\tests\test_import_graph.py:78: in test_import_line_numbers
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_______________ TestImportExtraction.test_empty_file_no_imports _______________
+packages\repo-intelligence\tests\test_import_graph.py:88: in test_empty_file_no_imports
+    edges = builder.extract_imports(str(empty_file))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_______________ TestImportExtraction.test_file_with_no_imports ________________
+packages\repo-intelligence\tests\test_import_graph.py:101: in test_file_with_no_imports
+    edges = builder.extract_imports(str(no_import_file))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_________________ TestImportExtraction.test_nonexistent_file __________________
+packages\repo-intelligence\tests\test_import_graph.py:115: in test_nonexistent_file
+    builder.extract_imports("/nonexistent/file.py")
+    ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+____________ TestImportTypes.test_standard_library_classification _____________
+packages\repo-intelligence\tests\test_import_graph.py:126: in test_standard_library_classification
+    edges = builder.extract_imports(str(stdlib_file))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_________________ TestImportTypes.test_relative_import_prefix _________________
+packages\repo-intelligence\tests\test_import_graph.py:137: in test_relative_import_prefix
+    edges = builder.extract_imports(str(relative_file))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+___________ TestImportEdgeProperties.test_edge_has_required_fields ____________
+packages\repo-intelligence\tests\test_import_graph.py:146: in test_edge_has_required_fields
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+______________ TestImportEdgeProperties.test_edge_source_module _______________
+packages\repo-intelligence\tests\test_import_graph.py:156: in test_edge_source_module
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_________ TestImportEdgeProperties.test_edge_target_module_not_empty __________
+packages\repo-intelligence\tests\test_import_graph.py:163: in test_edge_target_module_not_empty
+    edges = builder.extract_imports(sample_python_file)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+________________ TestMultipleImports.test_multiple_from_import ________________
+packages\repo-intelligence\tests\test_import_graph.py:178: in test_multiple_from_import
+    edges = builder.extract_imports(str(multi_file))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+_________________ TestMultipleImports.test_import_with_alias __________________
+packages\repo-intelligence\tests\test_import_graph.py:191: in test_import_with_alias
+    edges = builder.extract_imports(str(alias_file))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+__________________ TestMultipleImports.test_multiline_import __________________
+packages\repo-intelligence\tests\test_import_graph.py:205: in test_multiline_import
+    edges = builder.extract_imports(str(multiline_file))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+___________ TestCircularImports.test_detect_circular_import_pattern ___________
+packages\repo-intelligence\tests\test_import_graph.py:223: in test_detect_circular_import_pattern
+    edges_a = builder.extract_imports(str(file_a))
+              ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'ImportGraphBuilder' object has no attribute 'extract_imports'. Did you mean: '_extract_import_name'?
+______________ TestSymbolExtraction.test_extract_function_symbol ______________
+packages\repo-intelligence\tests\test_symbol_extractor.py:69: in test_extract_function_symbol
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+_______________ TestSymbolExtraction.test_extract_class_symbol ________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:79: in test_extract_class_symbol
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+_______________ TestSymbolExtraction.test_extract_method_symbol _______________
+packages\repo-intelligence\tests\test_symbol_extractor.py:89: in test_extract_method_symbol
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+_____________ TestSymbolExtraction.test_symbol_has_qualified_name _____________
+packages\repo-intelligence\tests\test_symbol_extractor.py:99: in test_symbol_has_qualified_name
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+________________ TestSymbolExtraction.test_symbol_line_numbers ________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:108: in test_symbol_line_numbers
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+____________________ TestSymbolExtraction.test_empty_file _____________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:119: in test_empty_file
+    symbols = extractor.extract_symbols(str(empty_file))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+_________________ TestSymbolExtraction.test_nonexistent_file __________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:134: in test_nonexistent_file
+    extractor.extract_symbols("/nonexistent/file.py")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+_________________ TestSymbolExtraction.test_symbol_docstring __________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:138: in test_symbol_docstring
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+___________________ TestSymbolTypes.test_property_detection ___________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:151: in test_property_detection
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+_________________ TestSymbolTypes.test_staticmethod_detection _________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:159: in test_staticmethod_detection
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+_________________ TestSymbolTypes.test_classmethod_detection __________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:167: in test_classmethod_detection
+    symbols = extractor.extract_symbols(sample_python_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+__________________ TestLargeFile.test_large_file_performance __________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:186: in test_large_file_performance
+    symbols = extractor.extract_symbols(str(large_file))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+____________________ TestUnicodePath.test_unicode_filename ____________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:200: in test_unicode_filename
+    symbols = extractor.extract_symbols(str(unicode_file))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SymbolExtractor' object has no attribute 'extract_symbols'
+____________________ TestUnicodePath.test_unicode_content _____________________
+packages\repo-intelligence\tests\test_symbol_extractor.py:206: in test_unicode_content
+    unicode_file.write_text('def greet(name="\u043c\u0438\u0440"): pass')
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1048: in write_text
+    return f.write(data)
+           ^^^^^^^^^^^^^
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py:19: in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   UnicodeEncodeError: 'charmap' codec can't encode characters in position 16-18: character maps to <undefined>
+=========================== short test summary info ===========================
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_simple_import
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_from_import
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_relative_imports
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_extract_external_imports
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_import_line_numbers
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_empty_file_no_imports
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_file_with_no_imports
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportExtraction::test_nonexistent_file
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportTypes::test_standard_library_classification
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportTypes::test_relative_import_prefix
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportEdgeProperties::test_edge_has_required_fields
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportEdgeProperties::test_edge_source_module
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestImportEdgeProperties::test_edge_target_module_not_empty
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestMultipleImports::test_multiple_from_import
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestMultipleImports::test_import_with_alias
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestMultipleImports::test_multiline_import
+FAILED packages\repo-intelligence\tests\test_import_graph.py::TestCircularImports::test_detect_circular_import_pattern
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_extract_function_symbol
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_extract_class_symbol
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_extract_method_symbol
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_symbol_has_qualified_name
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_symbol_line_numbers
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_empty_file
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_nonexistent_file
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolExtraction::test_symbol_docstring
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolTypes::test_property_detection
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolTypes::test_staticmethod_detection
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestSymbolTypes::test_classmethod_detection
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestLargeFile::test_large_file_performance
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestUnicodePath::test_unicode_filename
+FAILED packages\repo-intelligence\tests\test_symbol_extractor.py::TestUnicodePath::test_unicode_content
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_extract_simple_call
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_extract_method_calls
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_call_from_method
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_call_line_numbers
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_empty_file_no_calls
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_file_with_only_definitions
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_syntax_error_handling
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallExtraction::test_nonexistent_file
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallEdgeProperties::test_edge_has_required_fields
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallEdgeProperties::test_caller_not_empty
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestCallEdgeProperties::test_callee_not_empty
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestNestedCalls::test_detect_nested_calls
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestNestedCalls::test_multiple_calls_same_function
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestBuiltinCalls::test_builtin_calls
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestMethodCalls::test_self_method_calls
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestMethodCalls::test_instance_method_calls
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestAsyncCalls::test_async_function_calls
+ERROR packages\repo-intelligence\tests\test_call_graph.py::TestAsyncCalls::test_await_calls
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_detect_regular_package
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_detect_subpackage
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_detect_namespace_package
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_module_properties
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_regular_package_flag
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_single_module_detection
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_pycache_ignored
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_empty_directory
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestPackageDetection::test_no_python_files
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestModuleStructure::test_module_path_absolute
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestModuleStructure::test_module_path_exists
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestModuleStructure::test_submodule_names
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestComplexHierarchy::test_deep_nesting
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestComplexHierarchy::test_mixed_packages_and_modules
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestEdgeCases::test_symlink_handling
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestEdgeCases::test_hidden_modules
+ERROR packages\repo-intelligence\tests\test_module_detector.py::TestEdgeCases::test_permission_denied
+=================== 31 failed, 2 passed, 35 errors in 1.02s ===================
