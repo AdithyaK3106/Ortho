@@ -80,22 +80,35 @@ class LayerDetector:
         layers = self.detect_layers()
         graph = self.file_graph.build_from_imports()
 
-        # Map file to layer
+        # Map file to layer and layer to rank (higher rank = upper layer)
         layer_by_file = {}
-        for layer in layers:
+        layer_rank = {}
+        for rank, layer in enumerate(layers):
+            layer_rank[layer.id] = rank
             for file_id in layer.file_ids:
-                layer_by_file[file_id] = layer.name
+                layer_by_file[file_id] = layer.id
 
         violations = []
 
         # Check each edge for violations
+        # In layered architecture: upward dependencies are allowed
+        # Violations: downward or cross-layer (same rank) dependencies
         for u, v in graph.edges():
             layer_u = layer_by_file.get(u)
             layer_v = layer_by_file.get(v)
 
             if layer_u and layer_v and layer_u != layer_v:
-                # Check if this violates layer hierarchy
-                violations.append(f"{layer_u} imports {layer_v} (cross-layer)")
+                # Get ranks: higher rank = upper layer
+                rank_u = layer_rank.get(layer_u, 0)
+                rank_v = layer_rank.get(layer_v, 0)
+
+                # Violation: importing from a lower layer (downward) or same layer (cross)
+                # Allowed: importing from upper layer (upward)
+                if rank_v >= rank_u:
+                    # v is at same level or lower than u - this is a violation
+                    layer_v_name = next((l.name for l in layers if l.id == layer_v), layer_v)
+                    layer_u_name = next((l.name for l in layers if l.id == layer_u), layer_u)
+                    violations.append(f"{layer_u_name} imports {layer_v_name} (cross-layer)")
 
         return violations
 
@@ -150,7 +163,9 @@ class LayerDetector:
         conn.close()
 
         path_parts = []
+        full_paths = []
         for (path,) in paths:
+            full_paths.append(path.lower())
             parts = path.split("/")
             if parts:
                 path_parts.append(parts[0].lower())
@@ -158,16 +173,21 @@ class LayerDetector:
         if not path_parts:
             return None
 
-        # Check for common patterns
+        # Check for common patterns - look at both directory and file names
         path_str = " ".join(path_parts)
+        full_path_str = " ".join(full_paths)
 
-        if any(p in path_str for p in ["handler", "view", "api", "web", "ui", "route"]):
+        # Presentation layer indicators (more comprehensive)
+        if any(p in path_str or p in full_path_str for p in ["handler", "view", "api", "web", "ui", "route", "controller", "endpoint", "servlet"]):
             return "presentation"
-        elif any(p in path_str for p in ["service", "business", "logic", "domain"]):
+        # Business/domain layer indicators
+        elif any(p in path_str or p in full_path_str for p in ["service", "business", "logic", "domain", "use_case", "usecase"]):
             return "business"
-        elif any(p in path_str for p in ["model", "db", "data", "repository", "storage"]):
+        # Data layer indicators
+        elif any(p in path_str or p in full_path_str for p in ["model", "db", "data", "repository", "storage", "schema", "query"]):
             return "data"
-        elif any(p in path_str for p in ["util", "config", "infrastructure"]):
+        # Infrastructure (don't assign to main layers)
+        elif any(p in path_str or p in full_path_str for p in ["util", "config", "infrastructure"]):
             return "infrastructure"
 
         return None

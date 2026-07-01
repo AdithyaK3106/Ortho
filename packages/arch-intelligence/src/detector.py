@@ -56,7 +56,7 @@ class ArchitectureDetector:
 
         if (
             len(sorted_styles) > 1
-            and abs(sorted_styles[0][1] - sorted_styles[1][1]) < 0.15
+            and abs(sorted_styles[0][1] - sorted_styles[1][1]) < 0.12
         ):
             alternative = sorted_styles[1][0]
             alternative_conf = sorted_styles[1][1]
@@ -138,17 +138,31 @@ class ArchitectureDetector:
             + metrics.cohesion_score * 0.05
         )
 
-        # Penalty if looks like MVC (small # of files per tier, exactly 3 tiers)
+        # Mild penalty if looks like MVC (small # of files per tier, exactly 3 tiers)
+        # Only penalize if VERY small (< 2), not at 2-3 files
         files_per_tier = self._files_per_tier()
         tier_count = self._tier_count()
-        if tier_count == 3 and files_per_tier < 3.5:
-            layered_base *= 0.6  # Likely MVC, not layered
+        if tier_count == 3 and files_per_tier < 1.8:
+            layered_base *= 0.7  # Very small tiers, more likely MVC
+
+        # CRITICAL: Penalize if modularity is high (independent services, not layered)
+        if metrics.modularity_score > 0.65:
+            layered_base *= 0.6
+
+        # Penalize if edge density is VERY high (looks like flat/monolithic, not structured)
+        g = self.file_graph.build_from_imports()
+        num_nodes = len(g)
+        if num_nodes > 1:
+            num_edges = g.number_of_edges()
+            edge_density = num_edges / (num_nodes * (num_nodes - 1))
+            if edge_density > 0.33:  # Very high interconnectedness
+                layered_base *= 0.50  # Penalty for flat-like density
 
         # CRITICAL: Penalize if pattern suggests hexagonal (hub-and-spoke)
-        # Hexagonal has high cohesion relative to modularity (core dominates)
-        if (metrics.cohesion_score > 0.4 and
-            metrics.modularity_score < 0.5 and
-            metrics.cohesion_score > metrics.modularity_score * 1.5):
+        # Hexagonal has VERY high cohesion (core modules tightly coupled) and LOW modularity
+        if (metrics.cohesion_score > 0.65 and
+            metrics.modularity_score < 0.35 and
+            metrics.cohesion_score > metrics.modularity_score * 2.0):
             layered_base *= 0.6
 
         return layered_base
@@ -201,8 +215,13 @@ class ArchitectureDetector:
         )
 
         # Bonus for exactly 3 tiers (strong MVC signal)
+        # Stronger bonus if files per tier is small (2-3), weaker if larger (4+)
+        files_per_tier = self._files_per_tier()
         if tier_count == 3:
-            mvc_base *= 1.15
+            if files_per_tier < 3.0:
+                mvc_base *= 1.25  # Strong MVC (small tiers)
+            else:
+                mvc_base *= 1.10  # Mild bonus for 3 tiers even if larger
 
         # Penalty if hub pattern is very strong (that's hexagonal, not MVC)
         hub = self._hub_score()
@@ -213,21 +232,39 @@ class ArchitectureDetector:
 
     def _score_microservices(self, metrics: DetectionMetrics) -> float:
         """Score microservices architecture."""
-        # Microservices if: high modularity + moderate layering (independent services)
-        # CRITICAL: Require layering_score < 0.6 to avoid competing with layered
+        # Microservices if: high modularity (independent services, low coupling)
+        # Each service can have internal layering, so layering_score is not a blocker
         microservices_base = (
-            metrics.modularity_score * 0.75
-            + (1.0 - metrics.cohesion_score) * 0.25
+            metrics.modularity_score * 0.85
+            + (1.0 - metrics.cohesion_score) * 0.15
         )
-        # Penalty if structure looks layered
-        if metrics.layering_score > 0.6:
-            microservices_base *= 0.6
+        # Mild penalty only if VERY layered and VERY cohesive (looks monolithic layered)
+        if metrics.layering_score > 0.9 and metrics.cohesion_score > 0.7:
+            microservices_base *= 0.65
         return microservices_base
 
     def _score_flat(self, metrics: DetectionMetrics) -> float:
         """Score flat architecture (no structure)."""
-        # Flat if: low layering AND low modularity (everything connected, no organization)
-        return (1.0 - metrics.layering_score) * 0.6 + (1.0 - metrics.modularity_score) * 0.4
+        # Flat if: highly interconnected with low structure
+        # Look for: high edge density (many edges relative to nodes) + low modularity
+        g = self.file_graph.build_from_imports()
+        num_nodes = len(g)
+        num_edges = g.number_of_edges()
+        max_edges = num_nodes * (num_nodes - 1)  # Complete graph
+
+        if max_edges == 0:
+            edge_density = 0.0
+        else:
+            edge_density = num_edges / max_edges
+
+        # Flat score: high edge density + low modularity
+        # High interconnectedness = no clear module boundaries
+        flat_base = (
+            edge_density * 0.75
+            + (1.0 - metrics.modularity_score) * 0.25
+        )
+
+        return flat_base
 
     def _build_evidence(
         self, best_style: ArchStyle, metrics: DetectionMetrics, scores: Dict[ArchStyle, float]
@@ -239,7 +276,7 @@ class ArchitectureDetector:
             evidence.append(
                 f"Strict layering detected: {metrics.layering_score:.0%} of imports flow upward between tiers"
             )
-            evidence.append("Clear tier separation (presentation → business → data)")
+            evidence.append("Clear layer separation (presentation -> business -> data)")
             evidence.append("Low cross-layer coupling enforced")
 
         elif best_style == "hexagonal":
