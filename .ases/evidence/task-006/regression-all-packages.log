@@ -1,0 +1,299 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collected 221 items
+
+apps\api-server\tests\test_main.py .......                               [  3%]
+packages\arch-intelligence\tests\test_detector.py ...FF....F.........    [ 11%]
+packages\arch-intelligence\tests\test_integration.py ................... [ 20%]
+                                                                         [ 20%]
+packages\arch-intelligence\tests\test_layer_detector.py ..........F..... [ 27%]
+.                                                                        [ 28%]
+packages\arch-intelligence\tests\test_subsystem_detector.py ............ [ 33%]
+.....                                                                    [ 35%]
+packages\context-hub\tests\test_ingestion.py ..........                  [ 40%]
+packages\context-hub\tests\test_metadata.py ......F.E.....               [ 46%]
+packages\context-hub\tests\test_search.py ..........                     [ 50%]
+packages\context-hub\tests\test_store_basic.py ........                  [ 54%]
+packages\context-hub\tests\test_versioning.py .............              [ 60%]
+packages\repo-intelligence\tests\test_adapters.py ....x..                [ 63%]
+packages\repo-intelligence\tests\test_basic_integration.py ............. [ 69%]
+                                                                         [ 69%]
+packages\repo-intelligence\tests\test_call_graph.py XXXXXXXXXXXXXXXXXX   [ 77%]
+packages\repo-intelligence\tests\test_import_graph.py XXXXXXXXXXXXXXXXXX [ 85%]
+                                                                         [ 85%]
+packages\repo-intelligence\tests\test_module_detector.py xXXXXxXXXXXxxXx [ 92%]
+XX                                                                       [ 93%]
+packages\repo-intelligence\tests\test_symbol_extractor.py ....x.x....... [ 99%]
+x                                                                        [100%]
+
+=================================== ERRORS ====================================
+____ ERROR at teardown of TestGitMetadata.test_get_file_churn_with_commits ____
+
+path = 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmptyxtdbi_'
+onexc = <function TemporaryDirectory._rmtree.<locals>.onexc at 0x0000017CF87691C0>
+
+    def _rmtree_unsafe(path, onexc):
+        try:
+            with os.scandir(path) as scandir_it:
+                entries = list(scandir_it)
+        except OSError as err:
+            onexc(os.scandir, path, err)
+            entries = []
+        for entry in entries:
+            fullname = entry.path
+            try:
+                is_dir = entry.is_dir(follow_symlinks=False)
+            except OSError:
+                is_dir = False
+    
+            if is_dir and not entry.is_junction():
+                try:
+                    if entry.is_symlink():
+                        # This can only happen if someone replaces
+                        # a directory with a symlink after the call to
+                        # os.scandir or entry.is_dir above.
+                        raise OSError("Cannot call rmtree on a symbolic link")
+                except OSError as err:
+                    onexc(os.path.islink, fullname, err)
+                    continue
+                _rmtree_unsafe(fullname, onexc)
+            else:
+                try:
+                    os.unlink(fullname)
+                except OSError as err:
+                    onexc(os.unlink, fullname, err)
+        try:
+>           os.rmdir(path)
+E           PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmptyxtdbi_'
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\shutil.py:650: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+func = <built-in function rmdir>
+path = 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmptyxtdbi_'
+exc = PermissionError(13, 'The process cannot access the file because it is being used by another process')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+    
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+    
+                try:
+>                   _os.unlink(path)
+E                   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmptyxtdbi_'
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.fixture
+    def temp_git_repo():
+        """Create a temporary git repository for git metadata testing."""
+        import git
+    
+>       with tempfile.TemporaryDirectory() as tmpdir:
+
+packages\context-hub\tests\conftest.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:946: in __exit__
+    self.cleanup()
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\shutil.py:820: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\shutil.py:652: in _rmtree_unsafe
+    onexc(os.rmdir, path, err)
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:920: in onexc
+    cls._rmtree(path, ignore_errors=ignore_errors,
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\shutil.py:820: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\shutil.py:652: in _rmtree_unsafe
+    onexc(os.rmdir, path, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmptyxtdbi_'
+onexc = <function TemporaryDirectory._rmtree.<locals>.onexc at 0x0000017CF8769620>
+
+    def _rmtree_unsafe(path, onexc):
+        try:
+            with os.scandir(path) as scandir_it:
+                entries = list(scandir_it)
+        except OSError as err:
+            onexc(os.scandir, path, err)
+            entries = []
+        for entry in entries:
+            fullname = entry.path
+            try:
+                is_dir = entry.is_dir(follow_symlinks=False)
+            except OSError:
+                is_dir = False
+    
+            if is_dir and not entry.is_junction():
+                try:
+                    if entry.is_symlink():
+                        # This can only happen if someone replaces
+                        # a directory with a symlink after the call to
+                        # os.scandir or entry.is_dir above.
+                        raise OSError("Cannot call rmtree on a symbolic link")
+                except OSError as err:
+                    onexc(os.path.islink, fullname, err)
+                    continue
+                _rmtree_unsafe(fullname, onexc)
+            else:
+                try:
+                    os.unlink(fullname)
+                except OSError as err:
+                    onexc(os.unlink, fullname, err)
+        try:
+>           os.rmdir(path)
+E           PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmptyxtdbi_'
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\shutil.py:650: PermissionError
+================================== FAILURES ===================================
+_ TestArchitectureDetectorHexagonalPattern.test_hexagonal_fixture_detects_as_hexagonal _
+
+self = <test_detector.TestArchitectureDetectorHexagonalPattern object at 0x0000017CF82B9FA0>
+hexagonal_fixture_db = <storage.database.OrthoDatabase object at 0x0000017CF863EF30>
+hexagonal_repo_id = 'hexagonal-repo'
+
+    def test_hexagonal_fixture_detects_as_hexagonal(self, hexagonal_fixture_db, hexagonal_repo_id):
+        """Test that canonical hexagonal fixture detects as 'hexagonal'."""
+        detector = ArchitectureDetector(hexagonal_fixture_db, hexagonal_repo_id)
+        result = detector.detect()
+    
+>       assert result.style == "hexagonal", f"Expected 'hexagonal', got '{result.style}'"
+E       AssertionError: Expected 'hexagonal', got 'layered'
+E       assert 'layered' == 'hexagonal'
+E         
+E         - hexagonal
+E         + layered
+
+packages\arch-intelligence\tests\test_detector.py:67: AssertionError
+_ TestArchitectureDetectorHexagonalPattern.test_hexagonal_confidence_breakdown_shows_hexagonal_highest _
+
+self = <test_detector.TestArchitectureDetectorHexagonalPattern object at 0x0000017CF82BA5A0>
+hexagonal_fixture_db = <storage.database.OrthoDatabase object at 0x0000017CF8610E00>
+hexagonal_repo_id = 'hexagonal-repo'
+
+    def test_hexagonal_confidence_breakdown_shows_hexagonal_highest(self, hexagonal_fixture_db, hexagonal_repo_id):
+        """Test that hexagonal gets highest score in breakdown."""
+        detector = ArchitectureDetector(hexagonal_fixture_db, hexagonal_repo_id)
+        breakdown = detector.detect_confidence_breakdown()
+    
+        hex_score = breakdown.get("hexagonal", 0.0)
+        layered_score = breakdown.get("layered", 0.0)
+        mvc_score = breakdown.get("mvc", 0.0)
+    
+>       assert hex_score > layered_score, f"Hexagonal ({hex_score}) should beat layered ({layered_score})"
+E       AssertionError: Hexagonal (0.9099999999999999) should beat layered (0.95)
+E       assert 0.9099999999999999 > 0.95
+
+packages\arch-intelligence\tests\test_detector.py:79: AssertionError
+____ TestArchitectureDetectorFlatPattern.test_flat_fixture_detects_as_flat ____
+
+self = <test_detector.TestArchitectureDetectorFlatPattern object at 0x0000017CF82B9EE0>
+flat_fixture_db = <storage.database.OrthoDatabase object at 0x0000017CF86779E0>
+flat_repo_id = 'flat-repo'
+
+    def test_flat_fixture_detects_as_flat(self, flat_fixture_db, flat_repo_id):
+        """Test that canonical flat fixture detects as 'flat'."""
+        detector = ArchitectureDetector(flat_fixture_db, flat_repo_id)
+        result = detector.detect()
+    
+>       assert result.style == "flat", f"Expected 'flat', got '{result.style}'"
+E       AssertionError: Expected 'flat', got 'layered'
+E       assert 'layered' == 'flat'
+E         
+E         - flat
+E         + layered
+
+packages\arch-intelligence\tests\test_detector.py:140: AssertionError
+___ TestLayerViolationDetection.test_layered_fixture_has_minimal_violations ___
+
+self = <test_layer_detector.TestLayerViolationDetection object at 0x0000017CF83091F0>
+layered_fixture_db = <storage.database.OrthoDatabase object at 0x0000017CF8728D40>
+layered_repo_id = 'layered-repo'
+
+    def test_layered_fixture_has_minimal_violations(self, layered_fixture_db, layered_repo_id):
+        """AC7: Strict layered fixture should have few or no violations."""
+        detector = LayerDetector(layered_fixture_db, layered_repo_id)
+        violations = detector.detect_layer_violations()
+    
+        # Canonical layered fixture should have very few upward violations
+>       assert len(violations) <= 1, f"Strict layered should have \u22641 violations, got {len(violations)}"
+E       AssertionError: Strict layered should have \u22641 violations, got 9
+E       assert 9 <= 1
+E        +  where 9 = len(['presentation imports business (cross-layer)', 'presentation imports business (cross-layer)', 'presentation imports b...ion imports business (cross-layer)', 'business imports data (cross-layer)', 'business imports data (cross-layer)', ...])
+
+packages\arch-intelligence\tests\test_layer_detector.py:173: AssertionError
+_______________ TestGitMetadata.test_get_file_churn_no_history ________________
+
+self = <tests.test_metadata.TestGitMetadata object at 0x0000017CF853C470>
+temp_db = <sqlite3.Connection object at 0x0000017CF868C9A0>
+
+    def test_get_file_churn_no_history(self, temp_db):
+        """File with no git history returns zeros."""
+>       git_store = GitMetadataStore(temp_db, None, "repo1")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+packages\context-hub\tests\test_metadata.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+packages\context-hub\src\context_hub\git_metadata.py:32: in __init__
+    self.repo_root = Path(repo_root)
+                     ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1162: in __init__
+    super().__init__(*args)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <[AttributeError("'WindowsPath' object has no attribute '_raw_paths'") raised in repr()] WindowsPath object at 0x17cf8718a50>
+args = (None,), paths = [], arg = None, path = None
+
+    def __init__(self, *args):
+        paths = []
+        for arg in args:
+            if isinstance(arg, PurePath):
+                if arg._flavour is ntpath and self._flavour is posixpath:
+                    # GH-103631: Convert separators for backwards compatibility.
+                    paths.extend(path.replace('\\', '/') for path in arg._raw_paths)
+                else:
+                    paths.extend(arg._raw_paths)
+            else:
+                try:
+                    path = os.fspath(arg)
+                except TypeError:
+                    path = arg
+                if not isinstance(path, str):
+>                   raise TypeError(
+                        "argument should be a str or an os.PathLike "
+                        "object where __fspath__ returns a str, "
+                        f"not {type(path).__name__!r}")
+E                   TypeError: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'NoneType'
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:373: TypeError
+=========================== short test summary info ===========================
+FAILED packages/arch-intelligence/tests/test_detector.py::TestArchitectureDetectorHexagonalPattern::test_hexagonal_fixture_detects_as_hexagonal
+FAILED packages/arch-intelligence/tests/test_detector.py::TestArchitectureDetectorHexagonalPattern::test_hexagonal_confidence_breakdown_shows_hexagonal_highest
+FAILED packages/arch-intelligence/tests/test_detector.py::TestArchitectureDetectorFlatPattern::test_flat_fixture_detects_as_flat
+FAILED packages/arch-intelligence/tests/test_layer_detector.py::TestLayerViolationDetection::test_layered_fixture_has_minimal_violations
+FAILED packages/context-hub/tests/test_metadata.py::TestGitMetadata::test_get_file_churn_no_history
+ERROR packages/context-hub/tests/test_metadata.py::TestGitMetadata::test_get_file_churn_with_commits
+======== 5 failed, 159 passed, 9 xfailed, 48 xpassed, 1 error in 7.37s ========
+EXIT: 0
+TIMESTAMP: 2026-07-01T14:02:16Z
