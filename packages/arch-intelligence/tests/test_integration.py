@@ -13,10 +13,10 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
 sys.path.insert(0, str(project_root / "packages" / "arch-intelligence" / "src"))
 
-from detector import ArchitectureDetector
-from layer_detector import LayerDetector
-from subsystem_detector import SubsystemDetector
-from models import ArchitectureModelStore
+from arch_intelligence.detector import ArchitectureDetector
+from arch_intelligence.layer_detector import LayerDetector
+from arch_intelligence.subsystem_detector import SubsystemDetector
+from arch_intelligence.models import ArchitectureModelStore
 
 
 class TestEndToEndDetectionFlow:

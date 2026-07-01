@@ -11,8 +11,8 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
 sys.path.insert(0, str(project_root / "packages" / "arch-intelligence" / "src"))
 
-from detector import ArchitectureDetector
-from detection_types import ArchStyle
+from arch_intelligence.detector import ArchitectureDetector
+from arch_intelligence.detection_types import ArchStyle
 
 
 class TestArchitectureDetectorLayeredPattern:

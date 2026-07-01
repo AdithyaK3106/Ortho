@@ -11,7 +11,7 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
 sys.path.insert(0, str(project_root / "packages" / "arch-intelligence" / "src"))
 
-from subsystem_detector import SubsystemDetector
+from arch_intelligence.subsystem_detector import SubsystemDetector
 
 
 class TestSubsystemDetectionBasics:

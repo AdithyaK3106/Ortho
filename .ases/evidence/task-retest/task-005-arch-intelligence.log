@@ -1,0 +1,34 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 34 items / 2 errors
+
+=================================== ERRORS ====================================
+___________________ ERROR collecting tests/test_detector.py ___________________
+ImportError while importing test module 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence\tests\test_detector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages\arch-intelligence\tests\test_detector.py:15: in <module>
+    from detection_types import ArchStyle
+E   ModuleNotFoundError: No module named 'detection_types'
+_________________ ERROR collecting tests/test_integration.py __________________
+ImportError while importing test module 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence\tests\test_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages\arch-intelligence\tests\test_integration.py:19: in <module>
+    from models import ArchitectureModelStore
+E   ModuleNotFoundError: No module named 'models'
+=========================== short test summary info ===========================
+ERROR packages\arch-intelligence\tests\test_detector.py
+ERROR packages\arch-intelligence\tests\test_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+============================== 2 errors in 0.78s ==============================

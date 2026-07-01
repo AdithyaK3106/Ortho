@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from shared.storage import OrthoDatabase
+from storage import OrthoDatabase
 
 from .embedding import EmbeddingProvider, NullEmbedding
 from .ingestion import ArtifactIngestionRequest, ValidationResult, validate_ingestion

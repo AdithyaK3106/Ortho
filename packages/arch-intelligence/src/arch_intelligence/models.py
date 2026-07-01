@@ -10,8 +10,8 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root / "shared" / "storage" / "src"))
 sys.path.insert(0, str(project_root / "packages" / "arch-intelligence" / "src"))
 
-from database import OrthoDatabase
-from detection_types import ArchitectureModel, Layer, Subsystem, ServiceBoundary
+from storage import OrthoDatabase
+from .detection_types import ArchitectureModel, Layer, Subsystem, ServiceBoundary
 
 
 class ArchitectureModelStore:
