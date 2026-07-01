@@ -1,0 +1,235 @@
+
+> ortho-cli@0.1.0 test
+> jest
+
+  console.log
+    ? Created .ortho/ directory
+
+      at initCommand (src/commands/init.ts:10:13)
+
+  console.log
+    ? Created .ortho/config.toml
+
+      at initCommand (src/commands/init.ts:33:13)
+
+  console.log
+    ? Created .ortho/ortho.db
+
+      at initCommand (src/commands/init.ts:38:13)
+
+  console.log
+    ? Created .ortho/vectors.db
+
+      at initCommand (src/commands/init.ts:42:13)
+
+  console.log
+    
+    ? Ortho initialized successfully!
+
+      at initCommand (src/commands/init.ts:44:13)
+
+  console.log
+    Next: ortho scan
+
+      at initCommand (src/commands/init.ts:45:13)
+
+  console.log
+    ? Created .ortho/ directory
+
+      at initCommand (src/commands/init.ts:10:13)
+
+  console.log
+    ? Created .ortho/config.toml
+
+      at initCommand (src/commands/init.ts:33:13)
+
+  console.log
+    ? Created .ortho/ortho.db
+
+      at initCommand (src/commands/init.ts:38:13)
+
+  console.log
+    ? Created .ortho/vectors.db
+
+      at initCommand (src/commands/init.ts:42:13)
+
+  console.log
+    
+    ? Ortho initialized successfully!
+
+      at initCommand (src/commands/init.ts:44:13)
+
+  console.log
+    Next: ortho scan
+
+      at initCommand (src/commands/init.ts:45:13)
+
+  console.log
+    ? Created .ortho/ directory
+
+      at initCommand (src/commands/init.ts:10:13)
+
+  console.log
+    ? Created .ortho/config.toml
+
+      at initCommand (src/commands/init.ts:33:13)
+
+  console.log
+    ? Created .ortho/ortho.db
+
+      at initCommand (src/commands/init.ts:38:13)
+
+  console.log
+    ? Created .ortho/vectors.db
+
+      at initCommand (src/commands/init.ts:42:13)
+
+  console.log
+    
+    ? Ortho initialized successfully!
+
+      at initCommand (src/commands/init.ts:44:13)
+
+  console.log
+    Next: ortho scan
+
+      at initCommand (src/commands/init.ts:45:13)
+
+  console.log
+    ? Created .ortho/ directory
+
+      at initCommand (src/commands/init.ts:10:13)
+
+  console.log
+    ? Created .ortho/config.toml
+
+      at initCommand (src/commands/init.ts:33:13)
+
+  console.log
+    ? Created .ortho/ortho.db
+
+      at initCommand (src/commands/init.ts:38:13)
+
+  console.log
+    ? Created .ortho/vectors.db
+
+      at initCommand (src/commands/init.ts:42:13)
+
+  console.log
+    
+    ? Ortho initialized successfully!
+
+      at initCommand (src/commands/init.ts:44:13)
+
+  console.log
+    Next: ortho scan
+
+      at initCommand (src/commands/init.ts:45:13)
+
+  console.log
+    ? Created .ortho/ directory
+
+      at initCommand (src/commands/init.ts:10:13)
+
+  console.log
+    ? Created .ortho/config.toml
+
+      at initCommand (src/commands/init.ts:33:13)
+
+  console.log
+    ? Created .ortho/ortho.db
+
+      at initCommand (src/commands/init.ts:38:13)
+
+  console.log
+    ? Created .ortho/vectors.db
+
+      at initCommand (src/commands/init.ts:42:13)
+
+  console.log
+    
+    ? Ortho initialized successfully!
+
+      at initCommand (src/commands/init.ts:44:13)
+
+  console.log
+    Next: ortho scan
+
+      at initCommand (src/commands/init.ts:45:13)
+
+  console.log
+    ? Created .ortho/ directory
+
+      at initCommand (src/commands/init.ts:10:13)
+
+  console.log
+    ? Created .ortho/config.toml
+
+      at initCommand (src/commands/init.ts:33:13)
+
+  console.log
+    ? Created .ortho/ortho.db
+
+      at initCommand (src/commands/init.ts:38:13)
+
+  console.log
+    ? Created .ortho/vectors.db
+
+      at initCommand (src/commands/init.ts:42:13)
+
+  console.log
+    
+    ? Ortho initialized successfully!
+
+      at initCommand (src/commands/init.ts:44:13)
+
+  console.log
+    Next: ortho scan
+
+      at initCommand (src/commands/init.ts:45:13)
+
+  console.log
+    ? Created .ortho/ directory
+
+      at initCommand (src/commands/init.ts:10:13)
+
+  console.log
+    ? Created .ortho/config.toml
+
+      at initCommand (src/commands/init.ts:33:13)
+
+  console.log
+    ? Created .ortho/ortho.db
+
+      at initCommand (src/commands/init.ts:38:13)
+
+  console.log
+    ? Created .ortho/vectors.db
+
+      at initCommand (src/commands/init.ts:42:13)
+
+  console.log
+    
+    ? Ortho initialized successfully!
+
+      at initCommand (src/commands/init.ts:44:13)
+
+  console.log
+    Next: ortho scan
+
+      at initCommand (src/commands/init.ts:45:13)
+
+PASS src/commands/init.test.ts
+  initCommand
+    v should create .ortho directory (70 ms)
+    v should create ortho.db file (10 ms)
+    v should create vectors.db file (9 ms)
+    v should create config.toml file (9 ms)
+    v should handle already initialized directory (14 ms)
+    v should create all required files in .ortho directory (9 ms)
+System.Management.Automation.RemoteException
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        2.341 s
+Ran all test suites.

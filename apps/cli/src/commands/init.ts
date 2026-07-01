@@ -9,10 +9,27 @@ export async function initCommand(): Promise<void> {
     await fs.mkdir(orthoDir, { recursive: true });
     console.log("✓ Created .ortho/ directory");
 
-    // Copy config template
-    const configSource = join(__dirname, "../../../.ortho/config.toml");
+    // Create default config template
     const configDest = join(orthoDir, "config.toml");
-    await fs.copyFile(configSource, configDest);
+    const defaultConfig = `[project]
+name = "my-project"
+root = "."
+primary_language = "python"
+
+[indexing]
+languages = ["python"]
+exclude_patterns = ["**/node_modules", "**/__pycache__"]
+
+[context_hub]
+embedding_model = "text-embedding-3-small"
+embedding_provider = "openai"
+
+[llm]
+default_model = "claude-sonnet-4-6"
+fallback_model = "claude-haiku-4-5-20251001"
+max_tokens = 8192
+`;
+    await fs.writeFile(configDest, defaultConfig);
     console.log("✓ Created .ortho/config.toml");
 
     // Create database files (empty, will be initialized on first use)

@@ -1,0 +1,17 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 7 items
+
+apps/api-server/tests/test_main.py::TestHealthCheck::test_health_endpoint_returns_ok PASSED [ 14%]
+apps/api-server/tests/test_main.py::TestSearchEndpoint::test_search_without_query_param PASSED [ 28%]
+apps/api-server/tests/test_main.py::TestSearchEndpoint::test_search_with_empty_query PASSED [ 42%]
+apps/api-server/tests/test_main.py::TestSearchEndpoint::test_search_with_query_returns_results PASSED [ 57%]
+apps/api-server/tests/test_main.py::TestArtifactEndpoint::test_create_artifact_missing_name PASSED [ 71%]
+apps/api-server/tests/test_main.py::TestArtifactEndpoint::test_create_artifact_missing_content PASSED [ 85%]
+apps/api-server/tests/test_main.py::TestArtifactEndpoint::test_create_artifact_success PASSED [100%]
+
+============================== 7 passed in 0.98s ==============================
