@@ -149,14 +149,14 @@ class ArchitectureDetector:
         if metrics.modularity_score > 0.65:
             layered_base *= 0.6
 
-        # Penalize if edge density is high (looks like flat/monolithic, not structured)
+        # Penalize if edge density is VERY high (looks like flat/monolithic, not structured)
         g = self.file_graph.build_from_imports()
         num_nodes = len(g)
         if num_nodes > 1:
             num_edges = g.number_of_edges()
             edge_density = num_edges / (num_nodes * (num_nodes - 1))
-            if edge_density > 0.20:  # Moderate-high interconnectedness (flat signature)
-                layered_base *= 0.25  # Very strong penalty for flat-like density
+            if edge_density > 0.33:  # Very high interconnectedness
+                layered_base *= 0.50  # Penalty for flat-like density
 
         # CRITICAL: Penalize if pattern suggests hexagonal (hub-and-spoke)
         # Hexagonal has VERY high cohesion (core modules tightly coupled) and LOW modularity
@@ -175,17 +175,17 @@ class ArchitectureDetector:
         if metrics.cohesion_score < 0.3:
             return 0.1  # Can't be hexagonal without some core cohesion
 
-        # Hub-and-spoke pattern: hub >0.60 indicates good adapter pattern
+        # CRITICAL: Hub-and-spoke must be VERY strong (>0.80) to distinguish from MVC
+        # In hexagonal, adapters all import from core; in MVC, distribution is wider
         hub = self._hub_score()
 
-        if hub < 0.60:
-            return 0.1  # Not strong enough hub pattern
+        if hub < 0.75:
+            return 0.1  # Not strong enough hub pattern - likely MVC not hexagonal
 
-        # Combine strong hub pattern with low modularity
-        # ponytail: boost hexagonal vs layered by weighting hub higher
+        # Combine very strong hub pattern with low modularity
         score = (
-            hub * 0.75
-            + (1.0 - metrics.modularity_score) * 0.25
+            hub * 0.70
+            + (1.0 - metrics.modularity_score) * 0.30
         )
 
         return min(1.0, score)
@@ -245,8 +245,8 @@ class ArchitectureDetector:
 
     def _score_flat(self, metrics: DetectionMetrics) -> float:
         """Score flat architecture (no structure)."""
-        # Flat if: highly interconnected with no clear layers, hub-spoke, or modules
-        # Look for: high edge density + low layering (no clear tier structure)
+        # Flat if: highly interconnected with low structure
+        # Look for: high edge density (many edges relative to nodes) + low modularity
         g = self.file_graph.build_from_imports()
         num_nodes = len(g)
         num_edges = g.number_of_edges()
@@ -257,11 +257,11 @@ class ArchitectureDetector:
         else:
             edge_density = num_edges / max_edges
 
-        # ponytail: high edge density is strong flat signature
-        # Flat score: high edge density + low layering (no clear tiers)
+        # Flat score: high edge density + low modularity
+        # High interconnectedness = no clear module boundaries
         flat_base = (
-            edge_density * 0.70
-            + (1.0 - metrics.layering_score) * 0.30
+            edge_density * 0.75
+            + (1.0 - metrics.modularity_score) * 0.25
         )
 
         return flat_base
