@@ -1,0 +1,66 @@
+Error indexing libs\langchain\tests\integration_tests\examples\non-utf8-encoding.py: Cannot decode file: 'utf-8' codec can't decode byte 0xb1 in position 23: invalid start byte
+
+######################################################################
+# ORTHO REAL-REPO TEST SUITE
+# Testing repositories in C:\Users\urbra\OneDrive\Desktop\Projects\ortho\Repos
+######################################################################
+
+======================================================================
+Testing: fastapi
+Path: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\Repos\fastapi
+======================================================================
+✓ Repository initialized for scanning
+✓ Git repository detected
+
+Scanning repository...
+
+──────────────────────────────────────────────────────────────────────
+SCAN RESULTS:
+──────────────────────────────────────────────────────────────────────
+  Total files:       1121
+  Files scanned:     1121
+  Files with errors: 0
+  Success rate:      100.0%
+  Symbols:           5438
+  Imports:           3440
+  Calls:             14774
+  Errors:            0
+
+  Acceptable error rate (≥90%): ✓ YES
+
+======================================================================
+Testing: langchain
+Path: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\Repos\langchain
+======================================================================
+✓ Repository initialized for scanning
+✓ Git repository detected
+
+Scanning repository...
+
+──────────────────────────────────────────────────────────────────────
+SCAN RESULTS:
+──────────────────────────────────────────────────────────────────────
+  Total files:       2530
+  Files scanned:     2529
+  Files with errors: 1
+  Success rate:      100.0%
+  Symbols:           16449
+  Imports:           11555
+  Calls:             62121
+  Errors:            1
+
+  Sample errors:
+    - libs\langchain\tests\integration_tests\examples\non-utf8-encoding.py: Cannot decode file: 'utf-8' codec can't decode byte 0xb1 in position 23: invalid start byte
+
+  Acceptable error rate (≥90%): ✓ YES
+
+
+======================================================================
+SUMMARY
+======================================================================
+
+fastapi              | Symbols:  5438 | Imports:  3440 | Calls: 14774 | Success: 100.0% | Accepted: ✓
+
+langchain            | Symbols: 16449 | Imports: 11555 | Calls: 62121 | Success: 100.0% | Accepted: ✓
+
+======================================================================
