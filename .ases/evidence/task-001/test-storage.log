@@ -1,0 +1,56 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\shared\storage
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 37 items
+
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_config_from_file PASSED [  2%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_languages_list PASSED [  5%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_exclude_patterns PASSED [  8%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_embedding_config PASSED [ 10%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_llm_config PASSED [ 13%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_orchestration_config PASSED [ 16%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_token_optimizer_config PASSED [ 18%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_file_not_found PASSED [ 21%]
+shared\storage\tests\test_config.py::TestOrthoConfigLoad::test_load_minimal_config PASSED [ 24%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_project_name PASSED [ 27%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_primary_language PASSED [ 29%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_languages_list PASSED [ 32%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_embedding_model PASSED [ 35%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_llm_models PASSED [ 37%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_max_tokens PASSED [ 40%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_token_optimizer_budget PASSED [ 43%]
+shared\storage\tests\test_config.py::TestOrthoConfigDefaults::test_default_compression_threshold PASSED [ 45%]
+shared\storage\tests\test_config.py::TestOrthoConfigValidation::test_validate_requires_project_name PASSED [ 48%]
+shared\storage\tests\test_config.py::TestOrthoConfigValidation::test_validate_requires_primary_language PASSED [ 51%]
+shared\storage\tests\test_config.py::TestOrthoConfigValidation::test_validate_requires_positive_budget PASSED [ 54%]
+shared\storage\tests\test_config.py::TestOrthoConfigValidation::test_validate_compression_threshold_bounds PASSED [ 56%]
+shared\storage\tests\test_config.py::TestOrthoConfigValidation::test_valid_config_passes_validation PASSED [ 59%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_database_initialization PASSED [ 62%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_connection_creates_directory FAILED [ 64%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_connection_returns_sqlite_connection PASSED [ 67%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_connection_has_wal_mode PASSED [ 70%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_connection_has_foreign_keys_enabled PASSED [ 72%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_multiple_connections PASSED [ 75%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_db_path_different_for_different_projects PASSED [ 78%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_connection_can_execute_query PASSED [ 81%]
+shared\storage\tests\test_database.py::TestOrthoDatabase::test_multiple_connections_share_same_db_file PASSED [ 83%]
+shared\storage\tests\test_integration.py::TestStorageIntegration::test_database_initialization_and_config_load PASSED [ 86%]
+shared\storage\tests\test_integration.py::TestStorageIntegration::test_multiple_connections_concurrent PASSED [ 89%]
+shared\storage\tests\test_integration.py::TestStorageIntegration::test_database_persistence_across_connections PASSED [ 91%]
+shared\storage\tests\test_integration.py::TestStorageIntegration::test_foreign_key_constraint_enabled PASSED [ 94%]
+shared\storage\tests\test_integration.py::TestStorageIntegration::test_wal_mode_persistence PASSED [ 97%]
+shared\storage\tests\test_integration.py::TestStorageIntegration::test_config_path_and_db_path_independent PASSED [100%]
+
+================================== FAILURES ===================================
+_____________ TestOrthoDatabase.test_connection_creates_directory _____________
+shared\storage\tests\test_database.py:28: in test_connection_creates_directory
+    assert not (temp_project / ".ortho").exists()
+E   AssertionError: assert not True
+E    +  where True = exists()
+E    +    where exists = (WindowsPath('C:/Users/urbra/AppData/Local/Temp/tmpvkf7wh27') / '.ortho').exists
+=========================== short test summary info ===========================
+FAILED shared\storage\tests\test_database.py::TestOrthoDatabase::test_connection_creates_directory
+======================== 1 failed, 36 passed in 0.44s =========================
