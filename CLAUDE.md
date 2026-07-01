@@ -100,12 +100,23 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 - No previously passing tests broken
 - 9 remaining xfail are legitimate edge cases only
 
-**Commits:**
+**GATE 3 APPROVED** ✓
+
+**BUILDER Commits:**
 - 142d5a3: Fix CallGraphBuilder exception handling
 - 4a0be05: Complete ImportGraphBuilder  
 - a357df6: Complete all implementations
 
-**Next Action:** HUMAN approves at GATE 3 → TEST-DESIGNER (independent verification) → VERIFIER → REVIEWER
+**TEST-DESIGNER Session Complete** ✓
+- ✓ test-plan.md designed independently (58+ tests)
+- ✓ AC1: 16 tests for CallGraphBuilder
+- ✓ AC2: 12 tests for ImportGraphBuilder
+- ✓ AC3: 13 tests for ModuleDetector
+- ✓ AC4: 13 tests for SymbolExtractor
+- ✓ AC5: 2 regression tests
+- ✓ Commit: 9405d8d
+
+**Next Action:** VERIFIER runs full pytest suite and produces evidence logs
 
 ---
 
