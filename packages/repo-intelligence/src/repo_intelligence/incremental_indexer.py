@@ -197,3 +197,34 @@ class IncrementalIndexer:
             raise NotAGitRepoError(f"git ls-files failed: {e}")
 
         return all_files
+
+    def filter_python_files(self, changed_files: List[ChangedFile]) -> List[ChangedFile]:
+        """
+        Filter changed files to only Python files.
+
+        Args:
+            changed_files: List of ChangedFile objects
+
+        Returns:
+            Filtered list containing only .py files
+        """
+        return [f for f in changed_files if f.path.endswith('.py')]
+
+    def has_unmerged_changes(self) -> bool:
+        """
+        Check if repository has unmerged changes (merge in progress).
+
+        Returns:
+            True if unmerged files exist, False otherwise
+        """
+        try:
+            result = subprocess.run(
+                ["git", "ls-files", "--unmerged"],
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            return result.returncode == 0 and len(result.stdout.strip()) > 0
+        except Exception:
+            return False
