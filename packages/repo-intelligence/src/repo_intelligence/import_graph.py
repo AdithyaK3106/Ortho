@@ -35,7 +35,27 @@ class ImportGraphBuilder:
 
         Returns:
             List of ImportEdge objects
+
+        Raises:
+            SyntaxError: If file has syntax errors
+            FileNotFoundError: If file not found
         """
+        from pathlib import Path
+
+        # Check file exists
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        # Parse with syntax error detection
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                source = f.read()
+            import ast
+            ast.parse(source)  # Check for syntax errors
+        except SyntaxError as e:
+            raise SyntaxError(f"Syntax error in {file_path}: {e}") from e
+
         # ponytail: lazy parse, avoid import cycle by importing here
         from .adapters.python_adapter import PythonAdapter
 
@@ -122,17 +142,40 @@ class ImportGraphBuilder:
 
     def _extract_import_name(self, node: Any) -> Optional[str]:
         """
-        Extract module name from 'import X' statement.
+        Extract module name from 'import X' or 'import X as Y' statement.
+
+        Returns the actual module name (not the alias).
 
         Args:
-            node: tree-sitter node
+            node: tree-sitter node (import_statement)
 
         Returns:
             Module name, or None if not found
         """
+        # Look for aliased_import or dotted_name/identifier
         for child in node.children:
-            if child.type == "dotted_name" or child.type == "identifier":
+            if child.type == "aliased_import":
+                # Structure: dotted_name/identifier as alias
+                for subchild in child.children:
+                    if subchild.type == "dotted_name":
+                        return subchild.text.decode("utf-8")
+                    elif subchild.type == "identifier":
+                        # Check if this is before 'as'
+                        idx = child.children.index(subchild)
+                        if idx + 1 < len(child.children) and child.children[idx + 1].type == "as":
+                            return subchild.text.decode("utf-8")
+                        elif idx + 1 >= len(child.children):
+                            # Last child, no 'as' after
+                            return subchild.text.decode("utf-8")
+            elif child.type == "dotted_name":
                 return child.text.decode("utf-8")
+            elif child.type == "identifier":
+                # Check if next is "as"
+                idx = node.children.index(child)
+                if idx + 1 < len(node.children) and node.children[idx + 1].type == "as":
+                    return child.text.decode("utf-8")
+                elif idx + 1 >= len(node.children):
+                    return child.text.decode("utf-8")
         return None
 
     def _extract_from_import_name(self, node: Any) -> Optional[str]:
