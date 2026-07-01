@@ -7,6 +7,7 @@ Walks tree-sitter AST and extracts code symbols (functions, classes, methods).
 from dataclasses import dataclass
 from typing import Any, List, Optional
 from pathlib import Path
+from tree_sitter import Language, Parser
 
 
 @dataclass
@@ -31,26 +32,47 @@ class Symbol:
 
 
 class SymbolExtractor:
-    """Extracts symbols from Python AST."""
+    """Extracts symbols from Python source code."""
 
-    def extract_symbols(self, file_path: str) -> List[Symbol]:
+    def __init__(self) -> None:
+        """Initialize parser."""
+        self._parser: Optional[Parser] = None
+
+    def _get_parser(self) -> Parser:
+        """Get or create tree-sitter parser."""
+        if self._parser is None:
+            from tree_sitter_languages import get_language
+            self._parser = Parser()
+            self._parser.set_language(get_language("python"))
+        return self._parser
+
+    def extract_symbols(self, file_path: Path, source: Optional[str] = None) -> List[Symbol]:
         """
-        Extract symbols from a Python file (test compatibility method).
+        Extract symbols from Python source code.
 
         Args:
-            file_path: Path to Python file
+            file_path: Path to file (for reference/logging)
+            source: Python source code as string. If not provided, reads from file_path.
 
         Returns:
             List of Symbol objects
         """
-        # ponytail: lazy parse, avoid import cycle
-        from .adapters.python_adapter import PythonAdapter
+        try:
+            # If source not provided, read from file
+            if source is None:
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        source = f.read()
+                except (FileNotFoundError, OSError):
+                    return []
 
-        adapter = PythonAdapter()
-        tree = adapter.parse(file_path)
-        if tree is None:
+            parser = self._get_parser()
+            tree = parser.parse(source.encode("utf-8"))
+            if tree is None:
+                return []
+            return self.extract(tree)
+        except Exception:
             return []
-        return self.extract(tree)
 
     def extract(self, tree: Any) -> List[Symbol]:
         """

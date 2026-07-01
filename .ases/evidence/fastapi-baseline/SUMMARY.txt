@@ -1,0 +1,64 @@
+TASK-006 REAL-REPO VERIFICATION REPORT
+======================================
+
+Test Date: 2026-07-01
+Test Target: fastapi repository (real codebase)
+
+1. BASELINE UNIT TESTS
+=====================
+Location: packages/repo-intelligence/tests/
+Result: 31 PASS, 48 XPASS, 9 XFAIL (88 total)
+Exit Code: 0
+Duration: 0.99s
+Verdict: SUCCESS (all tests pass)
+
+2. REAL-REPO SCAN (fastapi)
+===========================
+Location: Repos/fastapi/
+Files Scanned: 30
+Modules Detected: 194
+
+SymbolExtractor Results:
+- Expected: >=100 symbols from 30 files
+- Actual: 0 symbols
+- Errors: TypeError on all 30 files
+- Root Cause: Signature mismatch (expects 1 arg, spec says 2 args)
+
+CallGraphBuilder Results:
+- Expected: >=50 calls
+- Actual: 0 calls
+- Errors: TypeError (depends on SymbolExtractor)
+
+ImportGraphBuilder Results:
+- Expected: >=100 imports
+- Actual: 0 imports
+- Errors: TypeError (depends on SymbolExtractor)
+
+3. CRITICAL FINDING
+====================
+Bug Type: API Signature Mismatch
+Severity: CRITICAL
+Impact: Task-006 untested against real code
+
+Details:
+- Spec requires: extract_symbols(file_path: Path, source: str)
+- Implementation has: extract_symbols(file_path: str)
+- Tests pass because they use tiny mock files
+- Real code fails because implementation signature is wrong
+
+The tool CANNOT scan real Python repositories due to this bug.
+
+4. CONCLUSION
+=============
+GATE 5 (Verification) should have FAILED because:
+- Real-repo scan 0% successful (0 symbols, 0 calls, 0 imports)
+- Tests passed by accident (mocks hid signature bug)
+- Implementation doesn't match spec
+
+This is WHY task-007 requires property-based + real-repo tests.
+Mock-only tests miss critical bugs that real code exposes.
+
+Recommendation: 
+- Fix SymbolExtractor.extract_symbols() signature
+- Implement real-repo scan as part of GATE 5 verification
+- Do not accept XPASS as "passing" without real code verification

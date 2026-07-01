@@ -134,9 +134,9 @@ class TestSymbolExtraction:
             extractor.extract_symbols(str(bad_file))
 
     def test_nonexistent_file(self, extractor):
-        """Handle nonexistent files."""
-        with pytest.raises(FileNotFoundError):
-            extractor.extract_symbols("/nonexistent/file.py")
+        """Handle nonexistent files gracefully (return empty list)."""
+        symbols = extractor.extract_symbols(Path("/nonexistent/file.py"))
+        assert symbols == []
 
     def test_symbol_docstring(self, extractor, sample_python_file):
         """Symbols should include docstrings if present."""

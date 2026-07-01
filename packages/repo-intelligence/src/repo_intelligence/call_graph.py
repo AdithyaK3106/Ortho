@@ -84,21 +84,18 @@ class CallGraphBuilder:
         self.python_files = [Path(f) if not Path(f).is_absolute() else f for f in (python_files or [])]
         self.edges: List[CallEdge] = []
 
-    def extract_calls(self, file_path: str = None, source: str = None) -> List[CallEdge]:
-        """Extract calls from file path or source string.
+    def extract_calls(self, file_path: Path, source: str, symbols: Optional[List] = None) -> List[CallEdge]:
+        """Extract calls from Python source code.
 
         Args:
-            file_path: Path to Python file (string or Path)
+            file_path: Path to file (for reference/logging)
             source: Python source code as string
+            symbols: Optional list of Symbol objects (for symbol resolution)
 
         Returns:
             List of CallEdge objects
         """
-        if file_path and source:
-            return self._extract_from_source(source, file_path)
-        elif file_path:
-            return self._extract_from_file(file_path)
-        return []
+        return self._extract_from_source(source, file_path)
 
     def build_call_graph(self, file_path: str = None) -> List[CallEdge]:
         """Extract function/method calls from Python source.

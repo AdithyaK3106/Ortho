@@ -168,6 +168,7 @@ CLAUDE.md updated: task moved to COMPLETED
 
 **Required Artifact:**
 - `.ases/tasks/[task-id]/test-plan.md` — Tests per criterion, integration tests, edge cases, failure scenarios
+- **NEW:** Sample working tests (≥5) with evidence of property-based testing (hypothesis) if applicable
 
 **Human Review Checklist:**
 - [ ] ≥1 test per acceptance criterion (from spec.md)
@@ -177,14 +178,16 @@ CLAUDE.md updated: task moved to COMPLETED
 - [ ] Regression candidates identified (existing tests listed)
 - [ ] No vague tests ("should work" is forbidden — must be specific)
 - [ ] Tests can actually run (no syntax errors in examples)
+- [ ] **NEW:** ≥1 property-based test included (uses hypothesis with ≥10 generated cases)
+- [ ] **NEW:** ≥1 real-repo scan test designed (uses actual codebase, not mocks)
 
 **Valid Decisions:**
-- ✓ **APPROVED** — Test coverage is comprehensive, proceed to VERIFIER
-- ✗ **SEND BACK TO TEST-DESIGNER** — Coverage gaps (missing criteria, no edge cases, only happy path)
+- ✓ **APPROVED** — Test coverage is comprehensive (unit + property + real-repo), proceed to VERIFIER
+- ✗ **SEND BACK TO TEST-DESIGNER** — Coverage gaps (missing property tests, no real-repo scan, or only happy path)
 
 **Transition:**
 - If APPROVED: Move task to VERIFICATION state, proceed to VERIFIER session
-- If SEND BACK: TEST-DESIGNER session (new session, fresh context) adds tests and resubmits
+- If SEND BACK: TEST-DESIGNER session (new session, fresh context) adds property tests and real-repo scan, resubmits
 
 ---
 
@@ -329,15 +332,23 @@ IMPLEMENTED (new session, fix issue)
 - Does NOT claim to have tested or verified
 
 ### TEST-DESIGNER
-- Writes tests in independent session (zero BUILDER context)
+- **NEW:** Shadows BUILDER — writes tests concurrently as code lands, not after implementation complete
 - Covers all acceptance criteria (1+ test per criterion)
 - Tests edge cases and failure scenarios
-- Produces test files + test-plan.md
+- **NEW:** Includes ≥1 property-based test (hypothesis with ≥10 generated test cases)
+- **NEW:** Includes ≥1 real-repo scan test (uses actual codebase from .../Repos/, not mocks)
+- Produces test files + test-plan.md with evidence of property + real-repo tests
 
 ### VERIFIER
 - Mode A: Runs commands, captures evidence to timestamped logs
+  - **NEW:** Pre-flight: validate imports and environment
+  - **NEW:** Pilot test: run 5-10 sample tests from test-plan.md (fail fast if test code broken)
+  - Full suite: run all tests with coverage
+  - Regression: run full test suite across all packages
 - Mode B: Reads logs, compares to spec, produces verification-report.md
-- Never claims to have run commands it did not run
+  - **NEW:** Verify property-based tests actually executed (≥10 cases per test)
+  - **NEW:** Verify real-repo scan results are included (not mocks)
+  - Never claims to have run commands it did not run
 - Produces evidence-package.md with gates checklist
 
 ### REVIEWER

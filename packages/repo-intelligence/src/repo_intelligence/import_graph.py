@@ -26,41 +26,32 @@ class ImportGraphBuilder:
         """Initialize the import graph builder."""
         self.visited: Set[str] = set()
 
-    def extract_imports(self, file_path: str) -> List[ImportEdge]:
+    def extract_imports(self, file_path: Path, source: Optional[str] = None) -> List[ImportEdge]:
         """
-        Extract imports from a Python file (test compatibility method).
+        Extract imports from Python source code.
 
         Args:
-            file_path: Path to Python file
+            file_path: Path to file (for reference/logging)
+            source: Python source code as string. If not provided, reads from file_path.
 
         Returns:
             List of ImportEdge objects
-
-        Raises:
-            SyntaxError: If file has syntax errors
-            FileNotFoundError: If file not found
         """
-        from pathlib import Path
+        # If source not provided, read from file
+        if source is None:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    source = f.read()
+            except (FileNotFoundError, OSError):
+                return []
 
-        # Check file exists
-        path = Path(file_path)
-        if not path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
+        # Parse with tree-sitter
+        from tree_sitter_languages import get_language
+        from tree_sitter import Parser
 
-        # Parse with syntax error detection
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                source = f.read()
-            import ast
-            ast.parse(source)  # Check for syntax errors
-        except SyntaxError as e:
-            raise SyntaxError(f"Syntax error in {file_path}: {e}") from e
-
-        # ponytail: lazy parse, avoid import cycle by importing here
-        from .adapters.python_adapter import PythonAdapter
-
-        adapter = PythonAdapter()
-        tree = adapter.parse(file_path)
+        parser = Parser()
+        parser.set_language(get_language("python"))
+        tree = parser.parse(source.encode("utf-8"))
         if tree is None:
             return []
         return self.build(tree)
