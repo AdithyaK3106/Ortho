@@ -1,0 +1,88 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\repo-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 1 item
+
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerBasic::test_is_git_repo_true PASSED [100%]
+
+============================== 1 passed in 0.19s ==============================
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\repo-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 1 item
+
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererBasic::test_find_python_files PASSED [100%]
+
+============================== 1 passed in 0.08s ==============================
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\repo-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 1 item
+
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerBasic::test_index_repository PASSED [100%]
+
+============================== 1 passed in 0.19s ==============================
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\repo-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 43 items
+
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerBasic::test_is_git_repo_true PASSED [  2%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerBasic::test_is_git_repo_false PASSED [  4%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerBasic::test_init_with_repo_root PASSED [  6%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerBasic::test_get_changed_files_not_git_repo PASSED [  9%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerGitDiff::test_get_changed_files_added PASSED [ 11%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerGitDiff::test_get_changed_files_modified PASSED [ 13%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerGitDiff::test_get_changed_files_deleted PASSED [ 16%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerFullMode::test_get_changed_files_full_mode PASSED [ 18%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerFullMode::test_get_changed_files_full_vs_git_diff PASSED [ 20%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerFiltering::test_filter_python_files PASSED [ 23%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerFiltering::test_filter_python_files_empty PASSED [ 25%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerMergeConflicts::test_has_unmerged_changes_false PASSED [ 27%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestIncrementalIndexerMergeConflicts::test_allow_unmerged_parameter PASSED [ 30%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py::TestChangedFileDataclass::test_changed_file_properties PASSED [ 32%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererBasic::test_find_python_files PASSED [ 34%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererBasic::test_find_python_files_excludes_non_python PASSED [ 37%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererBasic::test_find_python_files_excludes_directories PASSED [ 39%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererBasic::test_find_python_files_relative PASSED [ 41%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererBasic::test_count_files PASSED [ 44%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererExclusions::test_default_excludes PASSED [ 46%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererExclusions::test_add_exclude_pattern PASSED [ 48%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererExclusions::test_remove_exclude_pattern PASSED [ 51%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererExclusions::test_reset_excludes PASSED [ 53%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererExclusions::test_custom_exclude_patterns_on_init PASSED [ 55%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererEdgeCases::test_empty_directory PASSED [ 58%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererEdgeCases::test_only_excluded_files PASSED [ 60%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py::TestFileDiscovererEdgeCases::test_deeply_nested_files PASSED [ 62%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerBasic::test_indexer_init PASSED [ 65%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerBasic::test_index_repository PASSED [ 67%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerBasic::test_index_result_properties PASSED [ 69%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerExtraction::test_extracts_symbols PASSED [ 72%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerExtraction::test_extracts_imports PASSED [ 74%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerExtraction::test_extracts_calls PASSED [ 76%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerExtraction::test_reports_accurate_counts PASSED [ 79%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerErrorHandling::test_handles_syntax_errors PASSED [ 81%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerErrorHandling::test_error_threshold_check PASSED [ 83%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerErrorHandling::test_accepts_within_threshold PASSED [ 86%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerFileList::test_index_files PASSED [ 88%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerFileList::test_index_files_multiple PASSED [ 90%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerFileList::test_index_files_nonexistent PASSED [ 93%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerProgressTracking::test_progress_callback_called PASSED [ 95%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerProgressTracking::test_progress_callback_monotonic PASSED [ 97%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py::TestIndexerExclusions::test_respects_exclude_patterns PASSED [100%]
+
+============================= 43 passed in 3.39s ==============================
+EXIT: 0
+TIMESTAMP: 2026-07-01T16:07:45Z
