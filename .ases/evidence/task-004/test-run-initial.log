@@ -1,0 +1,80 @@
+packages\context-hub\tests\test_search.py::TestBM25Search::test_bm25_search_scope_filter PASSED [ 51%]
+packages\context-hub\tests\test_search.py::TestBM25Search::test_bm25_search_normalized_scores PASSED [ 53%]
+packages\context-hub\tests\test_search.py::TestSemanticSearch::test_semantic_search_unavailable PASSED [ 55%]
+packages\context-hub\tests\test_search.py::TestHybridSearch::test_hybrid_search_fallback_to_bm25 PASSED [ 57%]
+packages\context-hub\tests\test_search.py::TestHybridSearch::test_hybrid_search_limit_respected FAILED [ 59%]
+packages\context-hub\tests\test_search.py::TestHybridSearch::test_hybrid_search_returns_search_result PASSED [ 61%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_ingest_artifact PASSED [ 62%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_ingest_and_retrieve PASSED [ 64%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_ingest_invalid_artifact PASSED [ 66%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_versioning_same_content PASSED [ 68%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_versioning_different_content FAILED [ 70%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_get_artifact_history FAILED [ 72%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_get_artifact_specific_version FAILED [ 74%]
+packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_delete_artifact PASSED [ 75%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_make_artifact_id_deterministic PASSED [ 77%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_make_artifact_id_different_title PASSED [ 79%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_make_artifact_id_length PASSED [ 81%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_make_content_hash_deterministic PASSED [ 83%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_make_content_hash_different_content PASSED [ 85%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_make_content_hash_length PASSED [ 87%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_get_next_version_first_artifact PASSED [ 88%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_get_next_version_existing FAILED [ 90%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_check_content_changed_first_artifact PASSED [ 92%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_check_content_changed_same_hash PASSED [ 94%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_check_content_changed_different_hash PASSED [ 96%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_get_artifact_version_count_no_versions PASSED [ 98%]
+packages\context-hub\tests\test_versioning.py::TestVersioning::test_get_artifact_version_count_multiple_versions FAILED [100%]
+
+=================================== ERRORS ====================================
+____ ERROR at teardown of TestGitMetadata.test_get_file_churn_with_commits ____
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmp9q3bhxsf'
+
+During handling of the above exception, another exception occurred:
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmp9q3bhxsf'
+
+During handling of the above exception, another exception occurred:
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\urbra\\AppData\\Local\\Temp\\tmp9q3bhxsf'
+================================== FAILURES ===================================
+E   TypeError: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'NoneType'
+C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:373: TypeError: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'NoneType'
+E   AssertionError: assert False is True
+     +  where False = StalenessReport(is_stale=False, reason='non-file artifact', last_verified_at='2026-07-01T18:08:49.418482').is_stale
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_metadata.py:152: AssertionError: assert False is True
+E   AssertionError: assert 'non-file artifact' == 'up-to-date'
+      
+      - up-to-date
+      + non-file artifact
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_metadata.py:178: AssertionError: assert 'non-file artifact' == 'up-to-date'
+E   AssertionError: assert False is True
+     +  where False = StalenessReport(is_stale=False, reason='non-file artifact', last_verified_at='2026-07-01T18:08:49.442179').is_stale
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_metadata.py:204: AssertionError: assert False is True
+E   sqlite3.OperationalError: fts5: syntax error near ""
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\src\context_hub\search\bm25.py:61: sqlite3.OperationalError: fts5: syntax error near ""
+E   AssertionError: assert '667ba4c3a64a6f5a' == 'a04afb68e6b11e0b'
+      
+      - a04afb68e6b11e0b
+      + 667ba4c3a64a6f5a
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_store_basic.py:74: AssertionError: assert '667ba4c3a64a6f5a' == 'a04afb68e6b11e0b'
+E   AssertionError: assert 1 == 3
+     +  where 1 = len([Artifact(id='a04afb68e6b11e0b', repo_id='test-repo', type='adr', title='ADR-001: Storage Strategy', content='We have decided to use SQLite for local storage...', source='docs/adr/ADR-001.md', created_at='2026-07-01T18:08:49.523647', last_modified='2026-07-01T18:08:49.523647', relevance_scope='global', tags=['storage', 'decision'], related_symbols=[], estimated_tokens=36, content_hash='aea2f714e356de478186157b1a86c2e9f226ba6f040778a3b470a6f412139ae4', version=1)])
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_store_basic.py:109: AssertionError: assert 1 == 3
+E   AttributeError: 'NoneType' object has no attribute 'version'
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_store_basic.py:139: AttributeError: 'NoneType' object has no attribute 'version'
+E   sqlite3.IntegrityError: UNIQUE constraint failed: artifacts.id
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_versioning.py:72: sqlite3.IntegrityError: UNIQUE constraint failed: artifacts.id
+E   sqlite3.IntegrityError: UNIQUE constraint failed: artifacts.id
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\context-hub\tests\test_versioning.py:137: sqlite3.IntegrityError: UNIQUE constraint failed: artifacts.id
+=========================== short test summary info ===========================
+FAILED packages\context-hub\tests\test_metadata.py::TestGitMetadata::test_get_file_churn_no_history
+FAILED packages\context-hub\tests\test_metadata.py::TestStalenessDetector::test_staleness_file_deleted
+FAILED packages\context-hub\tests\test_metadata.py::TestStalenessDetector::test_staleness_content_unchanged
+FAILED packages\context-hub\tests\test_metadata.py::TestStalenessDetector::test_staleness_content_changed
+FAILED packages\context-hub\tests\test_search.py::TestHybridSearch::test_hybrid_search_limit_respected
+FAILED packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_versioning_different_content
+FAILED packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_get_artifact_history
+FAILED packages\context-hub\tests\test_store_basic.py::TestArtifactStoreBasic::test_get_artifact_specific_version
+FAILED packages\context-hub\tests\test_versioning.py::TestVersioning::test_get_next_version_existing
+FAILED packages\context-hub\tests\test_versioning.py::TestVersioning::test_get_artifact_version_count_multiple_versions
+ERROR packages\context-hub\tests\test_metadata.py::TestGitMetadata::test_get_file_churn_with_commits
+=================== 10 failed, 44 passed, 1 error in 0.76s ====================

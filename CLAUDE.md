@@ -64,7 +64,30 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-(None — task-003 completed)
+### task-006: Complete Python Adapter (Week 3–4 continued)
+
+**State:** GATE 1 PENDING (awaiting human approval of plan.md, spec.md, rollback-plan.md)  
+**Workflow:** `.ases/workflows/feature.md`  
+**Started:** 2026-07-01
+
+**Artifacts Created:**
+- ✓ `.ases/tasks/task-006-python-adapter-completion/plan.md` (8 atomic tasks, behavior-based AC)
+- ✓ `.ases/tasks/task-006-python-adapter-completion/spec.md` (AC1–AC5, confidence semantics, quality metrics)
+- ✓ `.ases/tasks/task-006-python-adapter-completion/rollback-plan.md` (recovery procedure)
+- ✓ `.ases/tasks/task-006-python-adapter-completion/PLANNER-REVISIONS.md` (revision summary)
+- ✓ `.ases/tasks/task-006-python-adapter-completion/REVISION-REQUIREMENTS-MAPPING.md` (requirement mapping)
+
+**Revision Completed:** PLANNER addressed all four documentation improvement requirements:
+1. ✓ Replaced xfail-based metrics with behavior-based AC1–AC5
+2. ✓ Reclassified coverage as quality metric (not gate-blocking)
+3. ✓ Defined confidence score semantics (5 bands, 0.0–1.0)
+4. ✓ Completed consistency review across all documents
+
+**Objective:** Implement CallGraphBuilder, ImportGraphBuilder, ModuleDetector, SymbolExtractor to satisfy AC1–AC5.
+
+**Expected Result:** All 88 tests execute and pass, zero regressions, AC1–AC5 behaviors verified.
+
+**Next Action:** HUMAN reviews plan.md/spec.md/rollback-plan.md at GATE 1 → ARCHITECT review (optional waiver) → BUILDER implements
 
 ---
 
