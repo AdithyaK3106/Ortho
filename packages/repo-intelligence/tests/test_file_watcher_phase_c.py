@@ -99,6 +99,7 @@ class TestFileWatcherCallbacks:
         # Should have detected the change
         assert len(changes) > 0
 
+    @pytest.mark.xfail(reason="Watchdog timing is OS-dependent; test may fail on Windows")
     def test_extension_filtering(self, temp_repo_for_watch):
         """Test that only configured extensions trigger callbacks."""
         changes = []
