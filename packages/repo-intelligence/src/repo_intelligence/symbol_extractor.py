@@ -6,9 +6,10 @@ Walks tree-sitter AST and extracts code symbols (functions, classes, methods).
 
 from dataclasses import dataclass
 from typing import Any, List, Optional
+from pathlib import Path
 
 
-@dataclass(frozen=True)
+@dataclass
 class Symbol:
     """Represents a code symbol (function, class, method)."""
 
@@ -18,9 +19,38 @@ class Symbol:
     lineno: int
     docstring: Optional[str] = None
 
+    @property
+    def kind(self) -> str:
+        """Alias for type (test compatibility)."""
+        return self.type
+
+    @property
+    def start_line(self) -> int:
+        """Alias for lineno (test compatibility)."""
+        return self.lineno
+
 
 class SymbolExtractor:
     """Extracts symbols from Python AST."""
+
+    def extract_symbols(self, file_path: str) -> List[Symbol]:
+        """
+        Extract symbols from a Python file (test compatibility method).
+
+        Args:
+            file_path: Path to Python file
+
+        Returns:
+            List of Symbol objects
+        """
+        # ponytail: lazy parse, avoid import cycle
+        from .adapters.python_adapter import PythonAdapter
+
+        adapter = PythonAdapter()
+        tree = adapter.parse(file_path)
+        if tree is None:
+            return []
+        return self.extract(tree)
 
     def extract(self, tree: Any) -> List[Symbol]:
         """

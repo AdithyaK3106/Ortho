@@ -6,6 +6,7 @@ Extracts import statements from Python AST and builds dependency graph.
 
 from dataclasses import dataclass
 from typing import Any, List, Set, Optional
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -24,6 +25,25 @@ class ImportGraphBuilder:
     def __init__(self) -> None:
         """Initialize the import graph builder."""
         self.visited: Set[str] = set()
+
+    def extract_imports(self, file_path: str) -> List[ImportEdge]:
+        """
+        Extract imports from a Python file (test compatibility method).
+
+        Args:
+            file_path: Path to Python file
+
+        Returns:
+            List of ImportEdge objects
+        """
+        # ponytail: lazy parse, avoid import cycle by importing here
+        from .adapters.python_adapter import PythonAdapter
+
+        adapter = PythonAdapter()
+        tree = adapter.parse(file_path)
+        if tree is None:
+            return []
+        return self.build(tree)
 
     def build(self, tree: Any) -> List[ImportEdge]:
         """

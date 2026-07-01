@@ -36,19 +36,23 @@ class CallEdge:
 class CallGraphBuilder:
     """Extract call edges from Python source code using AST analysis."""
 
-    def __init__(self, repo_root: Path, python_files: List[Path]):
+    def __init__(self, repo_root: Path = None, python_files: List[Path] = None):
         """
         Initialize call graph builder.
 
         Args:
-            repo_root: Project root directory
-            python_files: List of Python file paths (absolute or relative to repo_root)
+            repo_root: Project root directory (optional for testing)
+            python_files: List of Python file paths (optional for testing)
         """
-        self.repo_root = Path(repo_root)
-        self.python_files = [Path(f) if not Path(f).is_absolute() else f for f in python_files]
+        self.repo_root = Path(repo_root) if repo_root else Path(".")
+        self.python_files = [Path(f) if not Path(f).is_absolute() else f for f in (python_files or [])]
         self.edges = []
         self._recursive_calls = set()
         self._call_stack = []
+
+    def extract_calls(self) -> List[CallEdge]:
+        """Alias for build_call_graph for backward compatibility."""
+        return self.build_call_graph()
 
     def build_call_graph(self) -> List[CallEdge]:
         """

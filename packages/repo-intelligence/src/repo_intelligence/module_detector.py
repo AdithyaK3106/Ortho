@@ -17,6 +17,9 @@ class Module:
         self.root_path = root_path
         self.type = type  # "regular" | "namespace"
         self.file_paths = file_paths
+        # Test compatibility
+        self.path = root_path
+        self.is_package = (type == "regular")
 
     def to_dict(self):
         return {
@@ -30,30 +33,34 @@ class Module:
 class ModuleDetector:
     """Detect Python packages (regular and namespace packages)."""
 
-    def __init__(self, repo_root: Path):
+    def __init__(self, repo_root: Path = None):
         """
         Initialize module detector.
 
         Args:
-            repo_root: Project root directory
+            repo_root: Project root directory (optional for testing)
         """
-        self.repo_root = Path(repo_root)
+        self.repo_root = Path(repo_root) if repo_root else Path(".")
         self._ignore_dirs = {
             "__pycache__", ".pytest_cache", ".tox", "venv", "env",
             ".venv", ".env", "build", "dist", ".git", ".venv",
         }
 
-    def detect_modules(self) -> List[Module]:
+    def detect_modules(self, path: Path = None) -> List[Module]:
         """
         Detect Python packages and namespace packages.
+
+        Args:
+            path: Optional override for repo_root (for testing)
 
         Returns:
             List of Module objects (regular and namespace packages)
         """
+        search_root = Path(path) if path else self.repo_root
         modules = []
         visited = set()
 
-        for py_file in self.repo_root.rglob("*.py"):
+        for py_file in search_root.rglob("*.py"):
             if self._should_skip(py_file):
                 continue
 
@@ -79,7 +86,7 @@ class ModuleDetector:
     def _find_package_root(self, py_file: Path) -> Path:
         """Find the package root directory for a Python file."""
         current = py_file.parent
-        while current != self.repo_root and current != current.parent:
+        while current != self.repo_root and current != current.parent and str(current) != str(self.repo_root):
             init_file = current / "__init__.py"
             if init_file.exists():
                 return current
