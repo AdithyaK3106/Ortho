@@ -110,46 +110,55 @@ class CallGraphBuilder:
             List of CallEdge objects
 
         Raises:
-            CallGraphError: If analysis fails
+            FileNotFoundError: If file_path provided but file doesn't exist
+            SyntaxError: If source has syntax errors
+            CallGraphError: If other analysis fails
         """
-        try:
-            if file_path:
-                return self._extract_from_file(file_path)
+        if file_path:
+            # Check file exists first - raise FileNotFoundError if not
+            path = Path(file_path)
+            if not path.exists():
+                raise FileNotFoundError(f"File not found: {file_path}")
+            return self._extract_from_file(file_path)
 
-            edges = []
-            for fpath in self.python_files:
-                abs_path = fpath if fpath.is_absolute() else self.repo_root / fpath
-                if abs_path.exists():
-                    edges.extend(self._extract_from_file(str(abs_path)))
-            return edges
-        except CallGraphError:
-            raise
-        except Exception as e:
-            raise CallGraphError(f"Call graph analysis failed: {e}") from e
+        edges = []
+        for fpath in self.python_files:
+            abs_path = fpath if fpath.is_absolute() else self.repo_root / fpath
+            if abs_path.exists():
+                edges.extend(self._extract_from_file(str(abs_path)))
+        return edges
 
     def _extract_from_file(self, file_path: str) -> List[CallEdge]:
-        """Extract calls from a file."""
+        """Extract calls from a file.
+
+        Raises:
+            SyntaxError: If file has syntax errors
+        """
         path = Path(file_path)
         if not path.exists():
-            return []
+            raise FileNotFoundError(f"File not found: {file_path}")
 
         try:
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 source = f.read()
-        except Exception:
-            return []
+        except Exception as e:
+            raise CallGraphError(f"Failed to read file {file_path}: {e}") from e
 
         return self._extract_from_source(source, str(path))
 
     def _extract_from_source(self, source: str, file_path: str = None) -> List[CallEdge]:
-        """Extract calls from source code."""
+        """Extract calls from source code.
+
+        Raises:
+            SyntaxError: If source has syntax errors
+        """
         if not source.strip():
             return []
 
         try:
             tree = ast.parse(source)
-        except SyntaxError:
-            return []
+        except SyntaxError as e:
+            raise SyntaxError(f"Syntax error in {file_path}: {e}") from e
 
         visitor = CallVisitor(str(file_path) if file_path else "<source>")
         visitor.visit(tree)
