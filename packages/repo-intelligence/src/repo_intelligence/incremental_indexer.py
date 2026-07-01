@@ -63,30 +63,44 @@ class IncrementalIndexer:
             repo_root: Project root directory
         """
         self.repo_root = Path(repo_root)
+        self._is_git_repo: bool | None = None  # Cache git repo status
 
-    def get_changed_files(self, strategy: str = 'git', since_commit: str | None = None) -> List[ChangedFile]:
+    def is_git_repo(self) -> bool:
+        """
+        Check if repository is a valid git repository.
+
+        Returns:
+            True if .git exists, False otherwise
+        """
+        if self._is_git_repo is None:
+            self._is_git_repo = (self.repo_root / ".git").exists()
+        return self._is_git_repo
+
+    def get_changed_files(self, strategy: str = 'git', since_commit: str | None = None, allow_unmerged: bool = False) -> List[ChangedFile]:
         """
         Detect changed files via git diff or full scan.
 
         Args:
-            strategy: 'git' (diff-based) or 'full' (no change detection)
+            strategy: 'git' (diff-based) or 'full' (no change detection, index all files)
             since_commit: Git reference for diff (e.g., 'HEAD~1', 'HEAD'). If None, uses HEAD.
+            allow_unmerged: If True, skip merge conflict check and index unmerged files anyway.
 
         Returns:
             List of ChangedFile objects
 
         Raises:
             NotAGitRepoError: If not a git repository
-            MergeConflictError: If unmerged files detected
+            MergeConflictError: If unmerged files detected and allow_unmerged=False
         """
-        if not (self.repo_root / ".git").exists():
+        if not self.is_git_repo():
             raise NotAGitRepoError(f"Not a git repository: {self.repo_root}")
 
         if strategy == 'full':
             return self._get_all_files()
 
-        # Check for merge conflicts
-        self._check_merge_conflicts()
+        # Check for merge conflicts unless explicitly allowed
+        if not allow_unmerged:
+            self._check_merge_conflicts()
 
         # Get git diff
         return self._compute_git_diff(since_commit or 'HEAD')
