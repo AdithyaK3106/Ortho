@@ -1,22 +1,45 @@
 """Incremental indexer using git diff to detect changed files."""
 
 from pathlib import Path
-from typing import List, Tuple
-from datetime import datetime
+from typing import List, Dict
+from dataclasses import dataclass
 import subprocess
 
 
+@dataclass
+class ChangedFile:
+    """Represents a changed file in git diff."""
+    path: str
+    status: str  # 'A' (added), 'M' (modified), 'D' (deleted), 'R' (renamed)
+
+    @property
+    def is_added(self) -> bool:
+        return self.status == 'A'
+
+    @property
+    def is_modified(self) -> bool:
+        return self.status == 'M'
+
+    @property
+    def is_deleted(self) -> bool:
+        return self.status == 'D'
+
+
+@dataclass
 class IndexDelta:
     """Result of incremental indexing."""
-    def __init__(
-        self,
-        added_symbols: List = None,
-        modified_symbols: List = None,
-        removed_symbols: List = None,
-    ):
-        self.added_symbols = added_symbols or []
-        self.modified_symbols = modified_symbols or []
-        self.removed_symbols = removed_symbols or []
+    added_files: List[str]
+    modified_files: List[str]
+    deleted_files: List[str]
+    errors: List[str]
+
+    @property
+    def total_changed(self) -> int:
+        return len(self.added_files) + len(self.modified_files) + len(self.deleted_files)
+
+    @property
+    def error_count(self) -> int:
+        return len(self.errors)
 
 
 class NotAGitRepoError(Exception):
@@ -24,161 +47,153 @@ class NotAGitRepoError(Exception):
     pass
 
 
+class MergeConflictError(Exception):
+    """Raised when unmerged files are detected."""
+    pass
+
+
 class IncrementalIndexer:
     """Incremental indexer for git-based change detection."""
 
-    def __init__(self, repo_root: Path, storage):
+    def __init__(self, repo_root: Path) -> None:
         """
         Initialize incremental indexer.
 
         Args:
             repo_root: Project root directory
-            storage: OrthoDatabase instance
         """
         self.repo_root = Path(repo_root)
-        self.storage = storage
 
-    def index_incremental(self) -> IndexDelta:
+    def get_changed_files(self, strategy: str = 'git', since_commit: str | None = None) -> List[ChangedFile]:
         """
-        Compute git diff and re-index only changed files.
+        Detect changed files via git diff or full scan.
+
+        Args:
+            strategy: 'git' (diff-based) or 'full' (no change detection)
+            since_commit: Git reference for diff (e.g., 'HEAD~1', 'HEAD'). If None, uses HEAD.
 
         Returns:
-            IndexDelta with added, modified, removed symbols
+            List of ChangedFile objects
 
         Raises:
-            NotAGitRepoError: If .git does not exist or git fails
+            NotAGitRepoError: If not a git repository
+            MergeConflictError: If unmerged files detected
         """
         if not (self.repo_root / ".git").exists():
             raise NotAGitRepoError(f"Not a git repository: {self.repo_root}")
 
-        # Get last indexed timestamp
-        last_indexed = self._get_last_indexed_timestamp()
+        if strategy == 'full':
+            return self._get_all_files()
 
-        # Compute git diff
-        changed_files = self._compute_git_diff(last_indexed)
+        # Check for merge conflicts
+        self._check_merge_conflicts()
 
-        # Re-index changed files
-        delta = self._reindex_changed_files(changed_files)
+        # Get git diff
+        return self._compute_git_diff(since_commit or 'HEAD')
 
-        # Update timestamp
-        self._update_last_indexed_timestamp()
-
-        return delta
-
-    def _get_last_indexed_timestamp(self) -> str:
-        """Get last indexed timestamp from database."""
-        try:
-            cursor = self.storage.db.cursor()
-            cursor.execute(
-                "SELECT last_indexed_at FROM repositories WHERE root_path = ? ORDER BY last_indexed_at DESC LIMIT 1",
-                (str(self.repo_root),),
-            )
-            result = cursor.fetchone()
-            return result[0] if result else None
-        except Exception:
-            return None
-
-    def _compute_git_diff(self, last_indexed: str) -> dict:
+    def _check_merge_conflicts(self) -> None:
         """
-        Compute git diff since last indexed time.
+        Check for unmerged files (merge conflicts).
+
+        Raises:
+            MergeConflictError: If unmerged files detected
+        """
+        try:
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if result.returncode == 0:
+                for line in result.stdout.strip().split("\n"):
+                    if line.startswith("UU "):  # Unmerged both modified
+                        raise MergeConflictError(
+                            f"Merge conflict detected: {line[3:]}. "
+                            "Resolve conflicts before re-indexing."
+                        )
+        except subprocess.TimeoutExpired:
+            raise NotAGitRepoError("git status timeout")
+        except MergeConflictError:
+            raise
+        except Exception as e:
+            raise NotAGitRepoError(f"Failed to check merge status: {e}")
+
+    def _compute_git_diff(self, since_commit: str) -> List[ChangedFile]:
+        """
+        Compute git diff between since_commit and HEAD.
+
+        Args:
+            since_commit: Git reference (e.g., 'HEAD', 'HEAD~1')
 
         Returns:
-            dict with 'added', 'modified', 'deleted' file lists
+            List of ChangedFile objects (A, M, D statuses)
+
+        Raises:
+            NotAGitRepoError: If git diff fails
         """
-        changed_files = {"added": [], "modified": [], "deleted": []}
+        changed_files: List[ChangedFile] = []
 
         try:
-            if last_indexed:
-                cmd = [
-                    "git",
-                    "diff",
-                    "--name-status",
-                    f"{last_indexed}...HEAD",
-                ]
-            else:
-                cmd = ["git", "ls-files", "--others", "--exclude-standard"]
-
             result = subprocess.run(
-                cmd,
+                ["git", "diff", "--name-status", "--diff-filter=AMDR", f"{since_commit}"],
                 cwd=self.repo_root,
                 capture_output=True,
                 text=True,
                 timeout=30,
             )
 
-            if result.returncode == 0:
-                for line in result.stdout.strip().split("\n"):
-                    if not line:
-                        continue
-                    if last_indexed:
-                        status, file_path = line.split("\t", 1)
-                        if status == "A":
-                            changed_files["added"].append(file_path)
-                        elif status == "M":
-                            changed_files["modified"].append(file_path)
-                        elif status == "D":
-                            changed_files["deleted"].append(file_path)
-                    else:
-                        changed_files["added"].append(line)
+            if result.returncode != 0:
+                raise NotAGitRepoError(f"git diff failed: {result.stderr}")
+
+            for line in result.stdout.strip().split("\n"):
+                if not line:
+                    continue
+                parts = line.split("\t", 1)
+                if len(parts) == 2:
+                    status, file_path = parts
+                    changed_files.append(ChangedFile(file_path, status))
 
         except subprocess.TimeoutExpired:
             raise NotAGitRepoError("git diff timeout")
+        except NotAGitRepoError:
+            raise
         except Exception as e:
             raise NotAGitRepoError(f"git diff failed: {e}")
 
         return changed_files
 
-    def _reindex_changed_files(self, changed_files: dict) -> IndexDelta:
-        """Re-index changed files and return delta."""
-        delta = IndexDelta()
+    def _get_all_files(self) -> List[ChangedFile]:
+        """
+        Get all tracked files (for --full flag).
 
-        for file_path in changed_files["added"]:
-            self._reindex_file(file_path, delta, "added")
+        Returns:
+            List of all files marked as 'A' (added for full index)
+        """
+        all_files: List[ChangedFile] = []
 
-        for file_path in changed_files["modified"]:
-            self._remove_file_entries(file_path)
-            self._reindex_file(file_path, delta, "modified")
-
-        for file_path in changed_files["deleted"]:
-            self._remove_file_entries(file_path)
-            delta.removed_symbols.append(file_path)
-
-        return delta
-
-    def _reindex_file(self, file_path: str, delta: IndexDelta, operation: str):
-        """Re-index a single file (placeholder for symbol/call extraction)."""
-        full_path = self.repo_root / file_path
-        if full_path.exists() and full_path.suffix == ".py":
-            if operation == "added":
-                delta.added_symbols.append(file_path)
-            elif operation == "modified":
-                delta.modified_symbols.append(file_path)
-
-    def _remove_file_entries(self, file_path: str):
-        """Remove all entries for a file from database."""
         try:
-            cursor = self.storage.db.cursor()
-            cursor.execute(
-                "DELETE FROM symbols WHERE file_id IN (SELECT id FROM files WHERE path = ?)",
-                (file_path,),
+            result = subprocess.run(
+                ["git", "ls-files"],
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
-            cursor.execute(
-                "DELETE FROM call_edges WHERE caller_id IN (SELECT id FROM symbols WHERE file_id IN (SELECT id FROM files WHERE path = ?))",
-                (file_path,),
-            )
-            self.storage.db.commit()
-        except Exception:
-            pass
 
-    def _update_last_indexed_timestamp(self):
-        """Update last_indexed_at timestamp in database."""
-        try:
-            now = datetime.now().isoformat()
-            cursor = self.storage.db.cursor()
-            cursor.execute(
-                "UPDATE repositories SET last_indexed_at = ? WHERE root_path = ?",
-                (now, str(self.repo_root)),
-            )
-            self.storage.db.commit()
-        except Exception:
-            pass
+            if result.returncode != 0:
+                raise NotAGitRepoError(f"git ls-files failed: {result.stderr}")
+
+            for line in result.stdout.strip().split("\n"):
+                if line:
+                    all_files.append(ChangedFile(line, 'A'))
+
+        except subprocess.TimeoutExpired:
+            raise NotAGitRepoError("git ls-files timeout")
+        except NotAGitRepoError:
+            raise
+        except Exception as e:
+            raise NotAGitRepoError(f"git ls-files failed: {e}")
+
+        return all_files
