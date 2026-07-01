@@ -46,8 +46,8 @@ class StalenessDetector:
 
         source, content_hash = row
 
-        # Non-file artifacts are never stale
-        if not source.startswith(("/", ".")) or source in ("manual", "generated"):
+        # Non-file artifacts are never stale (only "manual" and "generated")
+        if source in ("manual", "generated"):
             return StalenessReport(
                 is_stale=False,
                 reason="non-file artifact",

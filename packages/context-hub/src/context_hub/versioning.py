@@ -7,13 +7,16 @@ from datetime import datetime
 from typing import Optional
 
 
-def make_artifact_id(repo_id: str, title: str, source: str, content_hash: str) -> str:
+def make_artifact_id(repo_id: str, title: str, source: str, content_hash: str = "") -> str:
     """
     Generate stable artifact ID (hash-based, not timestamp).
 
-    Ensures same artifact (repo + title + source + content) always gets same ID.
+    Ensures same artifact (repo + title + source) always gets same ID.
+    Content is versioned separately, not part of ID.
     """
-    base = f"{repo_id}:{title}:{source}:{content_hash[:8]}"
+    # ponytail: ID based on identity (repo/title/source), not content
+    # Content changes create new versions with same ID
+    base = f"{repo_id}:{title}:{source}"
     return hashlib.sha256(base.encode()).hexdigest()[:16]
 
 

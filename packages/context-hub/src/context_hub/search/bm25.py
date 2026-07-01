@@ -24,6 +24,10 @@ class BM25Search:
 
         Returns results ranked by FTS5 relevance (highest first).
         """
+        # ponytail: empty query returns empty results (FTS5 can't handle empty MATCH)
+        if not query or not query.strip():
+            return []
+
         where_clauses = []
         params = [query]
 

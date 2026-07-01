@@ -10,7 +10,8 @@ def init_artifact_schema(db: sqlite3.Connection) -> None:
     # Main artifacts table
     db.execute("""
         CREATE TABLE IF NOT EXISTS artifacts (
-            id TEXT PRIMARY KEY,
+            id TEXT NOT NULL,
+            version INTEGER NOT NULL,
             repo_id TEXT NOT NULL,
             type TEXT NOT NULL,
             title TEXT NOT NULL,
@@ -23,7 +24,7 @@ def init_artifact_schema(db: sqlite3.Connection) -> None:
             related_symbols TEXT DEFAULT '[]',
             estimated_tokens INTEGER NOT NULL DEFAULT 0,
             content_hash TEXT NOT NULL,
-            version INTEGER NOT NULL DEFAULT 1
+            PRIMARY KEY (id, version)
         )
     """)
 

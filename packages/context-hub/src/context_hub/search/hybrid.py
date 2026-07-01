@@ -44,6 +44,7 @@ class HybridSearch:
         }
 
         # Semantic results (if embedding provided)
+        semantic_results = []
         semantic_ranked = {}
         if query_embedding:
             try:
@@ -62,13 +63,18 @@ class HybridSearch:
         merged = {}
         all_results = {r.artifact_id: r for r in bm25_results}
 
+        # Add semantic-only results to all_results dict (for RRF merging)
+        for r in semantic_results:
+            if r.artifact_id not in all_results:
+                all_results[r.artifact_id] = r
+
         for artifact_id, score in bm25_ranked.items():
             merged[artifact_id] = merged.get(artifact_id, 0) + score
 
         for artifact_id, score in semantic_ranked.items():
             merged[artifact_id] = merged.get(artifact_id, 0) + score
 
-        # Rank by merged RRF score (descending)
+        # Rank by merged RRF score (descending), apply limit
         ranked_ids = sorted(merged.items(), key=lambda x: -x[1])[:limit]
 
         # Return with RRF score
