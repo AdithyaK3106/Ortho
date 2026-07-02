@@ -1,5 +1,7 @@
 """Dependency health analyzer: detects coupling patterns and circular dependencies."""
 
+from typing import Optional
+
 from .types import DependencyHealthReport, CallEdge, ImportEdge
 
 
