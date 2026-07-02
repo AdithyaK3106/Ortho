@@ -73,12 +73,33 @@ def _similarity(seq_a: list[str], seq_b: list[str]) -> float:
     return SequenceMatcher(a=seq_a, b=seq_b, autojunk=False).ratio()
 
 
-def _evidence_for_pair(node_a: Any, node_b: Any, similarity: float) -> list[str]:
-    return [
-        f"Similarity {similarity:.2f}: "
+def _evidence_for_pair(symbol_a: Symbol, node_a: Any, symbol_b: Symbol, node_b: Any, similarity: float) -> str:
+    """One evidence line citing concrete matched structural facts for a symbol pair."""
+    return (
+        f"{symbol_a.qualified_name} (lines {node_a.start_point[0] + 1}-{node_a.end_point[0] + 1}) "
+        f"~ {symbol_b.qualified_name} (lines {node_b.start_point[0] + 1}-{node_b.end_point[0] + 1}): "
+        f"similarity {similarity:.2f}, "
         f"{_line_count(node_a)} vs {_line_count(node_b)} lines, "
-        f"{len(node_a.children)} vs {len(node_b.children)} top-level child nodes",
-    ]
+        f"{len(node_a.children)} vs {len(node_b.children)} top-level child nodes"
+    )
+
+
+class _UnionFind:
+    """Minimal union-find to merge overlapping pairwise matches into clusters."""
+
+    def __init__(self, n: int) -> None:
+        self._parent = list(range(n))
+
+    def find(self, x: int) -> int:
+        while self._parent[x] != x:
+            self._parent[x] = self._parent[self._parent[x]]
+            x = self._parent[x]
+        return x
+
+    def union(self, a: int, b: int) -> None:
+        root_a, root_b = self.find(a), self.find(b)
+        if root_a != root_b:
+            self._parent[root_b] = root_a
 
 
 class ReuseDetector:
@@ -115,26 +136,61 @@ class ReuseDetector:
         for idx, (_, symbol, _node, _seq, line_count) in enumerate(entries):
             buckets.setdefault(_bucket_key(symbol, line_count), []).append(idx)
 
-        clusters: list[ReuseCluster] = []
+        # Collect every qualifying pairwise match first (idx_a, idx_b, similarity, evidence_line),
+        # then merge overlapping matches into connected-component clusters (dedup near-identical
+        # clusters, plan.md Task 4) instead of emitting one cluster per pair.
+        pair_matches: list[tuple[int, int, float, str]] = []
         for indices in buckets.values():
             for i in range(len(indices)):
                 for j in range(i + 1, len(indices)):
                     idx_a, idx_b = indices[i], indices[j]
-                    file_a, symbol_a, node_a, seq_a, _ = entries[idx_a]
-                    file_b, symbol_b, node_b, seq_b, _ = entries[idx_b]
+                    _, symbol_a, node_a, seq_a, _ = entries[idx_a]
+                    _, symbol_b, node_b, seq_b, _ = entries[idx_b]
 
                     similarity = _similarity(seq_a, seq_b)
                     if similarity < threshold:
                         continue
 
-                    clusters.append(
-                        ReuseCluster(
-                            symbol_ids=[symbol_a.qualified_name, symbol_b.qualified_name],
-                            file_ids=[file_a, file_b],
-                            similarity=similarity,
-                            evidence=_evidence_for_pair(node_a, node_b, similarity),
+                    pair_matches.append(
+                        (
+                            idx_a,
+                            idx_b,
+                            similarity,
+                            _evidence_for_pair(symbol_a, node_a, symbol_b, node_b, similarity),
                         )
                     )
+
+        if not pair_matches:
+            return []
+
+        uf = _UnionFind(len(entries))
+        for idx_a, idx_b, _sim, _ev in pair_matches:
+            uf.union(idx_a, idx_b)
+
+        component_matches: dict[int, list[tuple[int, int, float, str]]] = {}
+        for match in pair_matches:
+            root = uf.find(match[0])
+            component_matches.setdefault(root, []).append(match)
+
+        clusters: list[ReuseCluster] = []
+        for matches in component_matches.values():
+            member_indices = sorted({idx for m in matches for idx in (m[0], m[1])})
+            symbol_ids = [entries[idx][1].qualified_name for idx in member_indices]
+            file_ids = [entries[idx][0] for idx in member_indices]
+            # Cluster similarity is the minimum pairwise similarity within the group — the
+            # honest worst-case bound for "how similar is this whole group," not an average
+            # that could overstate cohesion.
+            cluster_similarity = min(m[2] for m in matches)
+            evidence = [m[3] for m in sorted(matches, key=lambda m: -m[2])]
+
+            clusters.append(
+                ReuseCluster(
+                    symbol_ids=symbol_ids,
+                    file_ids=file_ids,
+                    similarity=cluster_similarity,
+                    evidence=evidence,
+                )
+            )
 
         clusters.sort(key=lambda c: c.similarity, reverse=True)
         return clusters

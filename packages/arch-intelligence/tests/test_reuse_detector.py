@@ -99,6 +99,27 @@ class TestReuseDetectorUnit:
         clusters = detector.find_similar(symbols_by_file, sources_by_file)
         assert all(c.evidence for c in clusters)
 
+    def test_dedup_merges_mutually_similar_group(self, detector):
+        src = "\n".join(
+            f"def validate_{name}({name}):\n    if {name} is None:\n        return False\n    return len({name}) > 0\n"
+            for name in ("a", "b", "c")
+        )
+        symbols_by_file, sources_by_file = _symbols_and_sources({"a.py": src})
+        clusters = detector.find_similar(symbols_by_file, sources_by_file)
+        # Without dedup this would fragment into 3 separate pairwise clusters (a~b, a~c, b~c).
+        assert len(clusters) == 1
+        assert set(clusters[0].symbol_ids) == {"validate_a", "validate_b", "validate_c"}
+        assert len(clusters[0].evidence) == 3
+
+    def test_evidence_cites_line_ranges(self, detector):
+        symbols_by_file, sources_by_file = _symbols_and_sources(
+            {"a.py": SRC_VALIDATE_USER, "b.py": SRC_VALIDATE_ACCOUNT}
+        )
+        clusters = detector.find_similar(symbols_by_file, sources_by_file)
+        assert "lines" in clusters[0].evidence[0]
+        assert "validate_user" in clusters[0].evidence[0]
+        assert "validate_account" in clusters[0].evidence[0]
+
 
 class TestReuseDetectorIntegration:
     def test_finds_known_duplicate_pair(self, detector):
