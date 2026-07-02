@@ -64,28 +64,37 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-008: Architecture Detection (Week 9–10) — ⏳ GATE 1 REVIEW
+### task-008: Architecture Detection (Week 9–10) — ✅ GATE 1 APPROVED
 
-**State:** PLANNED (Awaiting human review at GATE 1)  
+**State:** ARCH-REVIEW (Awaiting ARCHITECT review at GATE 2)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
-**Phase:** Phase 2 (Reasoning)
+**Phase:** Phase 2 (Reasoning)  
+**Commit:** 62c9307 (GATE 1 APPROVED)
 
-**GATE 1: Plan Approval — PENDING HUMAN REVIEW**
+**GATE 1: Plan Approval — ✅ APPROVED**
 
-**Artifacts Submitted:**
-- ✓ `.ases/tasks/task-008-architecture-detection/plan.md` (5 atomic tasks, risks, rollback)
-- ✓ `.ases/tasks/task-008-architecture-detection/spec.md` (component contracts, patterns, success criteria)
-- ✓ `.ases/tasks/task-008-architecture-detection/rollback-plan.md` (triggers, procedures, verification)
+**Artifacts Approved:**
+- ✓ `.ases/tasks/task-008-architecture-detection/plan.md` (5 atomic tasks, risks, ASES-aligned rollback)
+- ✓ `.ases/tasks/task-008-architecture-detection/spec.md` (complete confidence model, validation strategy)
+- ✓ `.ases/tasks/task-008-architecture-detection/rollback-plan.md` (git revert for published, reset for local)
+- ✓ `.ases/tasks/task-008-architecture-detection/planning-review.md` (all 5 planning issues resolved)
+
+**Planning Issues Resolved:**
+1. ✓ Rollback philosophy: git revert (published) vs git reset --hard (local)
+2. ✓ Layer numbering: consistent depth-first (Layer 0 = data/lowest)
+3. ✓ Confidence model: complete aggregation with deterministic tie-breaking
+4. ✓ Validation strategy: synthetic (deterministic) + real-repo (robustness)
+5. ✓ Consistency review: no ambiguity, fully aligned with ASES
 
 **What This Task Does:**
 Implement Pillar 3 (Architectural Intelligence): detect repo architecture patterns (layered, hexagonal, mvc, microservices, flat) from call/import graphs. Output: ArchitectureModel with detected style, confidence score (0.0–1.0), extracted layers/subsystems, and evidence justifications.
 
 **Key Components:**
-- ArchitectureDetector (pattern matching: 5 detectors)
-- LayerDetector (topological sort + semantic naming)
+- ArchitectureDetector (5 pattern detectors with full confidence model)
+- LayerDetector (topological sort, Layer 0=data, Layer 1=business, Layer 2=presentation)
 - SubsystemDetector (Louvain clustering + coupling score)
-- ArchitectureModelStore (SQLite persistence)
+- ArchitectureModelStore (SQLite persistence with versioning)
 - `ortho analyze` CLI command
 
 **Expected Deliverables:**
@@ -94,7 +103,7 @@ Implement Pillar 3 (Architectural Intelligence): detect repo architecture patter
 - ≥85% code coverage
 - Zero regressions in repo-intelligence + context-hub
 
-**Next Step:** Human reviews plan/spec/rollback at GATE 1. If approved → ARCHITECT session.
+**Next Step:** ARCHITECT reviews plan/spec/architecture-review.md at GATE 2. If approved → BUILDER implements.
 
 ---
 
