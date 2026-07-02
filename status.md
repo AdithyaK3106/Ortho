@@ -6,13 +6,13 @@
 **Previous Phase:** Phase 1 Foundation (100% complete, 2026-06-30 to 2026-07-01)  
 **Goal:** Complete Python parsing, call graphs, and incremental indexing. Integrate context hub for search and retrieval.
 
-**Status:** Phase 1 COMPLETE ✅ | Phase 2 IN PROGRESS
-- Phase 1: 252/265 tests passing (95%)
+**Status:** Phase 2 IN PROGRESS ✅
+- Phase 1: 252/265 tests passing (95%) — COMPLETE
+- task-009 (Impact Analysis + Debt Scoring): GATE 6 APPROVED ✅ (42/42 tests, 100%, 97% coverage)
 - task-008 (Architecture Detection): GATE 6 APPROVED ✅ (35/35 tests, 100%)
-- All critical bugs fixed (5/5)
-- Dependency versions pinned (prevents conflicts)
+- All GATE 5/6 test failures resolved (BUG-014, 015, 016 fixed)
 - Test execution policy enforced (mandatory pytest, real logs)
-- Ready to proceed with Phase 2 tasks
+- Ready for task-010 (next Phase 2 initiative)
 
 ---
 
@@ -82,6 +82,25 @@
 
 ---
 
+### Phase 2, Week 3–4: Impact Analysis + Debt Scoring (Pillar 2)
+- [x] ImpactAnalyzer class (BFS traversal, blast radius)
+- [x] DebtScorer class (5-dimensional scoring)
+- [x] DependencyHealthAnalyzer class (pattern detection, cycle detection)
+- [x] Risk scoring and analysis confidence metrics
+- [x] Evidence generation for all components
+- [x] CLI: `ortho analyze` command (expanded)
+
+**Status:** GATE 6 APPROVED ✅ (task-009, commit: c2c8201)
+- Impact analysis via BFS (blast radius, transitive dependents)
+- Debt scoring: coupling (0.30), churn (0.20), complexity (0.20), coverage (0.20), other (0.10)
+- Dependency health: fan-in/out patterns, cycle detection (DFS), recommendations
+- All metrics deterministic and bounded [0.0, 1.0]
+- 42/42 tests passing (100%), 97% code coverage
+- All 6 ASES gates passed (GATE-6 APPROVED)
+- Zero regressions in other packages (120/120 tests passing)
+
+---
+
 ### Week 7–8: ContextHub
 - [x] Artifact store with all types + ingestion contract
 - [x] BM25 search (SQLite FTS5)
@@ -104,10 +123,10 @@
 
 ## Active Tasks
 
-**Next:** task-008 (Architecture Detection, Pillar 3)
+**Next:** task-010 (TBD — Phase 2 continuation)
 - Status: Not started
-- Scope: Pattern detection (layered, hexagonal, mvc, microservices, flat)
-- Timeline: Weeks 9–10
+- Scope: TBD
+- Timeline: TBD
 
 ---
 
@@ -122,6 +141,8 @@
 | task-005 | Architecture Detection (Week 5–6 Extended) | feature.md | 5a40d05 | 2026-07-01 | GATE-5 ✓ |
 | task-006 | Complete Python Adapter (Week 3–4) | feature.md | 696ed12 | 2026-07-01 | GATE-6 ✓ |
 | task-007 | Incremental Indexing + ortho scan (Week 5–6) | feature.md | ffa6c6b | 2026-07-01 | GATE-6 ✓ |
+| task-008 | Architecture Detection (Pillar 3) | feature.md | 478b24c | 2026-07-02 | GATE-6 ✓ |
+| task-009 | Impact Analysis + Debt Scoring (Pillar 2) | feature.md | c2c8201 | 2026-07-02 | GATE-6 ✅ |
 
 ---
 
@@ -145,15 +166,16 @@ None.
 
 ## Verification Status (Phase 1 + Phase 2)
 
-| Check | Task-001 | Task-002-003 | Task-004 | Task-005 | Task-006 | Task-007 |
-|-------|----------|----------|----------|----------|---------|---------|
-| Build | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
-| Types | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
-| Lint | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
-| Unit Tests | 50/50 | 31+48xp | 53/55 | 68/72 | 31+46xp | 85+46xp* |
-| Real-Repo Scan | N/A | N/A | N/A | N/A | PASS ✓ | PASS ✓ |
-| Integration | PASS ✓ | PASS ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ |
-| Code Review | N/A | N/A | APPROVED | APPROVED | APPROVED ✓ | APPROVED ✓ |
+| Check | Task-001 | Task-002-003 | Task-004 | Task-005 | Task-006 | Task-007 | Task-008 | Task-009 |
+|-------|----------|----------|----------|----------|---------|---------|----------|----------|
+| Build | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
+| Types | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
+| Lint | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
+| Unit Tests | 50/50 | 31+48xp | 53/55 | 68/72 | 31+46xp | 85+46xp | 35/35 | 42/42 |
+| Real-Repo Scan | N/A | N/A | N/A | N/A | PASS ✓ | PASS ✓ | N/A | N/A |
+| Integration | PASS ✓ | PASS ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ |
+| Code Review | N/A | N/A | APPROVED | APPROVED | APPROVED ✓ | APPROVED ✓ | APPROVED ✓ | APPROVED ✅ |
+| Coverage | N/A | 89% | 87% | 92% | N/A | N/A | 98% | 97% |
 
 *Task-007: 85 PASSED, 1 SKIPPED, 12 XFAILED, 46 XPASSED (total 144 tests in repo-intelligence suite).
 
