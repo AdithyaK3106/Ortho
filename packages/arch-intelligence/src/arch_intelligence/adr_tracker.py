@@ -9,6 +9,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .types import ArchitectureModel
+
 _STATUS_RE = re.compile(r"^\**Status:?\**\s*[:]?\s*([A-Z][A-Z \-]*)", re.MULTILINE)
 _TITLE_RE = re.compile(r"^#\s*(ADR-\d+)\s*:?\s*(.*)$", re.MULTILINE)
 
@@ -40,6 +42,23 @@ class ADRStatus:
     referenced_paths: list[str] = field(default_factory=list)
     missing_paths: list[str] = field(default_factory=list)
     classification: str = "UNKNOWN"
+    evidence: list[str] = field(default_factory=list)
+
+
+# Subsystems with more files than this are flagged if no ADR references any of their files.
+# Heuristic hint, not a hard rule — see plan.md Task 2.
+_SUBSYSTEM_COVERAGE_MIN_FILES = 3
+
+
+@dataclass
+class SubsystemADRCoverage:
+    """Whether a detected subsystem has at least one owning ADR reference (heuristic hint)."""
+
+    subsystem_id: str
+    subsystem_name: str
+    file_count: int
+    has_owning_adr: bool
+    owning_adr_ids: list[str] = field(default_factory=list)
     evidence: list[str] = field(default_factory=list)
 
 
@@ -195,4 +214,62 @@ class ADRTracker:
             )
 
         results.sort(key=lambda r: r.adr_id)
+        return results
+
+    def check_subsystem_coverage(
+        self,
+        adr_statuses: list[ADRStatus],
+        architecture_model: ArchitectureModel,
+    ) -> list[SubsystemADRCoverage]:
+        """
+        For each subsystem with more than _SUBSYSTEM_COVERAGE_MIN_FILES files, flag whether
+        any ADR's referenced_paths overlaps the subsystem's file_ids. Heuristic hint only —
+        does not affect check_adrs()'s OK/STALE/UNLINKED/UNKNOWN classification (plan.md Task 2:
+        "reported as a hint, not a hard failure").
+
+        Args:
+            adr_statuses: output of check_adrs() (or any list of ADRStatus)
+            architecture_model: task-008's ArchitectureModel (layers/subsystems)
+
+        Returns:
+            One SubsystemADRCoverage per subsystem with file_count > _SUBSYSTEM_COVERAGE_MIN_FILES,
+            sorted by subsystem_id. Subsystems at or below the threshold are omitted entirely.
+        """
+        results: list[SubsystemADRCoverage] = []
+
+        for subsystem in architecture_model.subsystems:
+            file_count = len(subsystem.file_ids)
+            if file_count <= _SUBSYSTEM_COVERAGE_MIN_FILES:
+                continue
+
+            subsystem_files = set(subsystem.file_ids)
+            owning_adr_ids = [
+                status.adr_id
+                for status in adr_statuses
+                if subsystem_files & set(status.referenced_paths)
+            ]
+
+            has_owning_adr = bool(owning_adr_ids)
+            if has_owning_adr:
+                evidence = [
+                    f"Referenced by {', '.join(owning_adr_ids)}",
+                ]
+            else:
+                evidence = [
+                    f"Subsystem has {file_count} files (> {_SUBSYSTEM_COVERAGE_MIN_FILES}) "
+                    "but no ADR references any of them",
+                ]
+
+            results.append(
+                SubsystemADRCoverage(
+                    subsystem_id=subsystem.id,
+                    subsystem_name=subsystem.name,
+                    file_count=file_count,
+                    has_owning_adr=has_owning_adr,
+                    owning_adr_ids=owning_adr_ids,
+                    evidence=evidence,
+                )
+            )
+
+        results.sort(key=lambda r: r.subsystem_id)
         return results

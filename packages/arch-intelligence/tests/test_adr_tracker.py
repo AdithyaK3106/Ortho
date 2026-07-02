@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from arch_intelligence.adr_tracker import ADRTracker
+from arch_intelligence.adr_tracker import ADRTracker, ADRStatus
+from arch_intelligence.types import ArchitectureModel, ArchStyle, Subsystem
 
 
 def _write_adr(tmp_path: Path, filename: str, content: str) -> Path:
@@ -164,3 +165,60 @@ class TestADRTrackerEdgeCases:
         results = tracker.check_adrs(adr_dir, tmp_path)
         assert len(results) == 1
         assert results[0].status == "UNKNOWN"
+
+
+def _model_with_subsystems(*subsystems: Subsystem) -> ArchitectureModel:
+    return ArchitectureModel(
+        repo_id="repo",
+        style=ArchStyle.LAYERED,
+        style_confidence=0.9,
+        subsystems=list(subsystems),
+    )
+
+
+class TestSubsystemCoverage:
+    def test_small_subsystem_omitted(self, tracker):
+        small = Subsystem(id="s1", name="small", file_ids=["a.py", "b.py", "c.py"])
+        model = _model_with_subsystems(small)
+        results = tracker.check_subsystem_coverage([], model)
+        assert results == []
+
+    def test_large_subsystem_with_owning_adr(self, tracker):
+        large = Subsystem(id="s1", name="large", file_ids=["a.py", "b.py", "c.py", "d.py"])
+        model = _model_with_subsystems(large)
+        adr_statuses = [
+            ADRStatus(adr_id="ADR-001", title="", status="ACCEPTED", referenced_paths=["a.py"])
+        ]
+        results = tracker.check_subsystem_coverage(adr_statuses, model)
+        assert len(results) == 1
+        assert results[0].has_owning_adr is True
+        assert results[0].owning_adr_ids == ["ADR-001"]
+
+    def test_large_subsystem_without_owning_adr(self, tracker):
+        large = Subsystem(id="s1", name="large", file_ids=["a.py", "b.py", "c.py", "d.py"])
+        model = _model_with_subsystems(large)
+        adr_statuses = [
+            ADRStatus(adr_id="ADR-001", title="", status="ACCEPTED", referenced_paths=["unrelated.py"])
+        ]
+        results = tracker.check_subsystem_coverage(adr_statuses, model)
+        assert len(results) == 1
+        assert results[0].has_owning_adr is False
+        assert results[0].owning_adr_ids == []
+
+    def test_empty_model_returns_empty(self, tracker):
+        model = _model_with_subsystems()
+        results = tracker.check_subsystem_coverage([], model)
+        assert results == []
+
+    def test_threshold_boundary_exactly_three_omitted(self, tracker):
+        boundary = Subsystem(id="s1", name="boundary", file_ids=["a.py", "b.py", "c.py"])
+        model = _model_with_subsystems(boundary)
+        results = tracker.check_subsystem_coverage([], model)
+        assert results == []
+
+    def test_multiple_subsystems_sorted_by_id(self, tracker):
+        s_b = Subsystem(id="s-b", name="b", file_ids=["1.py", "2.py", "3.py", "4.py"])
+        s_a = Subsystem(id="s-a", name="a", file_ids=["5.py", "6.py", "7.py", "8.py"])
+        model = _model_with_subsystems(s_b, s_a)
+        results = tracker.check_subsystem_coverage([], model)
+        assert [r.subsystem_id for r in results] == ["s-a", "s-b"]

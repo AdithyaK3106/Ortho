@@ -5,6 +5,7 @@ from .layer_detector import LayerDetector
 from .subsystem_detector import SubsystemDetector
 from .model_store import ArchitectureModelStore
 from .types import ArchStyle, ArchitectureModel, Layer, Subsystem
+from .adr_tracker import ADRTracker, ADRStatus, SubsystemADRCoverage
 
 __all__ = [
     "ArchitectureDetector",
@@ -16,4 +17,7 @@ __all__ = [
     "ArchitectureModel",
     "Layer",
     "Subsystem",
+    "ADRTracker",
+    "ADRStatus",
+    "SubsystemADRCoverage",
 ]
