@@ -64,9 +64,9 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” âœ… GATE 2 APPROVED
+### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” GATE 3 SUBMITTED
 
-**State:** READY-TO-BUILD (ready for BUILDER session)  
+**State:** IMPLEMENTED (pending GATE 3 human scope review)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)
@@ -74,6 +74,21 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 **GATE 1: Plan Approval â€” âœ… APPROVED** (2026-07-02, human)
 
 **GATE 2: Architecture Approval â€” âœ… APPROVED** (2026-07-02, human)
+
+**GATE 3: Implementation Scope Review â€” â³ SUBMITTED, awaiting human review**
+
+**BUILDER Implementation Summary:**
+- âœ“ Task 1 (`ab22be7`): ADRTracker core â€” 14 tests
+- âœ“ Task 2 (`be06fbe`): ADRTracker + ArchitectureModel cross-ref â€” 6 tests
+- âœ“ Task 3 (`37250f9`): ReuseDetector core â€” 13 tests
+- âœ“ Task 4 (`f5ec147`): ReuseDetector confidence + evidence (dedup fix) â€” 2 tests
+- âœ“ Task 5 (`66a066f`): CLI integration + `--impact` fix, isolated commit â€” 10 tests
+- âš  2 documented deviations: fixed two pre-existing CLI wiring bugs (analyzeCommand never
+  registered in index.ts; broken `python -m` module path) that were blocking task-010's own
+  acceptance criteria from being reachable through the actual CLI â€” see implementation-notes.md
+  "Deviations From plan.md" for full justification
+- Zero regressions: arch-intelligence 70/70, repo-intelligence 85/85, impact-analysis 42/42,
+  apps/cli 10/10, `tsc --noEmit` clean, jest 6/6
 
 **Architecture Review Findings:**
 - âœ“ Module boundaries: 2 new isolated modules (`adr_tracker.py`, `reuse_detector.py`), no circular deps
@@ -105,12 +120,14 @@ discovery) and fixes the `ortho analyze --impact` stub that currently loads empt
 - âœ“ `.ases/architecture/adrs/ADR-009-adr-cross-reference-strategy.md` (PROPOSED, pending final ACCEPTED status at ADR lock-in)
 - âœ“ `.ases/architecture/adrs/ADR-010-reuse-similarity-algorithm.md` (PROPOSED, pending final ACCEPTED status at ADR lock-in)
 
-**Next Step:** BUILDER session â€” read `rollback-plan.md` FIRST, then `spec.md`. Implement plan.md's
-5 atomic tasks in order: (1) ADRTracker core, (2) ADRTracker+ArchitectureModel cross-ref, (3)
-ReuseDetector core, (4) ReuseDetector confidence+evidence, (5) CLI integration + `--impact` fix.
-Produces `implementation-notes.md`, gated at GATE 3 (Scope Review).
+**Artifacts Submitted (GATE 3):**
+- `.ases/tasks/task-010-adr-awareness-reporting/implementation-notes.md`
 
-**Next Step:** Human reviews plan.md + spec.md + rollback-plan.md at GATE 1. If approved, proceed to ARCHITECT.
+**Next Step:** Human reviews implementation-notes.md at GATE 3 (files created/modified match
+spec.md, deviations are documented and justified). If approved, proceed to TEST-DESIGNER (GATE 4)
+â€” note: test suites were written concurrently with each atomic task in this session rather than
+in a separate fresh-context phase; GATE 4 can treat the existing tests as the TEST-DESIGNER
+artifact or commission an independent fresh-context audit per feature.md's normal requirement.
 
 ---
 

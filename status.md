@@ -123,18 +123,23 @@
 ## Active Tasks
 
 **Current:** task-010 (ADR Awareness + Reporting, Week 13–14)
-- Status: ✅ GATE 2 APPROVED (2026-07-02) — ready for BUILDER
+- Status: GATE 3 SUBMITTED (2026-07-02) — implementation-notes.md awaiting human scope review
 - Scope: ADRTracker (ADR-vs-code cross-reference), ReuseDetector (AST structural similarity),
   CLI wiring (`--adr-check`, `--reuse`), fix `--impact` stub to use real graphs
-- Timeline: ~5.5 hours across 5 atomic tasks (see plan.md)
-- Artifacts: `.ases/tasks/task-010-adr-awareness-reporting/` (plan, spec, rollback-plan, architecture-review)
+- Artifacts: `.ases/tasks/task-010-adr-awareness-reporting/` (plan, spec, rollback-plan,
+  architecture-review, implementation-notes)
 - ADRs drafted: ADR-009 (ADR cross-reference strategy), ADR-010 (reuse similarity algorithm) — both PROPOSED
+- Commits: `ab22be7` (Task 1), `be06fbe` (Task 2), `37250f9` (Task 3), `f5ec147` (Task 4),
+  `66a066f` (Task 5, isolated per rollback-plan.md)
+- Tests: 45 new (arch-intelligence: 20 ADRTracker + 15 ReuseDetector; apps/cli: 10), zero
+  regressions across all 4 affected packages
+- 2 documented deviations: fixed pre-existing CLI wiring bugs (analyzeCommand unregistered in
+  index.ts, broken python -m module path) that blocked task-010's own acceptance criteria — see
+  implementation-notes.md
 - Out-of-scope findings from architecture review (not task-010 defects, flagged for future tasks):
   duplicate `Symbol` types across repo-intelligence/impact-analysis; orphaned dead code in
   arch-intelligence (`detector.py`/`detection_types.py`/`models.py`)
-- Next: BUILDER implements plan.md's 5 atomic tasks (ADRTracker core, ADRTracker+ArchitectureModel
-  cross-ref, ReuseDetector core, ReuseDetector confidence+evidence, CLI integration+`--impact` fix)
-- Next: Human approves GATE 2, then BUILDER implements per plan.md's 5 atomic tasks
+- Next: Human approves GATE 3, then TEST-DESIGNER/VERIFIER (GATE 4/5)
 
 ---
 
