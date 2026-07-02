@@ -65,12 +65,24 @@ def _bucket_key(symbol: Symbol, line_count: int) -> tuple[str, int]:
 
 
 def _similarity(seq_a: list[str], seq_b: list[str]) -> float:
-    """1 - normalized edit distance, via stdlib difflib (no new dependency by default)."""
+    """1 - normalized edit distance, via stdlib difflib (no new dependency by default).
+
+    SequenceMatcher.ratio() is not guaranteed symmetric: its greedy longest-matching-block
+    search can pick a different (equally valid) alignment depending on argument order, giving
+    similarity(a, b) != similarity(b, a) on the same pair (observed directly, not merely
+    theoretical -- see .ases/tasks/task-010-adr-awareness-reporting/implementation-notes.md).
+    ADR-010 and spec.md's acceptance criteria require strict symmetry, so both directions are
+    computed and averaged -- this neutralizes the order-dependent artifact without hiding a real
+    asymmetric signal (the two directions differ by at most a few percent in practice; averaging
+    doesn't change which pairs cluster, only removes sensitivity to file-processing order).
+    """
     if not seq_a and not seq_b:
         return 1.0
     if not seq_a or not seq_b:
         return 0.0
-    return SequenceMatcher(a=seq_a, b=seq_b, autojunk=False).ratio()
+    forward = SequenceMatcher(a=seq_a, b=seq_b, autojunk=False).ratio()
+    backward = SequenceMatcher(a=seq_b, b=seq_a, autojunk=False).ratio()
+    return (forward + backward) / 2
 
 
 def _evidence_for_pair(symbol_a: Symbol, node_a: Any, symbol_b: Symbol, node_b: Any, similarity: float) -> str:

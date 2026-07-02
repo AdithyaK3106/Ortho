@@ -166,6 +166,44 @@ class TestADRTrackerEdgeCases:
         assert len(results) == 1
         assert results[0].status == "UNKNOWN"
 
+    def test_unreadable_file_does_not_crash(self, tmp_path, tracker, monkeypatch):
+        """OSError during read (permissions, race with deletion) degrades gracefully."""
+        adr_dir = _write_adr(tmp_path, "ADR-001-example.md", "# ADR-001: Example\n\n**Status:** ACCEPTED  \n")
+
+        original_read_text = Path.read_text
+
+        def _flaky_read_text(self, *args, **kwargs):
+            if self.name == "ADR-001-example.md":
+                raise OSError("simulated read failure")
+            return original_read_text(self, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "read_text", _flaky_read_text)
+
+        results = tracker.check_adrs(adr_dir, tmp_path)
+        assert len(results) == 1
+        assert results[0].status == "UNKNOWN"
+        assert results[0].classification == "UNKNOWN"
+        assert "Could not read" in results[0].evidence[0]
+
+    def test_null_byte_in_candidate_dropped_silently(self, tmp_path, tracker):
+        adr_dir = _write_adr(
+            tmp_path,
+            "ADR-001-example.md",
+            "# ADR-001: Example\n\n**Status:** ACCEPTED  \n\nSee `a\x00b.py`.\n",
+        )
+        results = tracker.check_adrs(adr_dir, tmp_path)
+        assert results[0].referenced_paths == []
+        assert results[0].classification == "UNLINKED"
+
+    def test_candidate_with_only_whitespace_rejected(self, tmp_path, tracker):
+        adr_dir = _write_adr(
+            tmp_path,
+            "ADR-001-example.md",
+            "# ADR-001: Example\n\n**Status:** ACCEPTED  \n\nFile: not a path just words\n",
+        )
+        results = tracker.check_adrs(adr_dir, tmp_path)
+        assert results[0].referenced_paths == []
+
 
 def _model_with_subsystems(*subsystems: Subsystem) -> ArchitectureModel:
     return ArchitectureModel(

@@ -1,6 +1,7 @@
 """CLI-layer tests for `ortho analyze` — adr-check, reuse, and the --impact fix."""
 
 import json
+import subprocess
 import sqlite3
 import sys
 from pathlib import Path
@@ -9,6 +10,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "commands"))
 from analyze import AnalyzeCommand  # noqa: E402
+
+_ANALYZE_SCRIPT = Path(__file__).parent.parent / "src" / "commands" / "analyze.py"
 
 
 def _write_adr(adr_dir: Path, filename: str, content: str) -> None:
@@ -144,3 +147,83 @@ class TestImpactCommand:
         cmd = AnalyzeCommand(tmp_path)
         result = cmd.run_impact("auth.py")
         json.dumps(result)  # must not raise
+
+
+class TestCLIEntryPoint:
+    """
+    Exercises analyze.py's actual argparse entry point (_main) as a real subprocess -- the
+    same code path apps/cli/src/commands/analyze.ts spawns -- rather than calling
+    AnalyzeCommand methods directly in-process. Closes the gap between "the command object
+    works" and "the CLI as users invoke it works" (spec.md Component 3's test names describe
+    running `ortho analyze --adr-check` etc., not calling Python methods).
+    """
+
+    def _run(self, *args: str) -> dict:
+        result = subprocess.run(
+            [sys.executable, str(_ANALYZE_SCRIPT), *args],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert result.returncode == 0, result.stderr
+        return json.loads(result.stdout)
+
+    def test_cli_adr_check_command(self, tmp_path):
+        adr_dir = tmp_path / ".ases" / "architecture" / "adrs"
+        _write_adr(adr_dir, "ADR-001-example.md", "# ADR-001: Example\n\n**Status:** ACCEPTED  \n\nSee `x.py`.\n")
+        _write_py(tmp_path, "x.py", "pass")
+
+        result = self._run("--repo-root", str(tmp_path), "--adr-check")
+
+        assert "adrs" in result
+        assert len(result["adrs"]) == 1
+
+    def test_cli_reuse_command(self, tmp_path):
+        src = (
+            "def validate_a(x):\n    if x is None:\n        return False\n    return len(x) > 0\n\n"
+            "def validate_b(y):\n    if y is None:\n        return False\n    return len(y) > 0\n"
+        )
+        _write_py(tmp_path, "mod.py", src)
+
+        result = self._run("--repo-root", str(tmp_path), "--reuse")
+
+        assert "clusters" in result
+        assert len(result["clusters"]) == 1
+
+    def test_cli_reuse_threshold_option(self, tmp_path):
+        src = (
+            "def a(x):\n    if x > 0:\n        return 1\n    return 0\n\n"
+            "def b(y):\n    if y > 0:\n        return 2\n    return 3\n"
+        )
+        _write_py(tmp_path, "mod.py", src)
+
+        loose = self._run("--repo-root", str(tmp_path), "--reuse", "--threshold", "0.5")
+        strict = self._run("--repo-root", str(tmp_path), "--reuse", "--threshold", "1.0")
+
+        assert len(loose["clusters"]) >= len(strict["clusters"])
+
+    def test_cli_impact_fixed_not_stub(self, tmp_path):
+        _build_indexed_repo(tmp_path, target_dependent=True)
+
+        result = self._run("--repo-root", str(tmp_path), "--impact", "auth.py")
+
+        assert result["direct_dependents"] == ["f2"]
+        assert result["risk_score"] > 0.0
+
+    def test_cli_impact_missing_file(self, tmp_path):
+        _build_indexed_repo(tmp_path, target_dependent=False)
+
+        result = self._run("--repo-root", str(tmp_path), "--impact", "does_not_exist.py")
+
+        assert result["direct_dependents"] == []
+
+    def test_cli_json_format_all_new_commands(self, tmp_path):
+        adr_dir = tmp_path / ".ases" / "architecture" / "adrs"
+        _write_adr(adr_dir, "ADR-001-example.md", "# ADR-001: Example\n\n**Status:** ACCEPTED  \n")
+        _write_py(tmp_path, "mod.py", "def f(x):\n    return x\n")
+
+        adr_result = self._run("--repo-root", str(tmp_path), "--adr-check")
+        reuse_result = self._run("--repo-root", str(tmp_path), "--reuse")
+
+        json.dumps(adr_result)
+        json.dumps(reuse_result)

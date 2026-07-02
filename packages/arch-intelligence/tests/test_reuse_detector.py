@@ -150,37 +150,58 @@ class TestReuseDetectorIntegration:
         assert isinstance(clusters, list)
 
 
+_BLOCK_KINDS = ("if", "for", "nested_if")
+
+
+def _random_block(kind: str, count: int) -> str:
+    """Generate a body of `count` statements of the given control-flow shape."""
+    if kind == "if":
+        return "\n".join(f"    if x > {i}:\n        return {i}" for i in range(count))
+    if kind == "for":
+        return "\n".join(f"    for i{i} in range({i}):\n        pass" for i in range(count))
+    # nested_if: chains of nesting instead of sibling branches
+    body = "    return -1"
+    for i in range(count):
+        body = f"    if x > {i}:\n" + "\n".join("    " + line for line in body.splitlines())
+    return body
+
+
+_shape_strategy = st.tuples(st.sampled_from(_BLOCK_KINDS), st.integers(min_value=0, max_value=6))
+
+
 class TestReuseDetectorProperties:
-    @given(st.integers(min_value=0, max_value=3))
-    @settings(max_examples=10)
-    def test_similarity_bounds(self, extra_branches):
-        branches = "\n".join(f"    if x > {i}:\n        return {i}" for i in range(extra_branches))
-        src_a = f"def f(x):\n{branches}\n    return -1\n"
-        src_b = f"def g(y):\n{branches}\n    return -1\n"
+    @given(_shape_strategy)
+    @settings(max_examples=15)
+    def test_similarity_bounds(self, shape):
+        kind, count = shape
+        body = _random_block(kind, count)
+        src_a = f"def f(x):\n{body}\n    return -1\n"
+        src_b = f"def g(y):\n{body}\n    return -1\n"
         symbols_by_file, sources_by_file = _symbols_and_sources({"a.py": src_a, "b.py": src_b})
         detector = ReuseDetector()
         clusters = detector.find_similar(symbols_by_file, sources_by_file, threshold=0.0)
         for c in clusters:
             assert 0.0 <= c.similarity <= 1.0
 
-    @given(st.integers(min_value=0, max_value=3))
-    @settings(max_examples=10)
-    def test_deterministic(self, extra_branches):
-        branches = "\n".join(f"    if x > {i}:\n        return {i}" for i in range(extra_branches))
-        src = f"def f(x):\n{branches}\n    return -1\n"
+    @given(_shape_strategy)
+    @settings(max_examples=15)
+    def test_deterministic(self, shape):
+        kind, count = shape
+        body = _random_block(kind, count)
+        src = f"def f(x):\n{body}\n    return -1\n"
         symbols_by_file, sources_by_file = _symbols_and_sources({"a.py": src, "b.py": src.replace("f(x)", "g(x)")})
         detector = ReuseDetector()
         run1 = detector.find_similar(symbols_by_file, sources_by_file)
         run2 = detector.find_similar(symbols_by_file, sources_by_file)
         assert run1 == run2
 
-    @given(st.integers(min_value=0, max_value=3), st.integers(min_value=0, max_value=3))
-    @settings(max_examples=10)
-    def test_symmetry(self, branches_a, branches_b):
-        b_a = "\n".join(f"    if x > {i}:\n        return {i}" for i in range(branches_a))
-        b_b = "\n".join(f"    if x > {i}:\n        return {i}" for i in range(branches_b))
-        src_a = f"def f(x):\n{b_a}\n    return -1\n"
-        src_b = f"def g(x):\n{b_b}\n    return -1\n"
+    @given(_shape_strategy, _shape_strategy)
+    @settings(max_examples=15)
+    def test_symmetry(self, shape_a, shape_b):
+        kind_a, count_a = shape_a
+        kind_b, count_b = shape_b
+        src_a = f"def f(x):\n{_random_block(kind_a, count_a)}\n    return -1\n"
+        src_b = f"def g(x):\n{_random_block(kind_b, count_b)}\n    return -1\n"
 
         detector = ReuseDetector()
         symbols_fwd, sources_fwd = _symbols_and_sources({"a.py": src_a, "b.py": src_b})
@@ -192,3 +213,30 @@ class TestReuseDetectorProperties:
         fwd_sim = fwd[0].similarity if fwd else None
         rev_sim = rev[0].similarity if rev else None
         assert fwd_sim == rev_sim
+
+    @given(st.integers(min_value=2, max_value=8))
+    @settings(max_examples=10)
+    def test_varying_symbol_counts_no_crash(self, n):
+        """(+1 of the '7 more' spec.md calls for: varying symbol counts.)"""
+        sources = {
+            f"f{i}.py": f"def func_{i}(x):\n    if x > {i % 3}:\n        return {i}\n    return 0\n"
+            for i in range(n)
+        }
+        symbols_by_file, sources_by_file = _symbols_and_sources(sources)
+        detector = ReuseDetector()
+        clusters = detector.find_similar(symbols_by_file, sources_by_file, threshold=0.0)
+        assert isinstance(clusters, list)
+        for c in clusters:
+            assert 0.0 <= c.similarity <= 1.0
+
+    @given(st.floats(min_value=0.0, max_value=1.0))
+    @settings(max_examples=10)
+    def test_threshold_sweep_monotonic(self, threshold):
+        """(+1 of the '7 more': threshold sweeps — higher threshold never yields more clusters.)"""
+        src_a = "def f(x):\n    if x > 0:\n        return 1\n    return 0\n"
+        src_b = "def g(y):\n    if y > 0:\n        return 1\n    return 0\n"
+        symbols_by_file, sources_by_file = _symbols_and_sources({"a.py": src_a, "b.py": src_b})
+        detector = ReuseDetector()
+        loose = detector.find_similar(symbols_by_file, sources_by_file, threshold=0.0)
+        strict = detector.find_similar(symbols_by_file, sources_by_file, threshold=threshold)
+        assert len(strict) <= len(loose)

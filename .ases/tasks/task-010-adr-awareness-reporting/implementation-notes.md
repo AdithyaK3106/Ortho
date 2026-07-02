@@ -124,6 +124,59 @@ consistent with expectations.
 
 ---
 
+## Post-GATE-3 Fix: Similarity Symmetry Bug (Found During Fresh-Context Test Audit)
+
+**Found by:** a fresh-context TEST-DESIGNER audit conducted after GATE 3 approval, per the
+user's explicit correction that feature.md requires TEST-DESIGNER review to be genuinely
+independent of BUILDER context, not merely relabeled BUILDER continuation.
+
+**Bug:** `difflib.SequenceMatcher.ratio()` is not guaranteed symmetric — its greedy
+longest-matching-block search can select a different (equally valid) alignment depending on
+argument order, producing `similarity(a, b) != similarity(b, a)` on the same pair of sequences.
+Confirmed empirically: 264/500 random sequence-pair trials gave different ratios under swap; the
+audit's widened hypothesis property test (`test_symmetry`, now sampling `('if'|'for'|'nested_if',
+0..6)` control-flow shapes instead of a narrow `0..3` if-branch-only range) found a concrete
+falsifying example (`shape_a=('if', 2)`, `shape_b=('for', 2)` → 0.538 vs 0.564) within the wider
+search space. The original narrow property-test generator (documented in the original Task 3/4
+notes above) never exercised enough structural variety to surface this.
+
+**Root cause:** This directly contradicts ADR-010's stated design goal
+("`similarity(a, b) == similarity(b, a)`") and the GATE 1 acceptance criterion requiring
+`find_similar()` to be symmetric — a real defect, not a test artifact.
+
+**Fix:** `_similarity()` now computes both directions and averages them
+(`packages/arch-intelligence/src/arch_intelligence/reuse_detector.py`). Averaging is commutative
+by construction, so symmetry now holds for all inputs, not just tested ones — verified via
+500/500 random trials post-fix (0 mismatches). This does not hide a real asymmetric signal: the
+two directions differ by only a few percent in the observed case, and the fix doesn't change
+which pairs cluster in the real-repo scan (still 10 clusters, same top matches by similarity,
+before and after).
+
+**Test suite changes from this audit:**
+- Widened the 3 hypothesis property tests' generator from a narrow `st.integers(0, 3)` if-branch
+  count to a `(kind, count)` strategy spanning `if`/`for`/nested-`if` shapes over `0..6`, which is
+  what surfaced the bug
+- Added `test_varying_symbol_counts_no_crash` and `test_threshold_sweep_monotonic` (spec.md's
+  "+ 7 more" property tests were under-enumerated; these fill two of the named categories:
+  varying symbol counts, threshold sweeps)
+- Added a subprocess-level `TestCLIEntryPoint` class in `apps/cli/tests/test_analyze.py` that
+  invokes `analyze.py`'s actual argparse `_main()` as a real subprocess, matching spec.md's test
+  names ("runs `ortho analyze --adr-check`") literally — the original tests called
+  `AnalyzeCommand` methods directly in-process, which validated the command logic but not the
+  actual CLI entry point `analyze.ts` spawns
+- Added `test_unreadable_file_does_not_crash` (OSError-during-read branch, previously untested),
+  `test_null_byte_in_candidate_dropped_silently`, `test_candidate_with_only_whitespace_rejected`
+  to `test_adr_tracker.py`, closing coverage gaps found by re-running `--cov-report=term-missing`
+
+**Coverage after audit:** `adr_tracker.py` 95% (was 92%), `reuse_detector.py` 95% (was 95%,
+line count changed due to the fix). Both above spec.md's ≥85% target.
+
+**Regression check after fix:** arch-intelligence 75/75 (was 70, +5 net from audit additions),
+apps/cli 16/16 (was 10, +6 from the new `TestCLIEntryPoint` subprocess tests), repo-intelligence
+85/85 (unchanged), impact-analysis 42/42 (unchanged).
+
+---
+
 ## Task 5: CLI Integration + `--impact` Fix
 
 **Files:** `apps/cli/src/commands/analyze.py`, `apps/cli/src/commands/analyze.ts`,
