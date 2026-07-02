@@ -64,16 +64,16 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” GATE 2 SUBMITTED
+### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” âœ… GATE 2 APPROVED
 
-**State:** ARCH-REVIEW â†’ READY-TO-BUILD (pending GATE 2 human approval)  
+**State:** READY-TO-BUILD (ready for BUILDER session)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)
 
 **GATE 1: Plan Approval â€” âœ… APPROVED** (2026-07-02, human)
 
-**GATE 2: Architecture Approval â€” â³ SUBMITTED, awaiting human review**
+**GATE 2: Architecture Approval â€” âœ… APPROVED** (2026-07-02, human)
 
 **Architecture Review Findings:**
 - âœ“ Module boundaries: 2 new isolated modules (`adr_tracker.py`, `reuse_detector.py`), no circular deps
@@ -100,13 +100,15 @@ discovery) and fixes the `ortho analyze --impact` stub that currently loads empt
 - âœ“ `.ases/tasks/task-010-adr-awareness-reporting/spec.md` (fully-specified ADR extraction contract, threshold config policy, benchmark environment, validation baseline)
 - âœ“ `.ases/tasks/task-010-adr-awareness-reporting/rollback-plan.md`
 
-**Artifacts Submitted (GATE 2):**
-- `.ases/tasks/task-010-adr-awareness-reporting/architecture-review.md` (verdict: APPROVED)
-- `.ases/architecture/adrs/ADR-009-adr-cross-reference-strategy.md` (PROPOSED)
-- `.ases/architecture/adrs/ADR-010-reuse-similarity-algorithm.md` (PROPOSED)
+**Artifacts Approved (GATE 2):**
+- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/architecture-review.md` (verdict: APPROVED)
+- âœ“ `.ases/architecture/adrs/ADR-009-adr-cross-reference-strategy.md` (PROPOSED, pending final ACCEPTED status at ADR lock-in)
+- âœ“ `.ases/architecture/adrs/ADR-010-reuse-similarity-algorithm.md` (PROPOSED, pending final ACCEPTED status at ADR lock-in)
 
-**Next Step:** Human reviews architecture-review.md + ADR-009 + ADR-010 at GATE 2. If approved,
-proceed to BUILDER.
+**Next Step:** BUILDER session â€” read `rollback-plan.md` FIRST, then `spec.md`. Implement plan.md's
+5 atomic tasks in order: (1) ADRTracker core, (2) ADRTracker+ArchitectureModel cross-ref, (3)
+ReuseDetector core, (4) ReuseDetector confidence+evidence, (5) CLI integration + `--impact` fix.
+Produces `implementation-notes.md`, gated at GATE 3 (Scope Review).
 
 **Next Step:** Human reviews plan.md + spec.md + rollback-plan.md at GATE 1. If approved, proceed to ARCHITECT.
 
