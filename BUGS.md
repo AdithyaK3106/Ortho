@@ -199,15 +199,75 @@
 
 ---
 
+---
+
+## Task-009: Impact Analysis + Debt Scoring Test Failures (6 failures / 42 tests)
+
+**Date:** 2026-07-02  
+**Phase:** GATE 5 VERIFIER Execution  
+**Status:** 36/42 tests passing (85.7%), 97% code coverage, zero regressions  
+
+### BUG-014: GitFileMetadata Constructor Missing file_path [MEDIUM]
+- **File:** `packages/impact-analysis/tests/test_debt_scorer.py` (lines 72, 140, 177)
+- **Error:** `TypeError: __init__() missing required positional argument: 'file_path'`
+- **Impact:** 3 test failures in DebtScorer
+- **Tests:** 
+  - `test_evidence_generated()`
+  - `test_coupling_score_bounds()` 
+  - (1 more in hypothesis strategy)
+- **Cause:** Tests instantiate `GitFileMetadata(commits_30d=25)` but implementation requires `file_path` as first parameter
+- **Fix:** Add `file_path="test.py"` to all GitFileMetadata instantiations
+- **ETA:** 15 minutes
+
+### BUG-015: Hypothesis Strategy Syntax Error [MEDIUM]
+- **File:** `packages/impact-analysis/tests/test_debt_scorer.py` (line 198)
+- **Error:** `InvalidArgument: Cannot infer a strategy for <class 'list'>`
+- **Impact:** 1 test failure in DebtScorer property-based tests
+- **Test:** `test_total_score_weighted_average()`
+- **Cause:** Invalid list comprehension syntax `[st.floats(...) for _ in range(5)]` instead of proper hypothesis strategy
+- **Fix:** Use `st.lists(st.floats(min_value=0.0, max_value=1.0), min_size=5, max_size=5)` instead
+- **ETA:** 10 minutes
+
+### BUG-016: ImpactAnalyzer blast_radius Calculation Mismatch [MEDIUM]
+- **File:** `packages/impact-analysis/src/impact_analysis/impact_analyzer.py` (line 62-68)
+- **Error:** `AssertionError: assert 1 == 2` (blast_radius calculation differs from spec)
+- **Impact:** 2 test failures in ImpactAnalyzer
+- **Tests:**
+  - `test_analyze_simple_import_chain()` — expects blast_radius=2, got 1
+  - `test_analyze_depth_limit()` — off-by-one in transitive calculation
+  - `test_risk_score_high_fan_in()` — expects blast_radius≥4, got 0
+- **Cause:** Implementation counts only direct dependents; tests expect transitive dependents included in blast_radius
+- **Spec Definition:** Per spec.md section "ImpactReport", blast_radius should be `len(transitive_dependents)` (already correct), but tests misaligned
+- **Fix:** Clarify spec: does blast_radius include direct OR transitive? Tests assume both; implementation assumes transitive-only
+- **ETA:** 30 minutes (requires spec review)
+
+---
+
+## Test Execution Summary (GATE 5)
+
+| Phase | Result | Count | Status |
+|-------|--------|-------|--------|
+| A: Import Validation | ✅ PASS | 1/1 | Package imports successfully |
+| B: Pilot Tests | ⚠️ PARTIAL | 6/7 | 1 failure (blast_radius) |
+| C: Full Suite | ⚠️ PARTIAL | 36/42 | 6 failures (see above) |
+| D: Regression | ✅ PASS | 120/120 | No regressions in other packages |
+
+**Code Coverage:** 97% (excellent)  
+**Other Packages:** 0 regressions (clean integration)
+
+---
+
 ## Evidence Trail
 
-- Real test execution logs: `.ases/evidence/task-retest/`
-- Test results: 
+- Real test execution logs: `.ases/evidence/task-009/`
+  - verification-report.md (full findings)
+  - phase-a-import-check.log
+  - phase-b-pilot-test-final.log
+  - phase-c-full-test-suite.log
+  - phase-d-regression-packages-only.log
+- Test results summary:
   - Task-004: 44 pass, 10 fail, 1 error (80%)
   - Task-005: 49 pass, 4 fail (92.5%)
   - Task-002-003: 4 pass, 9 fail (31%)
-- Detailed reports:
-  - TASK-1-3-VERIFICATION-REPORT.md
-  - REAL-TEST-RESULTS.md
-  - TASK-2-3-TEST-EXECUTION-REPORT.md
+  - Task-009: 36 pass, 6 fail (85.7%) ← GATE 5 EXECUTION
 
