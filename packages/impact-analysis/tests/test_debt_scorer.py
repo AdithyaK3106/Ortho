@@ -75,7 +75,7 @@ class TestDebtScorerBasic:
             call_graph=[],
             import_graph=import_graph,
             symbols=[Symbol(id="1", name="core", file_id="B")],
-            git_metadata={},
+            git_metadata={"B": GitFileMetadata(file_path="B", commits_30d=0)},
         )
 
         # fan_in=4, fan_out=1 → (4+1)/2 = 2.5, clamped to 1.0
@@ -110,7 +110,7 @@ class TestDebtScorerBasic:
             call_graph=[],
             import_graph=[],
             symbols=[Symbol(id="1", name="func", file_id="core.py")],
-            git_metadata={},
+            git_metadata={"core.py": GitFileMetadata(file_path="core.py", commits_30d=0)},
         )
 
         assert score.test_coverage_score == 0.5  # Neutral, no test file detected
@@ -136,7 +136,7 @@ class TestDebtScorerBasic:
                 ImportEdge(importer_file_id="z", imported_file_id="messy.py"),
             ],
             symbols=[Symbol(id="1", name="func", file_id="messy.py")],
-            git_metadata={"messy.py": GitFileMetadata(commits_30d=25)},
+            git_metadata={"messy.py": GitFileMetadata(file_path="messy.py", commits_30d=25)},
         )
 
         # Should have evidence for high churn and coupling
@@ -221,7 +221,7 @@ def test_churn_score_bounds(commits):
         call_graph=[],
         import_graph=[],
         symbols=[Symbol(id="1", name="func", file_id="active.py")],
-        git_metadata={"active.py": GitFileMetadata(commits_30d=commits)},
+        git_metadata={"active.py": GitFileMetadata(file_path="active.py", commits_30d=commits)},
     )
 
     assert 0.0 <= score.churn_score <= 1.0
@@ -229,7 +229,7 @@ def test_churn_score_bounds(commits):
 
 
 @given(
-    scores=[st.floats(min_value=0.0, max_value=1.0) for _ in range(5)]
+    scores=st.lists(st.floats(min_value=0.0, max_value=1.0), min_size=5, max_size=5)
 )
 def test_total_score_weighted_average(scores):
     """Total score should be weighted average of all dimensions."""
@@ -239,7 +239,7 @@ def test_total_score_weighted_average(scores):
         max_score = max(scores)
 
         # Total should be between min and max of components
-        total = sum(
+        total = (
             DebtScorer.DEFAULT_WEIGHTS["coupling"] * scores[0] +
             DebtScorer.DEFAULT_WEIGHTS["churn"] * scores[1] +
             DebtScorer.DEFAULT_WEIGHTS["complexity"] * scores[2] +
