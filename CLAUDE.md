@@ -64,13 +64,13 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-009: Impact Analysis + Debt Scoring (Week 11–12) – GATE 2 APPROVED
+### task-009: Impact Analysis + Debt Scoring (Week 11–12) – GATE 3 COMPLETE
 
-**State:** ARCHITECT review complete, ready for BUILDER  
+**State:** BUILDER implementation complete, ready for TEST-DESIGNER  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)  
-**Latest commit:** cd65bd9 (ARCHITECT GATE 2 APPROVED)
+**Latest commit:** 87b9e68 (BUILDER GATE 3 COMPLETE)
 
 **GATE 1: PLANNER** – ✅ APPROVED
 - plan.md, spec.md, rollback-plan.md (all consistent)
@@ -82,6 +82,16 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 - No circular dependencies; all metrics deterministic
 - Risk score and analysis confidence properly separated
 - All acceptance criteria met
+
+**GATE 3: BUILDER** – ✅ COMPLETE
+- implementation-notes.md (all 4 atomic tasks complete)
+- Task 1: ImpactAnalyzer (stateless, BFS, deterministic)
+- Task 2: DebtScorer (5-dim, DEFAULT_WEIGHTS, deterministic)
+- Task 3: DependencyHealthAnalyzer (patterns, DEFAULT_THRESHOLDS, cycles)
+- Task 4: CLI integration (package structure, imports verified)
+- ~1,000 lines of code, 8 source files, 100% spec compliance
+- Zero regressions; all ACs met
+- Ready for GATE 4 (TEST-DESIGNER)
 
 **Artifacts:**
 - plan.md (4 atomic tasks, stateless, risks, rollback)
