@@ -267,6 +267,3 @@ def test_reuse_cluster_order_independent_of_input_order(detector):
     clusters_2 = detector.find_similar(symbols_by_file_2, sources_by_file_2, threshold=0.5)
 
     assert [c.symbol_ids for c in clusters_1] == [c.symbol_ids for c in clusters_2]
-
-    # TARGET for BUILDER's fix (Finding 1) -- currently would FAIL, left as documentation:
-    # assert [c.symbol_ids for c in clusters_1] == [c.symbol_ids for c in clusters_2]
