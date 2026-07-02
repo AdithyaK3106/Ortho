@@ -1,10 +1,10 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 1.2 — Phase 1 Complete, Phase 2 Ready  
+**Version:** 1.3 — Phase 1 Complete, Phase 2 Complete  
 **Started:** 2026-06-30  
-**Current Phase:** Phase 2 — Repo Intelligence Completion (Weeks 3–8)  
+**Current Phase:** Phase 2 COMPLETE — Ready for Phase 3 planning  
 **Previous Phase:** Phase 1 Foundation (100% complete, 2026-06-30 to 2026-07-01)  
-**Goal:** Complete Python parsing, call graphs, and incremental indexing. Integrate context hub for search and retrieval.
+**Goal:** Phase 2 delivered architectural intelligence, impact analysis, and ADR awareness (Pillar 3). Phase 3 scope TBD.
 
 **Status:** Phase 2 COMPLETE ✅
 - Phase 1: 252/265 tests passing (95%) — COMPLETE
@@ -13,6 +13,7 @@
 - task-008 (Architecture Detection): ✅ MERGED (35/35 tests, 100%, GATE 6 APPROVED)
 - All issues resolved (test bugs fixed, type consolidation completed)
 - Phase 2 exit criteria met (architectural style detection, `--impact` blast radius, circular dependency detection)
+- 2 real bugs found and fixed in task-010 via test execution (similarity symmetry, cluster ordering) — see task-010 entry in Completed Tasks
 
 ---
 
@@ -154,6 +155,11 @@ None.
 
 ## Architecture Decisions (ADRs)
 
+Note: numbering as originally recorded in this table (ADR-001/002) predates and does not match
+the actual filenames in `.ases/architecture/adrs/` (ADR-004/005) — a pre-existing drift, not
+introduced by task-010. See `.ases/architecture/adrs/INDEX.md` for the authoritative, up-to-date
+index of all 7 accepted ADRs.
+
 | ADR | Title | Status | Task | Date |
 |-----|-------|--------|------|------|
 | ADR-001 | Storage Strategy (SQLite + sqlite-vec) | ACCEPTED | task-001 | 2026-06-30 |
@@ -161,23 +167,29 @@ None.
 | ADR-006 | EmbeddingProvider Abstraction | ACCEPTED | task-004 | 2026-06-30 |
 | ADR-007 | FTS5 Triggers Synchronization | ACCEPTED | task-004 | 2026-06-30 |
 | ADR-008 | Artifact Versioning (Phase 1) | ACCEPTED | task-004 | 2026-06-30 |
+| ADR-009 | ADR Cross-Reference Strategy (regex/text extraction, not markdown AST) | ACCEPTED | task-010 | 2026-07-02 |
+| ADR-010 | Reuse Discovery Algorithm (AST-node-type-sequence edit distance, not embeddings) | ACCEPTED | task-010 | 2026-07-02 |
 
 ---
 
 ## Verification Status (Phase 1 + Phase 2)
 
-| Check | Task-001 | Task-002-003 | Task-004 | Task-005 | Task-006 | Task-007 | Task-008 | Task-009 |
-|-------|----------|----------|----------|----------|---------|---------|----------|----------|
-| Build | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
-| Types | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
-| Lint | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
-| Unit Tests | 50/50 | 31+48xp | 53/55 | 68/72 | 31+46xp | 85+46xp | 35/35 | 42/42 |
-| Real-Repo Scan | N/A | N/A | N/A | N/A | PASS ✓ | PASS ✓ | N/A | N/A |
-| Integration | PASS ✓ | PASS ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ |
-| Code Review | N/A | N/A | APPROVED | APPROVED | APPROVED ✓ | APPROVED ✓ | APPROVED ✓ | APPROVED ✅ |
-| Coverage | N/A | 89% | 87% | 92% | N/A | N/A | 98% | 97% |
+| Check | Task-001 | Task-002-003 | Task-004 | Task-005 | Task-006 | Task-007 | Task-008 | Task-009 | Task-010 |
+|-------|----------|----------|----------|----------|---------|---------|----------|----------|----------|
+| Build | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
+| Types | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ (tsc --noEmit) |
+| Lint | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | N/A (ruff unavailable in env) |
+| Unit Tests | 50/50 | 31+48xp | 53/55 | 68/72 | 31+46xp | 85+46xp | 35/35 | 42/42 | 76/76 + 16/16 |
+| Real-Repo Scan | N/A | N/A | N/A | N/A | PASS ✓ | PASS ✓ | N/A | N/A | PASS ✓ (10 clusters found) |
+| Integration | PASS ✓ | PASS ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ |
+| Code Review | N/A | N/A | APPROVED | APPROVED | APPROVED ✓ | APPROVED ✓ | APPROVED ✓ | APPROVED ✅ | APPROVED ✅ (fresh subagent) |
+| Coverage | N/A | 89% | 87% | 92% | N/A | N/A | 98% | 97% | 95%/95% |
 
 *Task-007: 85 PASSED, 1 SKIPPED, 12 XFAILED, 46 XPASSED (total 144 tests in repo-intelligence suite).
+*Task-010: arch-intelligence 76/76 (adr_tracker.py + reuse_detector.py, 95%/95% coverage), apps/cli
+16/16 (incl. subprocess-level CLI entry-point tests). GATE 4 (TEST-DESIGNER) and GATE 6 (REVIEWER)
+both performed by independent fresh-context subagents per feature.md's zero-BUILDER-context
+requirement; GATE 4 found and fixed a real cluster-ordering non-determinism bug.
 
 ---
 
@@ -342,38 +354,44 @@ All Python packages must pass:
 
 ## Phase 2 Progress Summary
 
-**Completed Tasks:** 2/5
+**Completed Tasks:** 5/5 — Phase 2 COMPLETE ✅
 - ✅ task-006: Complete Python Adapter (Week 3–4) — GATE-6 APPROVED
 - ✅ task-007: Incremental Indexing + ortho scan (Week 5–6) — GATE-6 APPROVED
-
-**In Progress / Pending Tasks:** 3/5
 - ✅ task-008: Architecture Detection (Week 9–10) — GATE-6 APPROVED
-- ⏳ task-009: Impact Analysis + Debt Scoring (Week 11–12) — GATE 4 SUBMITTED (TEST-DESIGNER concurrent), awaiting VERIFIER
-- ⏳ task-010: ADR Awareness + Reporting (Week 13–14)
+- ✅ task-009: Impact Analysis + Debt Scoring (Week 11–12) — GATE-6 APPROVED
+- ✅ task-010: ADR Awareness + Reporting (Week 13–14) — GATE-6 APPROVED
 
 **Phase 2 Test Results:**
 - 252 tests from Phase 1: ✅ ALL PASSING (100%)
 - 88 new tests from task-006: ✅ 85 PASSED, 3 XFAIL
 - 144 total in repo-intelligence suite: ✅ 85 PASSED, 46 XPASSED, 12 XFAILED
-- Overall: **327/332 tests passing (98.5%)**
+- task-008: 35/35 passing
+- task-009: 42/42 passing, 97% coverage
+- task-010: 76/76 (arch-intelligence) + 16/16 (apps/cli) passing, 95%/95% coverage
+- Zero regressions across all Phase 2 tasks
+
+**Phase 2 Exit Criteria (per FRD):** ✅ Met
+- `ortho analyze` correctly identifies architectural style with confidence score (task-008)
+- `ortho analyze --impact <file>` lists all affected files (task-009 built it, task-010 wired the
+  CLI to real graphs — previously an empty-list stub regardless of input)
+- Circular dependencies detected and reported (task-009's `DependencyHealthAnalyzer`)
+- ADR awareness + reuse discovery (task-010, closing Pillar 3's remaining FRD feature-table items)
 
 ---
 
-## Next Immediate Actions (Phase 2 Continue)
+## Next Immediate Actions
 
-1. [x] ~~Create task-007 planning (spec, plan, rollback)~~ (DONE)
-2. [x] ~~ARCHITECT review + approval~~ (DONE)
-3. [x] ~~BUILDER implement 5 phases~~ (DONE)
-4. [x] ~~TEST-DESIGNER write 43 tests~~ (DONE)
-5. [x] ~~VERIFIER run full pytest (85 PASSED)~~ (DONE)
-6. [x] ~~REVIEWER approve (GATE-6)~~ (DONE)
-7. [ ] Merge task-007 to main
-8. [ ] Begin task-008 (Architecture Detection, Weeks 9–10)
+1. [x] ~~task-008: Architecture Detection~~ (DONE, GATE-6 APPROVED)
+2. [x] ~~task-009: Impact Analysis + Debt Scoring~~ (DONE, GATE-6 APPROVED)
+3. [x] ~~task-010: ADR Awareness + Reporting~~ (DONE, GATE-6 APPROVED)
+4. [ ] Phase 3 planning — scope TBD (see FRD for Pillar 4/5 candidates: Engineering Orchestration,
+      Token Optimizer)
+5. [ ] Consider addressing out-of-scope findings flagged during task-010 (duplicate `Symbol` types
+      across repo-intelligence/impact-analysis; orphaned dead code in arch-intelligence)
 
 ---
 
-*Last updated: 2026-07-01 by CLAUDE  
+*Last updated: 2026-07-02 by BUILDER/VERIFIER/REVIEWER (task-010 closeout)  
 Phase 1 Status: COMPLETE (252/265 tests passing, 95%)  
-Phase 2 Status: task-006 & task-007 COMPLETE & APPROVED (85+31=116/122 tests, 95%)  
-Overall: 327/332 tests passing (98.5%)  
-Next Session: Merge task-007, begin task-008 (Architecture Detection)*
+Phase 2 Status: COMPLETE — all 5 tasks (006-010) GATE-6 APPROVED  
+Next Session: Phase 3 planning*
