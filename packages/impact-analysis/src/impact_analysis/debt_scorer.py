@@ -1,44 +1,6 @@
 """Technical debt scorer: computes multi-dimensional debt scores per module."""
 
-from dataclasses import dataclass
-from typing import Optional
-
-from .types import DebtScore
-
-
-@dataclass
-class CallEdge:
-    """Call relationship between symbols."""
-    caller_id: str
-    callee_id: str
-    confidence: float = 0.8
-
-
-@dataclass
-class ImportEdge:
-    """Import relationship between files."""
-    importer_file_id: str
-    imported_file_id: Optional[str] = None
-    imported_module: str = ""
-    is_external: bool = False
-
-
-@dataclass
-class Symbol:
-    """Code symbol (function, class, method, etc.)."""
-    id: str
-    name: str
-    file_id: str
-    start_line: int = 0
-    end_line: int = 0
-
-
-@dataclass
-class GitFileMetadata:
-    """Git metadata for a file."""
-    file_path: str
-    commits_30d: int = 0
-    size_bytes: int = 0
+from .types import DebtScore, CallEdge, ImportEdge, Symbol, GitFileMetadata
 
 
 class DebtScorer:

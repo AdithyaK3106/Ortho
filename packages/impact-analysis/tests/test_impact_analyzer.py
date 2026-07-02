@@ -3,7 +3,7 @@
 import pytest
 from hypothesis import given, strategies as st
 
-from impact_analysis.impact_analyzer import ImpactAnalyzer, CallEdge, ImportEdge, Symbol
+from impact_analysis import ImpactAnalyzer, Symbol, CallEdge, ImportEdge
 from impact_analysis.types import ImpactReport
 
 

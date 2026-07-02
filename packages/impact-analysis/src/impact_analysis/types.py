@@ -4,6 +4,41 @@ from dataclasses import dataclass, field
 
 
 @dataclass
+class Symbol:
+    """Code symbol (function, class, method, etc.)."""
+    id: str
+    name: str
+    file_id: str
+    start_line: int = 0
+    end_line: int = 0
+
+
+@dataclass
+class CallEdge:
+    """Call relationship between symbols."""
+    caller_id: str
+    callee_id: str
+    confidence: float = 0.8
+
+
+@dataclass
+class ImportEdge:
+    """Import relationship between files."""
+    importer_file_id: str
+    imported_file_id: str | None = None
+    imported_module: str = ""
+    is_external: bool = False
+
+
+@dataclass
+class GitFileMetadata:
+    """Git metadata for a file."""
+    file_path: str
+    commits_30d: int = 0
+    size_bytes: int = 0
+
+
+@dataclass
 class ImpactReport:
     """Report on change impact analysis results."""
 

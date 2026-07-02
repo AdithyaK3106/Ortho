@@ -3,7 +3,7 @@
 import pytest
 from hypothesis import given, strategies as st
 
-from impact_analysis.dependency_health import DependencyHealthAnalyzer, CallEdge, ImportEdge
+from impact_analysis import DependencyHealthAnalyzer, CallEdge, ImportEdge
 from impact_analysis.types import DependencyHealthReport
 
 

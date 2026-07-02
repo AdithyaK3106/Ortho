@@ -1,26 +1,6 @@
 """Dependency health analyzer: detects coupling patterns and circular dependencies."""
 
-from typing import Optional
-
-from .types import DependencyHealthReport
-
-
-class CallEdge:
-    """Call relationship between symbols."""
-    def __init__(self, caller_id: str, callee_id: str, confidence: float = 0.8):
-        self.caller_id = caller_id
-        self.callee_id = callee_id
-        self.confidence = confidence
-
-
-class ImportEdge:
-    """Import relationship between files."""
-    def __init__(self, importer_file_id: str, imported_file_id: Optional[str] = None,
-                 imported_module: str = "", is_external: bool = False):
-        self.importer_file_id = importer_file_id
-        self.imported_file_id = imported_file_id
-        self.imported_module = imported_module
-        self.is_external = is_external
+from .types import DependencyHealthReport, CallEdge, ImportEdge
 
 
 class DependencyHealthAnalyzer:

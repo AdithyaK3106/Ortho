@@ -1,35 +1,9 @@
 """Impact analyzer: computes blast radius for file/symbol changes."""
 
 from collections import deque
-from dataclasses import dataclass
 from typing import Optional
 
-from .types import ImpactReport
-
-
-@dataclass
-class CallEdge:
-    """Call relationship between symbols."""
-    caller_id: str
-    callee_id: str
-    confidence: float = 0.8
-
-
-@dataclass
-class ImportEdge:
-    """Import relationship between files."""
-    importer_file_id: str
-    imported_file_id: Optional[str] = None
-    imported_module: str = ""
-    is_external: bool = False
-
-
-@dataclass
-class Symbol:
-    """Code symbol (function, class, method, etc.)."""
-    id: str
-    name: str
-    file_id: str
+from .types import ImpactReport, CallEdge, ImportEdge, Symbol
 
 
 class ImpactAnalyzer:

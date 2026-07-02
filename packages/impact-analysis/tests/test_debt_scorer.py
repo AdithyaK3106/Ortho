@@ -3,7 +3,7 @@
 import pytest
 from hypothesis import given, strategies as st
 
-from impact_analysis.debt_scorer import DebtScorer, CallEdge, ImportEdge, Symbol, GitFileMetadata
+from impact_analysis import DebtScorer, Symbol, CallEdge, ImportEdge, GitFileMetadata
 from impact_analysis.types import DebtScore
 
 
