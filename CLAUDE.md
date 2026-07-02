@@ -64,9 +64,9 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-008: Architecture Detection (Week 9–10) — ✅ IMPLEMENTED & TESTED
+### task-008: Architecture Detection (Week 9–10) — ❌ GATE 5 FAILED
 
-**State:** TESTS-WRITTEN (Awaiting VERIFIER at GATE 5)  
+**State:** VERIFICATION FAILED (API mismatch between builder and tests)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)  
@@ -111,6 +111,32 @@ Implement Pillar 3 (Architectural Intelligence): detect repo architecture patter
 - SubsystemDetector (Louvain clustering + coupling score)
 - ArchitectureModelStore (SQLite persistence with versioning)
 - `ortho analyze` CLI command
+
+**GATE 5 VERIFICATION FAILURE:**
+
+Test Execution Results:
+- Phase A (Import Validation): ✅ PASSED (import packages.arch_intelligence successful)
+- Phase B (Pilot Test): ✅ PASSED (sample test_detect_layered_pattern → 1/1 PASSED)
+- Phase C (Full Suite): ❌ FAILED (30/72 passed, 38 failed, 4 errors)
+
+Failure Cause: **API Mismatch**
+- Tests expect stateful constructors: `SubsystemDetector(mock_db, repo_id)`
+- Builder implementation: Stateless functions `detect_subsystems(call_graph, symbols, files)`
+- Tests expect methods/properties not in implementation: `.violations()`, `.confidence`, etc.
+
+Affected Tests (38 failed):
+- Constructor-argument tests: ~15 failures
+- Missing method/property tests: ~12 failures
+- API cascades in integration tests: 4 errors
+
+Evidence:
+- `.ases/evidence/task-008/verification-report.md` (detailed analysis)
+- `.ases/evidence/task-008/test-full-*.log` (pytest output)
+
+Recovery Path:
+1. BUILDER refactors implementation to match test API expectations, OR
+2. TEST-DESIGNER revises tests to match builder's minimal API
+3. Re-run VERIFIER Phase C (no GATE replay needed)
 
 **Expected Deliverables:**
 - New package: `packages/arch-intelligence/` (4 modules + store)
