@@ -4,6 +4,7 @@ import { program } from "commander";
 import { initCommand } from "./commands/init";
 import { indexCommand } from "./commands/index";
 import { scanCommand } from "./commands/scan";
+import { analyzeCommand } from "./commands/analyze";
 
 program.name("ortho").description("AI Engineering Platform CLI").version("0.1.0");
 
@@ -34,5 +35,7 @@ program
       process.exit(1);
     });
   });
+
+program.addCommand(analyzeCommand);
 
 program.parse(process.argv);
