@@ -11,7 +11,7 @@
 - task-009 (Impact Analysis + Debt Scoring): ✅ MERGED (42/42 tests, 100%, 98% coverage, GATE 6 APPROVED)
 - task-008 (Architecture Detection): ✅ MERGED (35/35 tests, 100%, GATE 6 APPROVED)
 - All issues resolved (test bugs fixed, type consolidation completed)
-- task-010 (ADR Awareness + Reporting): GATE 1 SUBMITTED, awaiting human plan approval
+- task-010 (ADR Awareness + Reporting): ✅ GATE 1 APPROVED, ready for ARCHITECT
 
 ---
 
@@ -123,11 +123,12 @@
 ## Active Tasks
 
 **Current:** task-010 (ADR Awareness + Reporting, Week 13–14)
-- Status: GATE 1 SUBMITTED (plan.md, spec.md, rollback-plan.md written, awaiting human approval)
+- Status: GATE 1 APPROVED (2026-07-02) — proceeding to ARCHITECT session
 - Scope: ADRTracker (ADR-vs-code cross-reference), ReuseDetector (AST structural similarity),
   CLI wiring (`--adr-check`, `--reuse`), fix `--impact` stub to use real graphs
 - Timeline: ~5.5 hours across 5 atomic tasks (see plan.md)
 - Artifacts: `.ases/tasks/task-010-adr-awareness-reporting/`
+- Next: ARCHITECT reviews module boundaries/API contracts, drafts ADR-009 + ADR-010, GATE 2
 
 ---
 

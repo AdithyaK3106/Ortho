@@ -64,12 +64,14 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” GATE 1 SUBMITTED
+### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” âœ… GATE 1 APPROVED
 
-**State:** DRAFT â†’ PLANNED (awaiting human approval)  
+**State:** PLANNED â†’ ARCH-REVIEW (ready for ARCHITECT session)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)
+
+**GATE 1: Plan Approval â€” âœ… APPROVED** (2026-07-02, human)
 
 **What This Task Does:**
 Implements the final two Pillar 3 features from the FRD feature table (ADR awareness, reuse
@@ -82,10 +84,12 @@ discovery) and fixes the `ortho analyze --impact` stub that currently loads empt
 - CLI: `ortho analyze --adr-check`, `ortho analyze --reuse`, and `--impact` wired to real `OrthoDatabase` graphs + task-009's `ImpactAnalyzer`
 - ADR-009 (ADR parsing strategy), ADR-010 (reuse similarity algorithm) to be written by ARCHITECT
 
-**Artifacts Submitted (GATE 1):**
-- `.ases/tasks/task-010-adr-awareness-reporting/plan.md`
-- `.ases/tasks/task-010-adr-awareness-reporting/spec.md`
-- `.ases/tasks/task-010-adr-awareness-reporting/rollback-plan.md`
+**Artifacts Approved (GATE 1):**
+- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/plan.md` (5 atomic tasks, risks, repository-independent acceptance criteria)
+- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/spec.md` (fully-specified ADR extraction contract, threshold config policy, benchmark environment, validation baseline)
+- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/rollback-plan.md`
+
+**Next Step:** ARCHITECT session â€” reads plan.md, spec.md, existing ADRs; reviews module boundaries and API contracts for ADRTracker/ReuseDetector; writes `architecture-review.md` and drafts ADR-009 + ADR-010; verdict APPROVED or REJECTED at GATE 2.
 
 **Next Step:** Human reviews plan.md + spec.md + rollback-plan.md at GATE 1. If approved, proceed to ARCHITECT.
 
