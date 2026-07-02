@@ -26,7 +26,8 @@ undefined and an `--impact` flag that is a stub (loads empty graphs — see
 2. **ReuseDetector** (`packages/arch-intelligence/src/arch_intelligence/reuse_detector.py`)
    - AST-level similarity between functions/methods using the existing `Symbol` extraction
      (structural comparison, not text diff — normalize identifiers, compare shape)
-   - Report clusters of similar symbols above a similarity threshold with confidence + evidence
+   - Report clusters of similar symbols above a caller-configurable similarity threshold
+     (0.7 default for Phase 2, see spec.md Component 2) with confidence + evidence
 3. **CLI wiring** (`apps/cli/src/commands/analyze.py`, `apps/cli/src/commands/analyze.ts`)
    - `ortho analyze --adr-check` → ADRTracker report
    - `ortho analyze --reuse` → ReuseDetector report
@@ -66,22 +67,33 @@ undefined and an `--impact` flag that is a stub (loads empty graphs — see
 
 | Risk | Mitigation |
 |------|------------|
-| ADR markdown format has no strict schema (free-form prose sections) | Parse conservatively: look for backtick-quoted paths and `File:`/`Code:`-style lines only; false negatives (missed refs) are acceptable, false positives (wrong STALE flags) are not — bias toward under-reporting |
-| AST similarity is O(n²) over all symbol pairs — repo-intelligence's own suite has 100+ symbols | Bucket by symbol type + rough size (line count) before pairwise compare; document complexity ceiling as a known limitation if real-repo test exceeds a few seconds |
+| ADR markdown format has no strict schema (free-form prose sections) | Parse conservatively per the fully-specified ADR Path Extraction Contract in spec.md (File:/Code: lines, markdown links, backtick-quoted path-shaped spans only); false negatives (missed refs) are acceptable, false positives (wrong STALE flags) are not — bias toward under-reporting |
+| AST similarity is O(n²) over all symbol pairs — real codebases commonly have symbol counts in the hundreds to low thousands | Bucket by symbol type + rough size (line count) before pairwise compare; document complexity ceiling per the Benchmark Environment policy in spec.md (see "Note on Timing Assertions") rather than a fixed wall-clock number |
 | `--impact` stub fix touches code outside this task's new files (existing `AnalyzeCommand.run`) | Scope this as an explicit, minimal deviation — spec.md documents exact before/after diff, no other changes to `AnalyzeCommand` |
 | `ImpactAnalyzer`/`Symbol`/`ImportEdge` have no `file_id` field to map symbols back to files (see spec.md Known Gaps) | Document as pre-existing gap inherited from task-002/003/009, not introduced here; work around it using file path as the join key since `OrthoDatabase` stores per-file rows |
 
 ## Acceptance Criteria (Binary)
 
-- [ ] `ADRTracker.check_adrs()` returns a report listing every ADR in `.ases/architecture/adrs/`
-      with STALE/UNLINKED/OK status — verified against the 5 real ADRs currently in the repo
-- [ ] `ReuseDetector.find_similar()` run on `packages/arch-intelligence` and `packages/impact-analysis`
-      (both exist, both have overlapping dataclass/validation patterns) returns at least one
-      cluster with similarity > 0.7 — deterministic on repeat runs (same input, same output)
-- [ ] `ortho analyze --adr-check` and `ortho analyze --reuse` produce non-empty output on this repo
-- [ ] `ortho analyze --impact <file>` returns a non-empty `ImpactReport` for a file with real
-      dependents in this repo (e.g. a file imported by 2+ others), not the current empty-list stub
+- [ ] `ADRTracker.check_adrs()` classifies every discovered ADR as exactly one of
+      OK / STALE / UNLINKED / UNKNOWN, for any directory of ADR markdown files (zero or more)
+- [ ] `ADRTracker.check_adrs()` is deterministic: identical ADR directory contents always produce
+      identical `ADRStatus` results, in stable sorted order, across repeat runs
+- [ ] `ReuseDetector.find_similar()` returns a `ReuseCluster` for every pair (or group) of symbols
+      whose structural similarity meets or exceeds the configured threshold, whenever such
+      qualifying symbols exist in the input; returns `[]` when none qualify
+- [ ] `ReuseDetector.find_similar()` is deterministic and symmetric: identical symbol/source input
+      always produces identical clusters, and similarity(a, b) == similarity(b, a)
+- [ ] `ortho analyze --adr-check` and `ortho analyze --reuse` produce a valid, well-formed report
+      (text or JSON per `--format`) for any repository, including one with zero ADRs or zero
+      reusable code — an empty result set is valid, a crash or malformed output is not
+- [ ] `ortho analyze --impact <file>` returns graph-derived `ImpactReport` data (direct/transitive
+      dependents computed from real call/import graphs) whenever the target repository has been
+      indexed and dependency data exists for the file — replacing the current behavior of always
+      returning an empty report regardless of input
 - [ ] Zero regressions: full `pytest` suite (all packages) passes at the same rate as before this task
+
+See **Validation Baseline** in spec.md for the specific repository/values used to observe this
+behavior during development; those observations are informational, not part of this criteria list.
 
 ## Dependencies
 
