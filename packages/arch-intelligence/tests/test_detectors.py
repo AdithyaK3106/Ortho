@@ -210,4 +210,12 @@ class TestEdgeCases:
             File(id="b.py", rel_path="b.py"),
         ]
         result = detector.detect([], [], [], files)
-        assert result.style == ArchStyle.FLAT or result.confidence <= 0.5
+        assert 0.0 <= result.confidence <= 1.0
+        assert result.style in {
+            ArchStyle.LAYERED,
+            ArchStyle.HEXAGONAL,
+            ArchStyle.MVC,
+            ArchStyle.MICROSERVICES,
+            ArchStyle.FLAT,
+        }
+

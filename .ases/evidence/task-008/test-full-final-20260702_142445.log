@@ -1,0 +1,179 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 35 items
+
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_detect_layered_pattern PASSED [  2%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_detect_mvc_pattern PASSED [  5%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_confidence_range PASSED [  8%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_style_is_valid PASSED [ 11%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_evidence_not_empty PASSED [ 14%]
+packages/arch-intelligence/tests/test_detectors.py::TestLayerDetector::test_extract_layers_from_dag PASSED [ 17%]
+packages/arch-intelligence/tests/test_detectors.py::TestLayerDetector::test_layer_numbering PASSED [ 20%]
+packages/arch-intelligence/tests/test_detectors.py::TestLayerDetector::test_semantic_naming_detection PASSED [ 22%]
+packages/arch-intelligence/tests/test_detectors.py::TestSubsystemDetector::test_detect_subsystems PASSED [ 25%]
+packages/arch-intelligence/tests/test_detectors.py::TestSubsystemDetector::test_coupling_score_range PASSED [ 28%]
+packages/arch-intelligence/tests/test_detectors.py::TestSubsystemDetector::test_subsystem_stability PASSED [ 31%]
+packages/arch-intelligence/tests/test_detectors.py::TestEdgeCases::test_empty_graphs PASSED [ 34%]
+packages/arch-intelligence/tests/test_detectors.py::TestEdgeCases::test_single_file PASSED [ 37%]
+packages/arch-intelligence/tests/test_detectors.py::TestEdgeCases::test_no_imports FAILED [ 40%]
+packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_full_pipeline_simple_layered ERROR [ 42%]
+packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_full_pipeline_microservices ERROR [ 45%]
+packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_versioning ERROR [ 48%]
+packages/arch-intelligence/tests/test_integration.py::TestErrorHandling::test_missing_repo_returns_none ERROR [ 51%]
+packages/arch-intelligence/tests/test_integration.py::TestErrorHandling::test_cyclic_import_detection PASSED [ 54%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerDetectionBasics::test_extract_layers_returns_list PASSED [ 57%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerDetectionBasics::test_layered_fixture_extracts_layers PASSED [ 60%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerFieldContent::test_layer_has_id PASSED [ 62%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerFieldContent::test_layer_has_number PASSED [ 65%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestSemanticNaming::test_data_files_detected PASSED [ 68%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestSemanticNaming::test_service_files_detected PASSED [ 71%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerHierarchy::test_acyclic_graph_valid PASSED [ 74%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestDeterminism::test_extract_twice_identical PASSED [ 77%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemDetectionBasics::test_detect_subsystems_returns_list PASSED [ 80%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemDetectionBasics::test_microservices_fixture_detects PASSED [ 82%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_id PASSED [ 85%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_name PASSED [ 88%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_file_ids PASSED [ 91%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_coupling_score_in_range PASSED [ 94%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestCouplingCalculation::test_isolated_files_low_coupling PASSED [ 97%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestDeterminism::test_detect_twice_identical PASSED [100%]
+
+=================================== ERRORS ====================================
+____ ERROR at setup of TestFullPipeline.test_full_pipeline_simple_layered _____
+
+tmp_path = WindowsPath('C:/Users/urbra/AppData/Local/Temp/pytest-of-urbra/pytest-53/test_full_pipeline_simple_laye0')
+
+    @pytest.fixture
+    def arch_db(tmp_path):
+        """Create temporary database for testing."""
+        db_path = tmp_path / "test.db"
+>       return ArchitectureModelStore(str(db_path))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+packages\arch-intelligence\tests\test_integration.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+packages\arch-intelligence\src\arch_intelligence\model_store.py:15: in __init__
+    self._init_schema()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <arch_intelligence.model_store.ArchitectureModelStore object at 0x0000025E3608D5B0>
+
+    def _init_schema(self):
+        """Create architecture_models table if not exists."""
+>       conn = self.db.connection()
+               ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'str' object has no attribute 'connection'
+
+packages\arch-intelligence\src\arch_intelligence\model_store.py:19: AttributeError
+_____ ERROR at setup of TestFullPipeline.test_full_pipeline_microservices _____
+
+tmp_path = WindowsPath('C:/Users/urbra/AppData/Local/Temp/pytest-of-urbra/pytest-53/test_full_pipeline_microservic0')
+
+    @pytest.fixture
+    def arch_db(tmp_path):
+        """Create temporary database for testing."""
+        db_path = tmp_path / "test.db"
+>       return ArchitectureModelStore(str(db_path))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+packages\arch-intelligence\tests\test_integration.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+packages\arch-intelligence\src\arch_intelligence\model_store.py:15: in __init__
+    self._init_schema()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <arch_intelligence.model_store.ArchitectureModelStore object at 0x0000025E3610AA20>
+
+    def _init_schema(self):
+        """Create architecture_models table if not exists."""
+>       conn = self.db.connection()
+               ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'str' object has no attribute 'connection'
+
+packages\arch-intelligence\src\arch_intelligence\model_store.py:19: AttributeError
+_____________ ERROR at setup of TestFullPipeline.test_versioning ______________
+
+tmp_path = WindowsPath('C:/Users/urbra/AppData/Local/Temp/pytest-of-urbra/pytest-53/test_versioning0')
+
+    @pytest.fixture
+    def arch_db(tmp_path):
+        """Create temporary database for testing."""
+        db_path = tmp_path / "test.db"
+>       return ArchitectureModelStore(str(db_path))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+packages\arch-intelligence\tests\test_integration.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+packages\arch-intelligence\src\arch_intelligence\model_store.py:15: in __init__
+    self._init_schema()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <arch_intelligence.model_store.ArchitectureModelStore object at 0x0000025E3610B680>
+
+    def _init_schema(self):
+        """Create architecture_models table if not exists."""
+>       conn = self.db.connection()
+               ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'str' object has no attribute 'connection'
+
+packages\arch-intelligence\src\arch_intelligence\model_store.py:19: AttributeError
+_____ ERROR at setup of TestErrorHandling.test_missing_repo_returns_none ______
+
+tmp_path = WindowsPath('C:/Users/urbra/AppData/Local/Temp/pytest-of-urbra/pytest-53/test_missing_repo_returns_none0')
+
+    @pytest.fixture
+    def arch_db(tmp_path):
+        """Create temporary database for testing."""
+        db_path = tmp_path / "test.db"
+>       return ArchitectureModelStore(str(db_path))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+packages\arch-intelligence\tests\test_integration.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+packages\arch-intelligence\src\arch_intelligence\model_store.py:15: in __init__
+    self._init_schema()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <arch_intelligence.model_store.ArchitectureModelStore object at 0x0000025E36160170>
+
+    def _init_schema(self):
+        """Create architecture_models table if not exists."""
+>       conn = self.db.connection()
+               ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'str' object has no attribute 'connection'
+
+packages\arch-intelligence\src\arch_intelligence\model_store.py:19: AttributeError
+================================== FAILURES ===================================
+________________________ TestEdgeCases.test_no_imports ________________________
+
+self = <tests.test_detectors.TestEdgeCases object at 0x0000025E352E88F0>
+detector = <arch_intelligence.arch_detector.ArchitectureDetector object at 0x0000025E352EBE30>
+
+    def test_no_imports(self, detector):
+        """Test handling of repos with no imports."""
+        files = [
+            File(id="a.py", rel_path="a.py"),
+            File(id="b.py", rel_path="b.py"),
+        ]
+        result = detector.detect([], [], [], files)
+>       assert result.style == ArchStyle.FLAT or result.confidence <= 0.5
+E       AssertionError: assert (<ArchStyle.HE...: 'hexagonal'> == <ArchStyle.FLAT: 'flat'>
+E         
+E         - flat
+E         + hexagonal or 0.8 <= 0.5)
+E        +  where 0.8 = ArchitectureDetectionResult(style=<ArchStyle.HEXAGONAL: 'hexagonal'>, confidence=0.8, evidence=['Detected style: hexagonal', 'Confidence: 0.80'], alternative=None, alternative_confidence=None).confidence
+
+packages\arch-intelligence\tests\test_detectors.py:213: AssertionError
+=========================== short test summary info ===========================
+FAILED packages/arch-intelligence/tests/test_detectors.py::TestEdgeCases::test_no_imports
+ERROR packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_full_pipeline_simple_layered
+ERROR packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_full_pipeline_microservices
+ERROR packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_versioning
+ERROR packages/arch-intelligence/tests/test_integration.py::TestErrorHandling::test_missing_repo_returns_none
+=================== 1 failed, 30 passed, 4 errors in 0.79s ====================
+EXIT: 1
+TIMESTAMP: 2026-07-02T14:24:46Z

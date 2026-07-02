@@ -1,0 +1,47 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 35 items
+
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_detect_layered_pattern PASSED [  2%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_detect_mvc_pattern PASSED [  5%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_confidence_range PASSED [  8%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_style_is_valid PASSED [ 11%]
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_evidence_not_empty PASSED [ 14%]
+packages/arch-intelligence/tests/test_detectors.py::TestLayerDetector::test_extract_layers_from_dag PASSED [ 17%]
+packages/arch-intelligence/tests/test_detectors.py::TestLayerDetector::test_layer_numbering PASSED [ 20%]
+packages/arch-intelligence/tests/test_detectors.py::TestLayerDetector::test_semantic_naming_detection PASSED [ 22%]
+packages/arch-intelligence/tests/test_detectors.py::TestSubsystemDetector::test_detect_subsystems PASSED [ 25%]
+packages/arch-intelligence/tests/test_detectors.py::TestSubsystemDetector::test_coupling_score_range PASSED [ 28%]
+packages/arch-intelligence/tests/test_detectors.py::TestSubsystemDetector::test_subsystem_stability PASSED [ 31%]
+packages/arch-intelligence/tests/test_detectors.py::TestEdgeCases::test_empty_graphs PASSED [ 34%]
+packages/arch-intelligence/tests/test_detectors.py::TestEdgeCases::test_single_file PASSED [ 37%]
+packages/arch-intelligence/tests/test_detectors.py::TestEdgeCases::test_no_imports PASSED [ 40%]
+packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_full_pipeline_simple_layered PASSED [ 42%]
+packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_full_pipeline_microservices PASSED [ 45%]
+packages/arch-intelligence/tests/test_integration.py::TestFullPipeline::test_versioning PASSED [ 48%]
+packages/arch-intelligence/tests/test_integration.py::TestErrorHandling::test_missing_repo_returns_none PASSED [ 51%]
+packages/arch-intelligence/tests/test_integration.py::TestErrorHandling::test_cyclic_import_detection PASSED [ 54%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerDetectionBasics::test_extract_layers_returns_list PASSED [ 57%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerDetectionBasics::test_layered_fixture_extracts_layers PASSED [ 60%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerFieldContent::test_layer_has_id PASSED [ 62%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerFieldContent::test_layer_has_number PASSED [ 65%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestSemanticNaming::test_data_files_detected PASSED [ 68%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestSemanticNaming::test_service_files_detected PASSED [ 71%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestLayerHierarchy::test_acyclic_graph_valid PASSED [ 74%]
+packages/arch-intelligence/tests/test_layer_detector.py::TestDeterminism::test_extract_twice_identical PASSED [ 77%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemDetectionBasics::test_detect_subsystems_returns_list PASSED [ 80%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemDetectionBasics::test_microservices_fixture_detects PASSED [ 82%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_id PASSED [ 85%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_name PASSED [ 88%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_file_ids PASSED [ 91%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestSubsystemFieldContent::test_coupling_score_in_range PASSED [ 94%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestCouplingCalculation::test_isolated_files_low_coupling PASSED [ 97%]
+packages/arch-intelligence/tests/test_subsystem_detector.py::TestDeterminism::test_detect_twice_identical PASSED [100%]
+
+============================= 35 passed in 0.73s ==============================
+EXIT: 0
+TIMESTAMP: 2026-07-02T14:25:57Z

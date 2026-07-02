@@ -9,14 +9,15 @@ from .types import ArchitectureModel
 class ArchitectureModelStore:
     """SQLite persistence for architecture models."""
 
-    def __init__(self, db):
-        """Initialize with OrthoDatabase connection."""
-        self.db = db
+    def __init__(self, db_path: str = ".ortho/ortho.db"):
+        """Initialize with database path (default: local ortho db)."""
+        self.db_path = db_path
         self._init_schema()
 
     def _init_schema(self):
         """Create architecture_models table if not exists."""
-        conn = self.db.connection()
+        import sqlite3
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS architecture_models (
@@ -39,7 +40,8 @@ class ArchitectureModelStore:
         model_id = str(uuid.uuid4())
         detected_at = model.detected_at or datetime.utcnow().isoformat()
 
-        conn = self.db.connection()
+        import sqlite3
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         evidence_json = json.dumps(model.evidence or [])
@@ -63,7 +65,8 @@ class ArchitectureModelStore:
 
     def load(self, model_id: str) -> Optional[ArchitectureModel]:
         """Load a specific model by ID."""
-        conn = self.db.connection()
+        import sqlite3
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT model_json FROM architecture_models WHERE id = ?", (model_id,))
         row = cursor.fetchone()
@@ -73,7 +76,8 @@ class ArchitectureModelStore:
 
     def load_latest(self, repo_id: str) -> Optional[ArchitectureModel]:
         """Load most recent model for repo."""
-        conn = self.db.connection()
+        import sqlite3
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT model_json FROM architecture_models
@@ -88,7 +92,8 @@ class ArchitectureModelStore:
 
     def load_all_versions(self, repo_id: str) -> list[ArchitectureModel]:
         """Load all versions for repo."""
-        conn = self.db.connection()
+        import sqlite3
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT model_json FROM architecture_models
@@ -99,7 +104,8 @@ class ArchitectureModelStore:
 
     def delete(self, model_id: str):
         """Delete a model by ID."""
-        conn = self.db.connection()
+        import sqlite3
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("DELETE FROM architecture_models WHERE id = ?", (model_id,))
         conn.commit()
