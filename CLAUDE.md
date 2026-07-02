@@ -91,7 +91,17 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 - Task 4: CLI integration (package structure, imports verified)
 - ~1,000 lines of code, 8 source files, 100% spec compliance
 - Zero regressions; all ACs met
-- Ready for GATE 4 (TEST-DESIGNER)
+
+**GATE 4: TEST-DESIGNER** – ✅ SUBMITTED (Concurrent with BUILDER)
+- test-plan.md (comprehensive test strategy)
+- test_impact_analyzer.py: 14 tests (13 unit + 1 property-based)
+- test_debt_scorer.py: 16 tests (14 unit + 2 property-based)
+- test_dependency_health.py: 15 tests (13 unit + 2 property-based)
+- ~850 lines of test code, 4 test files
+- 45+ total tests, all executable
+- Property-based tests verify bounds/invariants
+- Edge cases: cycles, empty graphs, missing data, external imports
+- Ready for GATE 4 approval and GATE 5 (VERIFIER) execution
 
 **Artifacts:**
 - plan.md (4 atomic tasks, stateless, risks, rollback)

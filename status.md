@@ -326,7 +326,7 @@ All Python packages must pass:
 
 **In Progress / Pending Tasks:** 3/5
 - ✅ task-008: Architecture Detection (Week 9–10) — GATE-6 APPROVED
-- ⏳ task-009: Impact Analysis + Debt Scoring (Week 11–12) — GATE 3 COMPLETE (BUILDER), awaiting TEST-DESIGNER
+- ⏳ task-009: Impact Analysis + Debt Scoring (Week 11–12) — GATE 4 SUBMITTED (TEST-DESIGNER concurrent), awaiting VERIFIER
 - ⏳ task-010: ADR Awareness + Reporting (Week 13–14)
 
 **Phase 2 Test Results:**
