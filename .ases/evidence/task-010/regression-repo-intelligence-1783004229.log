@@ -1,0 +1,29 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\repo-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 144 items
+
+packages\repo-intelligence\tests\test_adapters.py ....x..                [  4%]
+packages\repo-intelligence\tests\test_basic_integration.py ............. [ 13%]
+                                                                         [ 13%]
+packages\repo-intelligence\tests\test_call_graph.py XXXXXXXXXXXXXXXXXX   [ 26%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py ....... [ 31%]
+......                                                                   [ 35%]
+packages\repo-intelligence\tests\test_file_watcher_phase_c.py s.......x. [ 42%]
+...                                                                      [ 44%]
+packages\repo-intelligence\tests\test_import_graph.py XXXXXXXxxXXXXXXXXX [ 56%]
+                                                                         [ 56%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py ... [ 59%]
+...........                                                              [ 66%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py ............... [ 77%]
+.                                                                        [ 77%]
+packages\repo-intelligence\tests\test_module_detector.py xXXXXxXXXXXxxXx [ 88%]
+XX                                                                       [ 89%]
+packages\repo-intelligence\tests\test_symbol_extractor.py ....x.x....... [ 99%]
+x                                                                        [100%]
+
+============ 85 passed, 1 skipped, 12 xfailed, 46 xpassed in 6.23s ============
+EXIT: 0
+TIMESTAMP: 2026-07-02T14:57:16Z

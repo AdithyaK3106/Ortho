@@ -1,0 +1,29 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pyproject.toml
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collecting ... collected 16 items
+
+apps/cli/tests/test_analyze.py::TestADRCheckCommand::test_adr_check_command_well_formed PASSED [  6%]
+apps/cli/tests/test_analyze.py::TestADRCheckCommand::test_adr_check_zero_adrs_is_valid PASSED [ 12%]
+apps/cli/tests/test_analyze.py::TestADRCheckCommand::test_adr_check_json_serializable PASSED [ 18%]
+apps/cli/tests/test_analyze.py::TestReuseCommand::test_reuse_command_well_formed PASSED [ 25%]
+apps/cli/tests/test_analyze.py::TestReuseCommand::test_reuse_threshold_option_changes_results PASSED [ 31%]
+apps/cli/tests/test_analyze.py::TestReuseCommand::test_reuse_zero_symbols_is_valid PASSED [ 37%]
+apps/cli/tests/test_analyze.py::TestImpactCommand::test_impact_fixed_not_stub PASSED [ 43%]
+apps/cli/tests/test_analyze.py::TestImpactCommand::test_impact_missing_file_no_crash PASSED [ 50%]
+apps/cli/tests/test_analyze.py::TestImpactCommand::test_impact_no_database_no_crash PASSED [ 56%]
+apps/cli/tests/test_analyze.py::TestImpactCommand::test_impact_json_serializable PASSED [ 62%]
+apps/cli/tests/test_analyze.py::TestCLIEntryPoint::test_cli_adr_check_command PASSED [ 68%]
+apps/cli/tests/test_analyze.py::TestCLIEntryPoint::test_cli_reuse_command PASSED [ 75%]
+apps/cli/tests/test_analyze.py::TestCLIEntryPoint::test_cli_reuse_threshold_option PASSED [ 81%]
+apps/cli/tests/test_analyze.py::TestCLIEntryPoint::test_cli_impact_fixed_not_stub PASSED [ 87%]
+apps/cli/tests/test_analyze.py::TestCLIEntryPoint::test_cli_impact_missing_file PASSED [ 93%]
+apps/cli/tests/test_analyze.py::TestCLIEntryPoint::test_cli_json_format_all_new_commands PASSED [100%]
+
+============================= 16 passed in 2.58s ==============================
+EXIT: 0
+TIMESTAMP: 2026-07-02T14:56:59Z

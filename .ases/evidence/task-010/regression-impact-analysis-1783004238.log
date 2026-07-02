@@ -1,0 +1,14 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\impact-analysis
+configfile: pyproject.toml
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 42 items
+
+packages\impact-analysis\tests\test_debt_scorer.py ..............        [ 33%]
+packages\impact-analysis\tests\test_dependency_health.py ..............  [ 66%]
+packages\impact-analysis\tests\test_impact_analyzer.py ..............    [100%]
+
+============================= 42 passed in 1.30s ==============================
+EXIT: 0
+TIMESTAMP: 2026-07-02T14:57:20Z

@@ -1,0 +1,108 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence
+configfile: pyproject.toml
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collecting ... collected 76 items
+
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_parse_status_accepted PASSED [  1%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_parse_status_missing PASSED [  2%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_extract_backtick_paths PASSED [  3%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_extract_file_line_precedence PASSED [  5%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_extract_markdown_link PASSED [  6%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_classify_ok PASSED [  7%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_classify_stale PASSED [  9%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_classify_unlinked PASSED [ 10%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerUnit::test_glob_and_url_skipped PASSED [ 11%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerIntegration::test_directory_with_n_adrs PASSED [ 13%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerIntegration::test_empty_dir PASSED [ 14%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerIntegration::test_deterministic_repeat_run PASSED [ 15%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerIntegration::test_deterministic_across_extraction_order PASSED [ 17%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerEdgeCases::test_malformed_markdown PASSED [ 18%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerEdgeCases::test_unreadable_file_does_not_crash PASSED [ 19%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerEdgeCases::test_null_byte_in_candidate_dropped_silently PASSED [ 21%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestADRTrackerEdgeCases::test_candidate_with_only_whitespace_rejected PASSED [ 22%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestSubsystemCoverage::test_small_subsystem_omitted PASSED [ 23%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestSubsystemCoverage::test_large_subsystem_with_owning_adr PASSED [ 25%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestSubsystemCoverage::test_large_subsystem_without_owning_adr PASSED [ 26%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestSubsystemCoverage::test_empty_model_returns_empty PASSED [ 27%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestSubsystemCoverage::test_threshold_boundary_exactly_three_omitted PASSED [ 28%]
+packages\arch-intelligence\tests\test_adr_tracker.py::TestSubsystemCoverage::test_multiple_subsystems_sorted_by_id PASSED [ 30%]
+packages\arch-intelligence\tests\test_detectors.py::TestArchitectureDetector::test_detect_layered_pattern PASSED [ 31%]
+packages\arch-intelligence\tests\test_detectors.py::TestArchitectureDetector::test_detect_mvc_pattern PASSED [ 32%]
+packages\arch-intelligence\tests\test_detectors.py::TestArchitectureDetector::test_confidence_range PASSED [ 34%]
+packages\arch-intelligence\tests\test_detectors.py::TestArchitectureDetector::test_style_is_valid PASSED [ 35%]
+packages\arch-intelligence\tests\test_detectors.py::TestArchitectureDetector::test_evidence_not_empty PASSED [ 36%]
+packages\arch-intelligence\tests\test_detectors.py::TestLayerDetector::test_extract_layers_from_dag PASSED [ 38%]
+packages\arch-intelligence\tests\test_detectors.py::TestLayerDetector::test_layer_numbering PASSED [ 39%]
+packages\arch-intelligence\tests\test_detectors.py::TestLayerDetector::test_semantic_naming_detection PASSED [ 40%]
+packages\arch-intelligence\tests\test_detectors.py::TestSubsystemDetector::test_detect_subsystems PASSED [ 42%]
+packages\arch-intelligence\tests\test_detectors.py::TestSubsystemDetector::test_coupling_score_range PASSED [ 43%]
+packages\arch-intelligence\tests\test_detectors.py::TestSubsystemDetector::test_subsystem_stability PASSED [ 44%]
+packages\arch-intelligence\tests\test_detectors.py::TestEdgeCases::test_empty_graphs PASSED [ 46%]
+packages\arch-intelligence\tests\test_detectors.py::TestEdgeCases::test_single_file PASSED [ 47%]
+packages\arch-intelligence\tests\test_detectors.py::TestEdgeCases::test_no_imports PASSED [ 48%]
+packages\arch-intelligence\tests\test_integration.py::TestFullPipeline::test_full_pipeline_simple_layered PASSED [ 50%]
+packages\arch-intelligence\tests\test_integration.py::TestFullPipeline::test_full_pipeline_microservices PASSED [ 51%]
+packages\arch-intelligence\tests\test_integration.py::TestFullPipeline::test_versioning PASSED [ 52%]
+packages\arch-intelligence\tests\test_integration.py::TestErrorHandling::test_missing_repo_returns_none PASSED [ 53%]
+packages\arch-intelligence\tests\test_integration.py::TestErrorHandling::test_cyclic_import_detection PASSED [ 55%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestLayerDetectionBasics::test_extract_layers_returns_list PASSED [ 56%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestLayerDetectionBasics::test_layered_fixture_extracts_layers PASSED [ 57%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestLayerFieldContent::test_layer_has_id PASSED [ 59%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestLayerFieldContent::test_layer_has_number PASSED [ 60%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestSemanticNaming::test_data_files_detected PASSED [ 61%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestSemanticNaming::test_service_files_detected PASSED [ 63%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestLayerHierarchy::test_acyclic_graph_valid PASSED [ 64%]
+packages\arch-intelligence\tests\test_layer_detector.py::TestDeterminism::test_extract_twice_identical PASSED [ 65%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_identical_functions_different_names PASSED [ 67%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_unrelated_functions_not_clustered PASSED [ 68%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_threshold_boundary_included PASSED [ 69%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_empty_input PASSED [ 71%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_single_symbol PASSED [ 72%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_same_file_duplicates_clustered PASSED [ 73%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_bucketing_skips_size_mismatch PASSED [ 75%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_cluster_evidence_present PASSED [ 76%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_dedup_merges_mutually_similar_group PASSED [ 77%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorUnit::test_evidence_cites_line_ranges PASSED [ 78%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorIntegration::test_finds_known_duplicate_pair PASSED [ 80%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorIntegration::test_symbol_set_scales PASSED [ 81%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorProperties::test_similarity_bounds PASSED [ 82%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorProperties::test_deterministic PASSED [ 84%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorProperties::test_symmetry PASSED [ 85%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorProperties::test_varying_symbol_counts_no_crash PASSED [ 86%]
+packages\arch-intelligence\tests\test_reuse_detector.py::TestReuseDetectorProperties::test_threshold_sweep_monotonic PASSED [ 88%]
+packages\arch-intelligence\tests\test_reuse_detector.py::test_reuse_cluster_order_independent_of_input_order PASSED [ 89%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestSubsystemDetectionBasics::test_detect_subsystems_returns_list PASSED [ 90%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestSubsystemDetectionBasics::test_microservices_fixture_detects PASSED [ 92%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_id PASSED [ 93%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_name PASSED [ 94%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestSubsystemFieldContent::test_subsystem_has_file_ids PASSED [ 96%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestSubsystemFieldContent::test_coupling_score_in_range PASSED [ 97%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestCouplingCalculation::test_isolated_files_low_coupling PASSED [ 98%]
+packages\arch-intelligence\tests\test_subsystem_detector.py::TestDeterminism::test_detect_twice_identical PASSED [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.12.3-final-0 _______________
+
+Name                                                                     Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------------------------------------
+packages\arch-intelligence\src\arch_intelligence\__init__.py                 8      0   100%
+packages\arch-intelligence\src\arch_intelligence\adr_tracker.py            144      7    95%   79, 84, 92, 95, 97, 133, 146
+packages\arch-intelligence\src\arch_intelligence\arch_detector.py           87      2    98%   100, 148
+packages\arch-intelligence\src\arch_intelligence\detection_types.py         52     52     0%   3-84
+packages\arch-intelligence\src\arch_intelligence\detector.py               149    149     0%   3-312
+packages\arch-intelligence\src\arch_intelligence\graph_utils.py            163    163     0%   3-326
+packages\arch-intelligence\src\arch_intelligence\layer_detector.py          62      9    85%   22, 95-105
+packages\arch-intelligence\src\arch_intelligence\model_store.py             66     18    73%   68-75, 95-103, 107-111
+packages\arch-intelligence\src\arch_intelligence\models.py                  62     62     0%   3-205
+packages\arch-intelligence\src\arch_intelligence\reuse_detector.py         109      5    95%   55, 80, 82, 136, 141
+packages\arch-intelligence\src\arch_intelligence\subsystem_detector.py      69     22    68%   21-23, 35, 54, 56, 73, 86, 90, 94-115
+packages\arch-intelligence\src\arch_intelligence\types.py                   41      0   100%
+------------------------------------------------------------------------------------------------------
+TOTAL                                                                     1012    489    52%
+============================= 76 passed in 4.50s ==============================
+EXIT: 0
+TIMESTAMP: 2026-07-02T14:56:47Z
