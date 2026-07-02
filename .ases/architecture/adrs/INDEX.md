@@ -1,6 +1,6 @@
 # Architecture Decision Record Index
 
-**Last Updated:** 2026-07-02  
+**Last Updated:** 2026-07-02 (task-010 GATE 6 approved)  
 **Maintainer:** ARCHITECT  
 **Total ADRs:** 7
 
@@ -21,8 +21,8 @@ This index tracks all Architecture Decision Records (ADRs) for ASES. ADRs are pe
 | ADR-003 | Evidence Capture Strategy — Terminal Output Only | ACCEPTED | 2026-06-27 | Evidence must come from tool output (compiler, linter, test runner), never from Claude assessment; Claude interprets logs but never generates them |
 | ADR-004 | Storage Strategy — SQLite Local-First | ACCEPTED | 2026-06-30 | Local-first SQLite (+ sqlite-vec for Pillar 2 embeddings) over cloud/external DB; no auth, no network dependency |
 | ADR-005 | Language Adapter Plugin Model | ACCEPTED | 2026-06-30 | Abstract `LanguageAdapter` base class + per-language concrete adapters + registry, over monolithic conditionals or external LSP |
-| ADR-009 | ADR Cross-Reference Strategy | PROPOSED | 2026-07-02 | `ADRTracker` extracts code references via stdlib regex against raw markdown text (4-rule precedence), not a markdown AST parser — deterministic, zero new dependency |
-| ADR-010 | Reuse Discovery Algorithm | PROPOSED | 2026-07-02 | `ReuseDetector` measures similarity via AST-node-type-sequence edit distance, not embeddings — deterministic, local-first, consistent with Pillar 3's existing algorithm pattern |
+| ADR-009 | ADR Cross-Reference Strategy | ACCEPTED | 2026-07-02 | `ADRTracker` extracts code references via stdlib regex against raw markdown text (4-rule precedence), not a markdown AST parser — deterministic, zero new dependency |
+| ADR-010 | Reuse Discovery Algorithm | ACCEPTED | 2026-07-02 | `ReuseDetector` measures similarity via AST-node-type-sequence edit distance, not embeddings — deterministic, local-first, consistent with Pillar 3's existing algorithm pattern |
 
 ---
 
@@ -80,6 +80,10 @@ Numbers are sequential and never reused, even if superseded.
 ---
 
 ## Recent ADR Changes
+
+### 2026-07-02 (task-010 GATE 6)
+- ADR-009 ACCEPTED: ADR cross-reference strategy (regex/text extraction, not markdown AST)
+- ADR-010 ACCEPTED: Reuse discovery algorithm (AST-node-type-sequence edit distance, not embeddings)
 
 ### 2026-06-27 (Initial Bootstrap)
 - ADR-001 ACCEPTED: Multi-agent orchestration system

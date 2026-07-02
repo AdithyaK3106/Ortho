@@ -64,70 +64,78 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” GATE 3 SUBMITTED
+### task-010: ADR Awareness + Reporting (Week 13–14) — ✅ COMPLETED
 
-**State:** IMPLEMENTED (pending GATE 3 human scope review)  
-**Workflow:** `.ases/workflows/feature.md`  
-**Started:** 2026-07-02  
-**Phase:** Phase 2 (Reasoning)
+**State:** ✅ COMMITTED (All 6 gates approved)
+**Workflow:** `.ases/workflows/feature.md`
+**Completed:** 2026-07-02
+**Final Commit:** `3af9f3a`
 
-**GATE 1: Plan Approval â€” âœ… APPROVED** (2026-07-02, human)
+**All 6 ASES Gates Complete:**
 
-**GATE 2: Architecture Approval â€” âœ… APPROVED** (2026-07-02, human)
-
-**GATE 3: Implementation Scope Review â€” â³ SUBMITTED, awaiting human review**
-
-**BUILDER Implementation Summary:**
-- âœ“ Task 1 (`ab22be7`): ADRTracker core â€” 14 tests
-- âœ“ Task 2 (`be06fbe`): ADRTracker + ArchitectureModel cross-ref â€” 6 tests
-- âœ“ Task 3 (`37250f9`): ReuseDetector core â€” 13 tests
-- âœ“ Task 4 (`f5ec147`): ReuseDetector confidence + evidence (dedup fix) â€” 2 tests
-- âœ“ Task 5 (`66a066f`): CLI integration + `--impact` fix, isolated commit â€” 10 tests
-- âš  2 documented deviations: fixed two pre-existing CLI wiring bugs (analyzeCommand never
-  registered in index.ts; broken `python -m` module path) that were blocking task-010's own
-  acceptance criteria from being reachable through the actual CLI â€” see implementation-notes.md
-  "Deviations From plan.md" for full justification
-- Zero regressions: arch-intelligence 70/70, repo-intelligence 85/85, impact-analysis 42/42,
-  apps/cli 10/10, `tsc --noEmit` clean, jest 6/6
-
-**Architecture Review Findings:**
-- âœ“ Module boundaries: 2 new isolated modules (`adr_tracker.py`, `reuse_detector.py`), no circular deps
-- âœ“ Dependency flow: acyclic; `reuse_detector.py` reuses `SymbolExtractor`'s parser (read-only), `adr_tracker.py` has zero repo-intelligence/impact-analysis dependency (stdlib `re`/`pathlib` only)
-- âœ“ API contracts: `ADRTracker.check_adrs()`, `ReuseDetector.find_similar()` both stateless/deterministic, consistent with task-008/009 pattern
-- âœ“ Storage layer verified: `symbols` table already has `file_id` column â€” confirms the CLI's join-by-file-path workaround (documented in spec.md's Known Gap) is sound, no schema change needed
-- âœ“ ADR-009 (ADR cross-reference: regex/text extraction, not markdown AST) and ADR-010 (reuse similarity: AST-type-sequence edit distance, not embeddings) drafted, PROPOSED
-- âš  Two out-of-scope findings recorded (do not block GATE 2, do not expand task-010 scope):
-  1. Two incompatible `Symbol` classes exist across `repo_intelligence` and `impact_analysis` packages (different field sets, same name) â€” pre-existing, task-010 correctly uses the one it was specified against, future consolidation is separately ADR-worthy
-  2. Orphaned dead code in `arch-intelligence` (`detector.py`, `detection_types.py`, `models.py`) â€” never imported outside itself, predates task-008's accepted architecture, flagged for future cleanup
+✓ **GATE 1: PLANNER** — plan.md, spec.md, rollback-plan.md approved (repository-independent
+acceptance criteria, fully-specified ADR extraction contract, per a pre-approval revision pass)
+✓ **GATE 2: ARCHITECT** — architecture-review.md approved; ADR-009 (ADR cross-reference: regex/text
+extraction, not markdown AST) and ADR-010 (reuse similarity: AST-node-type-sequence edit distance,
+not embeddings) drafted
+✓ **GATE 3: BUILDER** — implementation-notes.md approved; 5 atomic tasks, each its own commit
+(`ab22be7`, `be06fbe`, `37250f9`, `f5ec147`, `66a066f`)
+✓ **GATE 4: TEST-DESIGNER** — test-plan.md, produced by an independent fresh-context subagent
+(zero BUILDER context) per feature.md's requirement; found a real cluster-ordering defect, fixed
+(`d531e0d`)
+✓ **GATE 5: VERIFIER** — verification-report.md, Mode A (real pytest/tsc execution, evidence in
+`.ases/evidence/task-010/`); status VERIFIED
+✓ **GATE 6: REVIEWER** — review.md, produced by a second independent fresh-context subagent;
+verdict APPROVED
 
 **What This Task Does:**
 Implements the final two Pillar 3 features from the FRD feature table (ADR awareness, reuse
-discovery) and fixes the `ortho analyze --impact` stub that currently loads empty graphs
-(`apps/cli/src/commands/analyze.py:31-34`), which blocks the FRD Phase 2 exit criterion.
+discovery) and fixes the `ortho analyze --impact` stub that previously loaded empty graphs
+regardless of input, closing the FRD Phase 2 exit criterion.
 
 **Key Components:**
-- ADRTracker (cross-references `.ases/architecture/adrs/*.md` against the repo tree; OK/STALE/UNLINKED/UNKNOWN)
-- ReuseDetector (AST-type-sequence structural similarity via existing tree-sitter parser, no ML/embeddings)
-- CLI: `ortho analyze --adr-check`, `ortho analyze --reuse`, and `--impact` wired to real `OrthoDatabase` graphs + task-009's `ImpactAnalyzer`
+- `ADRTracker` (cross-references `.ases/architecture/adrs/*.md` against the repo tree;
+  OK/STALE/UNLINKED/UNKNOWN, plus `check_subsystem_coverage` heuristic hint against
+  task-008's `ArchitectureModel`)
+- `ReuseDetector` (AST-node-type-sequence structural similarity via `difflib.SequenceMatcher`,
+  no ML/embeddings, union-find dedup of overlapping pairwise matches)
+- CLI: `ortho analyze --adr-check`, `ortho analyze --reuse`, and `--impact` wired to real
+  `OrthoDatabase` graphs + task-009's `ImpactAnalyzer` (previously unreachable — `analyzeCommand`
+  was never registered in `index.ts` and spawned a nonexistent Python module path; both fixed as
+  blocking preconditions, documented as deviations)
 
-**Artifacts Approved (GATE 1):**
-- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/plan.md` (5 atomic tasks, risks, repository-independent acceptance criteria)
-- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/spec.md` (fully-specified ADR extraction contract, threshold config policy, benchmark environment, validation baseline)
-- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/rollback-plan.md`
+**Two real bugs found and fixed during development (both by test execution, not manual review):**
+1. **Similarity symmetry** — `difflib.SequenceMatcher.ratio()` is not guaranteed symmetric; found
+   by widening a hypothesis property test's generator during a self-audit. Fixed by averaging both
+   directions (`4e155f3`).
+2. **Cluster ordering** — output order depended on `symbols_by_file` dict insertion order (which
+   the CLI's `Path.rglob()` doesn't guarantee) when clusters tied on similarity. Found by an
+   independent fresh-context TEST-DESIGNER subagent. Fixed with a secondary sort key (`d531e0d`).
 
-**Artifacts Approved (GATE 2):**
-- âœ“ `.ases/tasks/task-010-adr-awareness-reporting/architecture-review.md` (verdict: APPROVED)
-- âœ“ `.ases/architecture/adrs/ADR-009-adr-cross-reference-strategy.md` (PROPOSED, pending final ACCEPTED status at ADR lock-in)
-- âœ“ `.ases/architecture/adrs/ADR-010-reuse-similarity-algorithm.md` (PROPOSED, pending final ACCEPTED status at ADR lock-in)
+**Final Test Results:**
+- `packages/arch-intelligence/tests/`: 76/76 passing (95% coverage on both new modules, target ≥85%)
+- `apps/cli/tests/`: 16/16 passing (includes real subprocess-level CLI invocation tests, not just
+  in-process method calls)
+- Zero regressions: `repo-intelligence` 85/85, `impact-analysis` 42/42 unchanged
+- `tsc --noEmit` clean, `jest` 6/6
 
-**Artifacts Submitted (GATE 3):**
-- `.ases/tasks/task-010-adr-awareness-reporting/implementation-notes.md`
+**Two out-of-scope findings flagged for future tasks (not fixed here):**
+1. Two incompatible `Symbol` classes across `repo_intelligence`/`impact_analysis` (different field
+   sets, same name) — task-010 correctly used each where specified
+2. Orphaned dead code in `arch-intelligence` (`detector.py`, `detection_types.py`, `models.py`) —
+   predates task-008, never imported outside itself
 
-**Next Step:** Human reviews implementation-notes.md at GATE 3 (files created/modified match
-spec.md, deviations are documented and justified). If approved, proceed to TEST-DESIGNER (GATE 4)
-â€” note: test suites were written concurrently with each atomic task in this session rather than
-in a separate fresh-context phase; GATE 4 can treat the existing tests as the TEST-DESIGNER
-artifact or commission an independent fresh-context audit per feature.md's normal requirement.
+**Evidence Artifacts:**
+- `.ases/tasks/task-010-adr-awareness-reporting/` (plan, spec, rollback-plan, architecture-review,
+  implementation-notes, test-plan, verification-report, review)
+- `.ases/evidence/task-010/` (10 real pytest/tsc logs with exit codes and timestamps)
+- `.ases/architecture/adrs/ADR-009-adr-cross-reference-strategy.md`,
+  `ADR-010-reuse-similarity-algorithm.md`
+
+**Phase 2 Status:** With task-010 complete, all Phase 2 (Weeks 9–14) tasks are done
+(task-008 Architecture Detection, task-009 Impact Analysis + Debt Scoring, task-010 ADR Awareness
++ Reporting). Per FRD, Phase 2 exit criteria (architectural style detection, `--impact` blast
+radius, circular dependency detection) are met.
 
 ---
 

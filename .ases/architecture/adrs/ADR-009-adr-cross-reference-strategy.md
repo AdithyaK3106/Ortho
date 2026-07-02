@@ -1,9 +1,9 @@
 # ADR-009: ADR Cross-Reference Strategy — Markdown-Text Extraction, Not a Markdown AST
 
-**Status:** PROPOSED
+**Status:** ACCEPTED
 **Date:** 2026-07-02
 **Author:** ARCHITECT
-**Approved by:** [Pending human approval]
+**Approved by:** Human, via task-010 GATE 6 approval on 2026-07-02
 
 ---
 

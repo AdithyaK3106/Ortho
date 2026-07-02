@@ -6,12 +6,13 @@
 **Previous Phase:** Phase 1 Foundation (100% complete, 2026-06-30 to 2026-07-01)  
 **Goal:** Complete Python parsing, call graphs, and incremental indexing. Integrate context hub for search and retrieval.
 
-**Status:** Phase 2 IN PROGRESS ✅
+**Status:** Phase 2 COMPLETE ✅
 - Phase 1: 252/265 tests passing (95%) — COMPLETE
+- task-010 (ADR Awareness + Reporting): ✅ COMMITTED (76/76 tests, 95%/95% coverage, GATE 6 APPROVED)
 - task-009 (Impact Analysis + Debt Scoring): ✅ MERGED (42/42 tests, 100%, 98% coverage, GATE 6 APPROVED)
 - task-008 (Architecture Detection): ✅ MERGED (35/35 tests, 100%, GATE 6 APPROVED)
 - All issues resolved (test bugs fixed, type consolidation completed)
-- task-010 (ADR Awareness + Reporting): ✅ GATE 1 APPROVED, ready for ARCHITECT
+- Phase 2 exit criteria met (architectural style detection, `--impact` blast radius, circular dependency detection)
 
 ---
 
@@ -122,24 +123,9 @@
 
 ## Active Tasks
 
-**Current:** task-010 (ADR Awareness + Reporting, Week 13–14)
-- Status: GATE 3 SUBMITTED (2026-07-02) — implementation-notes.md awaiting human scope review
-- Scope: ADRTracker (ADR-vs-code cross-reference), ReuseDetector (AST structural similarity),
-  CLI wiring (`--adr-check`, `--reuse`), fix `--impact` stub to use real graphs
-- Artifacts: `.ases/tasks/task-010-adr-awareness-reporting/` (plan, spec, rollback-plan,
-  architecture-review, implementation-notes)
-- ADRs drafted: ADR-009 (ADR cross-reference strategy), ADR-010 (reuse similarity algorithm) — both PROPOSED
-- Commits: `ab22be7` (Task 1), `be06fbe` (Task 2), `37250f9` (Task 3), `f5ec147` (Task 4),
-  `66a066f` (Task 5, isolated per rollback-plan.md)
-- Tests: 45 new (arch-intelligence: 20 ADRTracker + 15 ReuseDetector; apps/cli: 10), zero
-  regressions across all 4 affected packages
-- 2 documented deviations: fixed pre-existing CLI wiring bugs (analyzeCommand unregistered in
-  index.ts, broken python -m module path) that blocked task-010's own acceptance criteria — see
-  implementation-notes.md
-- Out-of-scope findings from architecture review (not task-010 defects, flagged for future tasks):
-  duplicate `Symbol` types across repo-intelligence/impact-analysis; orphaned dead code in
-  arch-intelligence (`detector.py`/`detection_types.py`/`models.py`)
-- Next: Human approves GATE 3, then TEST-DESIGNER/VERIFIER (GATE 4/5)
+**Next:** task-011 (TBD — Phase 3 planning)
+- Status: Not started
+- Scope: TBD
 
 ---
 
@@ -156,6 +142,7 @@
 | task-007 | Incremental Indexing + ortho scan (Week 5–6) | feature.md | ffa6c6b | 2026-07-01 | GATE-6 ✓ |
 | task-008 | Architecture Detection (Pillar 3) | feature.md | 478b24c | 2026-07-02 | GATE-6 ✓ |
 | task-009 | Impact Analysis + Debt Scoring (Pillar 2) | feature.md | c2c8201 | 2026-07-02 | GATE-6 ✅ |
+| task-010 | ADR Awareness + Reporting (Week 13–14) | feature.md | 3af9f3a | 2026-07-02 | GATE-6 ✅ |
 
 ---
 
