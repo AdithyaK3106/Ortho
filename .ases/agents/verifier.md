@@ -267,6 +267,7 @@ You verify these gates in this order:
 2. **ARCH-APPROVED** — `.ases/tasks/[task-id]/architecture-review.md` exists and human approved it (or waived)
 3. **SPEC-APPROVED** — `.ases/tasks/[task-id]/spec.md` exists and human approved it
 4. **ROLLBACK-PLAN** — `.ases/tasks/[task-id]/rollback-plan.md` exists
+4.5. **CONTRACT-VALID (ASES v2)** — `.ases/tasks/[task-id]/contract-report.md` exists with verdict "Contract Valid" (produced by API CONTRACT GATE before you began; you may assume this was already checked at GATE 4, but if it's missing or shows a non-Valid verdict, declare BLOCKED rather than proceeding)
 5. **BUILD-PASSED** — Build log shows exit 0 (no type errors, no compilation errors)
 6. **LINT-PASSED** — Lint log shows exit 0 (no linting errors)
 7. **TYPE-CHECK-PASSED** — Type check log shows exit 0 (no type errors, if applicable)

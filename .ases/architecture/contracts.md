@@ -7,6 +7,12 @@ This file documents all API contracts between modules. Populated during ARCHITEC
 
 ---
 
+## Source of Truth
+
+See [source-of-truth.md](./source-of-truth.md) for artifact precedence and conflict resolution when implementation, tests, architecture, or specification disagree.
+
+---
+
 ## Contract Format
 
 ```

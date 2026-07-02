@@ -51,6 +51,9 @@ TEST-DESIGNER session (MUST be fresh — zero BUILDER context)
   produces: tests + test-plan.md
   task state: IMPLEMENTED → TESTS-WRITTEN
     ↓
+API CONTRACT GATE session (ASES v2 — reads spec.md, architecture-review.md, actual implementation, actual tests)
+  produces: contract-report.md (verdict: Contract Valid | Builder Deviated | Tests Deviated | Specification Ambiguous)
+    ↓
 [GATE 4: Test Coverage Review]
     ↓
 Human reviews test-plan.md before VERIFIER runs
@@ -169,6 +172,7 @@ CLAUDE.md updated: task moved to COMPLETED
 **Required Artifact:**
 - `.ases/tasks/[task-id]/test-plan.md` — Tests per criterion, integration tests, edge cases, failure scenarios
 - **NEW:** Sample working tests (≥5) with evidence of property-based testing (hypothesis) if applicable
+- **NEW (ASES v2):** `.ases/tasks/[task-id]/contract-report.md` — produced by an API CONTRACT GATE session run after TEST-DESIGNER, before VERIFIER (see `.ases/agents/api-contract-gate.md`)
 
 **Human Review Checklist:**
 - [ ] ≥1 test per acceptance criterion (from spec.md)
@@ -180,10 +184,12 @@ CLAUDE.md updated: task moved to COMPLETED
 - [ ] Tests can actually run (no syntax errors in examples)
 - [ ] **NEW:** ≥1 property-based test included (uses hypothesis with ≥10 generated cases)
 - [ ] **NEW:** ≥1 real-repo scan test designed (uses actual codebase, not mocks)
+- [ ] **NEW (ASES v2):** contract-report.md verdict is "Contract Valid" (if not, do not approve — send back to the role named in its Recommendation section)
 
 **Valid Decisions:**
-- ✓ **APPROVED** — Test coverage is comprehensive (unit + property + real-repo), proceed to VERIFIER
+- ✓ **APPROVED** — Test coverage is comprehensive (unit + property + real-repo) AND contract-report.md verdict is Contract Valid, proceed to VERIFIER
 - ✗ **SEND BACK TO TEST-DESIGNER** — Coverage gaps (missing property tests, no real-repo scan, or only happy path)
+- ✗ **SEND BACK PER CONTRACT VERDICT** — If contract-report.md verdict is Builder Deviated, Tests Deviated, or Specification Ambiguous, route to the specific role named in the Recommendation section (never both BUILDER and TEST-DESIGNER at once)
 
 **Transition:**
 - If APPROVED: Move task to VERIFICATION state, proceed to VERIFIER session
@@ -282,7 +288,7 @@ IMPLEMENTED (new session, fix issue)
 2. **Bug in tests** → TEST-DESIGNER fixes tests (new session), resubmit
 3. **Legitimate test failure** (test is correct, code is wrong) → BUILDER fixes code, resubmit
 
-**Recovery:** Depends on root cause. Either BUILDER or TEST-DESIGNER fixes and resubmits.
+**Recovery:** Depends on root cause. Either BUILDER or TEST-DESIGNER fixes and resubmits. **(ASES v2)** For API-mismatch-shaped failures (implementation and tests disagree about a signature or constructor), an ARCHITECTURE ARBITRATION session (see `.ases/agents/architecture-arbitrator.md`) determines root cause objectively before deciding BUILDER vs TEST-DESIGNER rework — this is the same failure mode the API CONTRACT GATE at GATE 4 is designed to catch earlier; arbitration is the fallback for tasks where it wasn't caught there.
 
 ### If REGRESSION fails (new test failures)
 

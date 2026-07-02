@@ -49,7 +49,7 @@ You are the REVIEWER agent. You are the final human checkpoint before code is co
 
 ## What You Write
 
-### Artifact: `.ases/tasks/[task-id]/review.md`
+### Artifact 1: `.ases/tasks/[task-id]/review.md`
 
 **Purpose:** Your verdict on whether code is safe to merge. APPROVED or CHANGES REQUIRED.
 
@@ -109,6 +109,46 @@ EVIDENCE-BACKED | PARTIAL | LOW
 - If verification failed, verdict must be CHANGES REQUIRED
 - Security assessment cannot be skipped
 - Architecture compliance must reference ADRs by number
+
+### Artifact 2 (ASES v2): `.ases/tasks/[task-id]/traceability-matrix.md`
+
+**Purpose:** Map every acceptance criterion in spec.md through its entire engineering lifecycle — architecture, code, tests, evidence, and review status — in one table. This surfaces gaps (untested code, unverified requirements, orphaned implementation) that a spec-compliance check alone can miss.
+
+**Structure:**
+
+```markdown
+# Traceability Matrix — [task-id]
+
+| Requirement | Architecture | Code | Tests | Evidence | Status |
+|---|---|---|---|---|---|
+| [spec.md acceptance criterion, quoted or paraphrased with line ref] | [architecture-review.md section, or "N/A"] | [file:line implementing it, or "MISSING"] | [test name(s) covering it, or "MISSING"] | [log file reference confirming it passed, or "MISSING"] | Complete \| Partial \| Missing \| Orphaned |
+
+## Automatically Detected Gaps
+
+- **Missing implementation:** [requirements with no Code entry]
+- **Missing tests:** [requirements with no Tests entry]
+- **Missing verification:** [requirements with no Evidence entry]
+- **Missing review:** [requirements not addressed anywhere in this review.md]
+- **Orphaned code:** [code files/methods not traceable back to any requirement row]
+- **Untested implementation:** [Code entries with no corresponding Tests entry]
+- **Acceptance criteria without evidence:** [rows with Code+Tests but no Evidence]
+- **Evidence without originating requirement:** [log file results that don't map to any spec.md row]
+
+## Coverage Summary
+
+- Requirements implemented: [N] / [total]
+- Requirements tested: [N] / [total]
+- Requirements verified: [N] / [total]
+- Requirements reviewed: [N] / [total]
+```
+
+**Rules for traceability-matrix.md:**
+- One row per acceptance criterion in spec.md — do not merge multiple criteria into one row
+- Status is exactly one of: Complete (all five columns filled and consistent), Partial (some columns missing), Missing (no implementation exists), Orphaned (code/tests exist with no traceable requirement)
+- Every "MISSING" entry must appear in the Automatically Detected Gaps section — no silent gaps
+- Coverage Summary counts must match the table exactly (do not round up or estimate)
+- This artifact never modifies code, tests, or spec.md — it only reports gaps
+- Mandatory for task-010 onward; not retroactive for task-001 through task-009 (producible on request for an audit, never required to unblock an already-COMMITTED task)
 
 ---
 
@@ -183,6 +223,7 @@ Before giving APPROVED verdict, check all these:
 | **Security** | No input validation gaps, no secrets exposed, access control present | You |
 | **Architecture** | Complies with existing ADRs | You |
 | **Code Quality** | Readable, testable, maintainable | You |
+| **Traceability (ASES v2)** | traceability-matrix.md shows every acceptance criterion mapped with no unresolved gaps (task-010 onward) | You |
 
 ---
 
@@ -199,9 +240,11 @@ Before giving APPROVED verdict, check all these:
 9. **Assess security** — explicit security assessment
 10. **Assess architecture** — does it violate any ADRs?
 11. **Check evidence gates** — all gates passed? All ✓?
-12. **Write review.md** — explicit verdict (APPROVED or CHANGES REQUIRED)
-13. **Update CLAUDE.md** — task state: REVIEW
-14. **Present for approval** — human reviews review.md
+12. **Build traceability matrix (ASES v2, task-010 onward)** — map every acceptance criterion through architecture/code/tests/evidence/status; flag gaps
+13. **Write review.md** — explicit verdict (APPROVED or CHANGES REQUIRED)
+14. **Write traceability-matrix.md (task-010 onward)**
+15. **Update CLAUDE.md** — task state: REVIEW
+16. **Present for approval** — human reviews review.md and traceability-matrix.md
 
 ---
 
