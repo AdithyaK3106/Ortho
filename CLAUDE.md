@@ -64,6 +64,40 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
+### task-008: Architecture Detection (Week 9–10) — ⏳ GATE 1 REVIEW
+
+**State:** PLANNED (Awaiting human review at GATE 1)  
+**Workflow:** `.ases/workflows/feature.md`  
+**Started:** 2026-07-02  
+**Phase:** Phase 2 (Reasoning)
+
+**GATE 1: Plan Approval — PENDING HUMAN REVIEW**
+
+**Artifacts Submitted:**
+- ✓ `.ases/tasks/task-008-architecture-detection/plan.md` (5 atomic tasks, risks, rollback)
+- ✓ `.ases/tasks/task-008-architecture-detection/spec.md` (component contracts, patterns, success criteria)
+- ✓ `.ases/tasks/task-008-architecture-detection/rollback-plan.md` (triggers, procedures, verification)
+
+**What This Task Does:**
+Implement Pillar 3 (Architectural Intelligence): detect repo architecture patterns (layered, hexagonal, mvc, microservices, flat) from call/import graphs. Output: ArchitectureModel with detected style, confidence score (0.0–1.0), extracted layers/subsystems, and evidence justifications.
+
+**Key Components:**
+- ArchitectureDetector (pattern matching: 5 detectors)
+- LayerDetector (topological sort + semantic naming)
+- SubsystemDetector (Louvain clustering + coupling score)
+- ArchitectureModelStore (SQLite persistence)
+- `ortho analyze` CLI command
+
+**Expected Deliverables:**
+- New package: `packages/arch-intelligence/` (4 modules + store)
+- 65+ tests (unit + integration + edge cases)
+- ≥85% code coverage
+- Zero regressions in repo-intelligence + context-hub
+
+**Next Step:** Human reviews plan/spec/rollback at GATE 1. If approved → ARCHITECT session.
+
+---
+
 ### task-006: Complete Python Adapter (Week 3–4 continued) — ✅ COMPLETED
 
 **State:** ✅ COMMITTED (All 6 gates approved)  
