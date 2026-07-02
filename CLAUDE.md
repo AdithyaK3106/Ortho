@@ -64,13 +64,28 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-008: Architecture Detection (Week 9–10) — ✅ GATE 1 APPROVED
+### task-008: Architecture Detection (Week 9–10) — ✅ GATE 2 APPROVED
 
-**State:** ARCH-REVIEW (Awaiting ARCHITECT review at GATE 2)  
+**State:** READY-TO-BUILD (Awaiting BUILDER to implement Task 1–5)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)  
-**Commit:** 62c9307 (GATE 1 APPROVED)
+**Commits:** 62c9307 (GATE 1), 9e5e157 (GATE 1 status), 079465d (GATE 2 APPROVED)
+
+**GATE 1: Plan Approval — ✅ APPROVED**
+
+**GATE 2: Architecture Approval — ✅ APPROVED**
+
+**Architecture Review Findings:**
+- ✓ Module boundaries: 4 focused modules (arch_detector, layer_detector, subsystem_detector, model_store)
+- ✓ No circular dependencies; acyclic import chain
+- ✓ All dependencies flow downward (toward shared/)
+- ✓ Shared data contracts: CallEdge, Symbol, File, ImportEdge (inputs); ArchitectureModel, Layer, Subsystem (outputs)
+- ✓ API contracts: ArchitectureDetector.detect(), LayerDetector.extract_layers(), SubsystemDetector.detect_subsystems() all deterministic
+- ✓ Confidence model: complete aggregation algorithm with deterministic tie-breaking
+- ✓ Architecture Decisions: 3 ADRs (Louvain clustering, topological sort, deterministic scoring) with full justifications
+- ✓ Risk mitigations: cyclic imports handling, Louvain reproducibility, performance analysis
+- ✓ FRD compliance: covers 3 of 10 Pillar 3 features (core detection, layer/subsystem extraction)
 
 **GATE 1: Plan Approval — ✅ APPROVED**
 
@@ -103,7 +118,7 @@ Implement Pillar 3 (Architectural Intelligence): detect repo architecture patter
 - ≥85% code coverage
 - Zero regressions in repo-intelligence + context-hub
 
-**Next Step:** ARCHITECT reviews plan/spec/architecture-review.md at GATE 2. If approved → BUILDER implements.
+**Next Step:** BUILDER implements 5 atomic tasks (Task 1–5). TEST-DESIGNER shadows concurrently (GATE 3 scope review after implementation complete).
 
 ---
 
