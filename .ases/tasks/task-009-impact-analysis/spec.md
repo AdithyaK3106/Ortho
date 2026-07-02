@@ -19,22 +19,26 @@ Implement Pillar 3 (Architectural Intelligence) components for:
 ### Purpose
 Answer: "If I change file X, what other files could break?"
 
+### Stateless Pattern (Consistent with Task-008)
+
+All analyzers follow the stateless pattern established by ArchitectureDetector (task-008):
+- No constructor state
+- All data passed as function arguments
+- Pure functions with deterministic outputs
+- Enables dependency injection and testability
+
 ### Class: `ImpactAnalyzer`
 
 ```python
 class ImpactAnalyzer:
-    def __init__(self, call_graph: dict, import_graph: dict):
-        """
-        call_graph: dict[symbol_id] -> list[symbol_id]  (caller -> list of callees)
-        import_graph: dict[file_id] -> list[file_id]    (importer -> list of imported files)
-        """
-        self.call_graph = call_graph
-        self.import_graph = import_graph
+    """Analyzes change impact by traversing call and import graphs."""
     
     def analyze(
         self,
+        call_graph: list[CallEdge],
+        import_graph: list[ImportEdge],
         changed_file_id: str,
-        depth: int = 3
+        depth: int = 3,
     ) -> ImpactReport:
         """
         Traverse call and import graphs starting from changed_file_id.
@@ -47,6 +51,8 @@ class ImpactAnalyzer:
         5. Compute risk_score based on centrality (fan-in + fan-out)
         
         Args:
+            call_graph: List of CallEdge objects (call relationships)
+            import_graph: List of ImportEdge objects (import relationships)
             changed_file_id: File being modified
             depth: How many hops to traverse (default 3)
         
@@ -56,16 +62,19 @@ class ImpactAnalyzer:
         Edge cases:
         - File not in graphs → return empty report with risk_score=0.0
         - Cycles in graph → use visited set to prevent infinite loop
-        - Symbol not found → skip (confidence < 1.0)
+        - Symbol not found → skip (analysis confidence < 1.0)
         """
         ...
     
     def analyze_symbol(
         self,
+        call_graph: list[CallEdge],
+        import_graph: list[ImportEdge],
+        symbols: list[Symbol],
         symbol_id: str,
-        depth: int = 3
+        depth: int = 3,
     ) -> ImpactReport:
-        """Variant: analyze by symbol instead of file."""
+        """Variant: analyze by symbol instead of file (stateless)."""
         ...
 ```
 
@@ -77,15 +86,33 @@ class ImpactReport:
     changed_file_id: str
     direct_dependents: list[str]          # File IDs that directly depend
     transitive_dependents: list[str]      # All reachable within depth
-    risk_score: float                     # 0.0–1.0
+    risk_score: float                     # 0.0–1.0 (engineering impact)
+    analysis_confidence: float            # 0.0–1.0 (certainty of analysis)
     blast_radius: int                     # len(transitive_dependents)
     evidence: list[str]                   # Human-readable justifications
     
     def __post_init__(self):
         # Validate scores
         assert 0.0 <= self.risk_score <= 1.0, "risk_score must be 0.0–1.0"
+        assert 0.0 <= self.analysis_confidence <= 1.0, "analysis_confidence must be 0.0–1.0"
         assert self.blast_radius >= 0, "blast_radius must be non-negative"
 ```
+
+### Risk Score vs Analysis Confidence
+
+**Risk Score** (0.0–1.0)
+- Represents: Estimated engineering impact if this file changes
+- Derives from: Dependency centrality, blast radius, graph connectivity
+- Example: High fan-in file has risk_score ≈ 0.8 (changing it affects many modules)
+- Interpretation: How risky is this change?
+
+**Analysis Confidence** (0.0–1.0)
+- Represents: Certainty that the static analysis is correct
+- Limited by: Dynamic dispatch, unresolved symbols, incomplete graphs
+- Example: Dynamic method calls reduce confidence (confidence ≈ 0.5)
+- Interpretation: How certain are we about this analysis?
+
+**Key distinction:** A file can have **high risk but low confidence** (central but calls unresolved), or **low risk with high confidence** (isolated and well-analyzed).
 
 ### Risk Score Computation
 
@@ -100,6 +127,18 @@ num_symbols = number of symbols in changed file (default 1 if unknown)
 ```
 
 **Intuition:** A file that is imported by many files (high fan_in) is central and risky to change.
+
+**Analysis Confidence Computation**
+
+```
+confidence = 1.0 - (unresolved_symbols / total_symbols)
+
+where:
+  unresolved_symbols = symbols that could not be resolved (dynamic dispatch, etc.)
+  total_symbols = all symbols in call/import analysis
+  
+Default: 1.0 if all symbols resolved, 0.0 if all unresolved.
+```
 
 ### Tests (13+ total)
 
@@ -132,27 +171,37 @@ Answer: "Which modules are highest tech debt?"
 
 ```python
 class DebtScorer:
-    def __init__(
+    """Computes multi-dimensional technical debt scores per module (stateless)."""
+    
+    # Default scoring weights (Phase 1 configuration)
+    # These can be customized in future versions
+    DEFAULT_WEIGHTS = {
+        "coupling": 0.30,
+        "churn": 0.20,
+        "complexity": 0.20,
+        "test_coverage": 0.20,
+        "other": 0.10,
+    }
+    
+    def score_module(
         self,
-        call_graph: dict,
-        import_graph: dict,
+        file_id: str,
+        call_graph: list[CallEdge],
+        import_graph: list[ImportEdge],
         symbols: list[Symbol],
-        git_metadata: dict[str, GitFileMetadata]
-    ):
-        """
-        git_metadata: dict[file_path] -> GitFileMetadata
-            - commits_30d: int
-            - last_modified: datetime
-            - size_bytes: int
-        """
+        git_metadata: dict[str, GitFileMetadata],
+    ) -> DebtScore:
+        """Compute debt score for a single file (stateless)."""
         ...
     
-    def score_module(self, file_id: str) -> DebtScore:
-        """Compute debt score for a single file."""
-        ...
-    
-    def score_all_modules(self) -> list[DebtScore]:
-        """Compute scores for all files, sorted by total_score desc."""
+    def score_all_modules(
+        self,
+        call_graph: list[CallEdge],
+        import_graph: list[ImportEdge],
+        symbols: list[Symbol],
+        git_metadata: dict[str, GitFileMetadata],
+    ) -> list[DebtScore]:
+        """Compute scores for all files, sorted by total_score desc (stateless)."""
         ...
 ```
 
@@ -162,12 +211,12 @@ class DebtScorer:
 @dataclass
 class DebtScore:
     module_id: str
-    total_score: float          # 0.0–1.0 (weighted average)
-    coupling_score: float       # 0.0–1.0
-    churn_score: float          # 0.0–1.0
-    complexity_score: float     # 0.0–1.0
-    test_coverage_score: float  # 0.0–1.0
-    evidence: list[str]         # One line per dimension
+    total_score: float          # 0.0–1.0 (weighted average of dimensions)
+    coupling_score: float       # 0.0–1.0 (dependency centrality)
+    churn_score: float          # 0.0–1.0 (commit frequency)
+    complexity_score: float     # 0.0–1.0 (AST nesting depth)
+    test_coverage_score: float  # 0.0–1.0 (presence of tests)
+    evidence: list[str]         # One line justification per dimension
     
     def __post_init__(self):
         for score in [self.total_score, self.coupling_score, self.churn_score,
@@ -175,9 +224,26 @@ class DebtScore:
             assert 0.0 <= score <= 1.0, f"All scores must be 0.0–1.0, got {score}"
 ```
 
+### Scoring Configuration (Phase 1 Defaults)
+
+Task-009 uses the following default weights for the total score calculation.
+These are documented defaults, not architectural constants.
+Future versions may expose these weights through configuration.
+
+**Default Weights:**
+- Coupling: 30% (dependency centrality)
+- Churn: 20% (change frequency)
+- Complexity: 20% (code nesting depth)
+- Test Coverage: 20% (presence of tests)
+- Other: 10% (reserved for future metrics)
+
+Note: Changing weights does not change the architecture or algorithm.
+The implementation uses these documented defaults in Phase 1.
+
 ### Scoring Formulas
 
-**1. Coupling Score**
+**1. Coupling Score** (30% weight)
+
 ```
 coupling = (fan_in + fan_out) / (2 * num_files_in_module)
 clamped to [0.0, 1.0]
@@ -188,7 +254,8 @@ Interpretation:
 - 1.0: Hub module (many dependents and dependencies)
 ```
 
-**2. Churn Score**
+**2. Churn Score** (20% weight)
+
 ```
 churn = min(1.0, commits_30_days / 20)
 
@@ -197,10 +264,13 @@ Interpretation:
 - 0.5: 10 commits in 30 days (moderate)
 - 1.0: 20+ commits in 30 days (very active)
 
-Rationale: Frequently changed files are risky.
+Rationale: Frequently changed files are risky and benefit from refactoring.
+Default threshold (20 commits/30d) works well for typical Python repos.
+Larger repositories may require calibration.
 ```
 
-**3. Complexity Score**
+**3. Complexity Score** (20% weight)
+
 ```
 complexity = min(1.0, avg_ast_depth / 8)
 
@@ -211,9 +281,13 @@ Interpretation:
 - 0.0: Simple functions (depth ≤ 2)
 - 0.5: Moderately nested (depth ~ 4)
 - 1.0: Deep nesting (depth ≥ 8)
+
+Default threshold (depth 8) is practical for most Python code.
+Deeper nesting indicates poor maintainability.
 ```
 
-**4. Test Coverage Score**
+**4. Test Coverage Score** (20% weight)
+
 ```
 if test_*.py exists in same package:
   test_coverage = 0.0 (has tests, good)
@@ -227,13 +301,14 @@ Interpretation:
 - 1.0: No tests
 ```
 
-**5. Total Score (Weighted Average)**
+**5. Total Score** (Weighted Average)
+
 ```
-total = 0.3 * coupling 
-      + 0.2 * churn 
-      + 0.2 * complexity 
-      + 0.2 * test_coverage 
-      + 0.1 * (other factors: size, age, etc.)
+total = 0.30 * coupling 
+      + 0.20 * churn 
+      + 0.20 * complexity 
+      + 0.20 * test_coverage 
+      + 0.10 * (other factors: size, age, etc.)
 ```
 
 ### Tests (21+ total)
@@ -265,28 +340,59 @@ total = 0.3 * coupling
 ### Purpose
 Answer: "Which dependencies are problematic?"
 
+### Dependency Thresholds (Phase 1 Defaults)
+
+Task-009 uses the following default thresholds to identify problematic patterns.
+These are documented defaults for typical Python repositories, not universal constants.
+
+**Default Thresholds:**
+- High fan-in: > 10 dependents
+- High fan-out: > 15 dependencies  
+- Hub detection: fan-in > 8 AND fan-out > 8
+
+Note: Larger repositories may require threshold calibration.
+Future versions may normalize thresholds relative to repository size.
+The implementation uses these documented defaults in Phase 1.
+
 ### Class: `DependencyHealthAnalyzer`
 
 ```python
 class DependencyHealthAnalyzer:
-    def __init__(
+    """Analyzes dependency health and identifies problematic patterns (stateless)."""
+    
+    # Phase 1 default thresholds (configurable in future)
+    DEFAULT_THRESHOLDS = {
+        "high_fan_in": 10,
+        "high_fan_out": 15,
+        "hub_fan_in": 8,
+        "hub_fan_out": 8,
+    }
+    
+    def analyze_module(
         self,
-        call_graph: dict,
-        import_graph: dict,
-        architecture_model: ArchitectureModel | None = None
-    ):
+        file_id: str,
+        call_graph: list[CallEdge],
+        import_graph: list[ImportEdge],
+        architecture_model: ArchitectureModel | None = None,
+    ) -> DependencyHealthReport:
+        """Analyze health of a single module (stateless)."""
         ...
     
-    def analyze_module(self, file_id: str) -> DependencyHealthReport:
-        """Analyze health of a single module."""
+    def analyze_all_modules(
+        self,
+        call_graph: list[CallEdge],
+        import_graph: list[ImportEdge],
+        architecture_model: ArchitectureModel | None = None,
+    ) -> list[DependencyHealthReport]:
+        """Full repository health report (stateless)."""
         ...
     
-    def analyze_all_modules(self) -> list[DependencyHealthReport]:
-        """Full repository health report."""
-        ...
-    
-    def find_cycles(self) -> list[list[str]]:
-        """Detect all circular dependency chains."""
+    def find_cycles(
+        self,
+        call_graph: list[CallEdge],
+        import_graph: list[ImportEdge],
+    ) -> list[list[str]]:
+        """Detect all circular dependency chains (stateless)."""
         ...
 ```
 
@@ -298,22 +404,25 @@ class DependencyHealthReport:
     module_id: str
     fan_in: int                     # Count of incoming dependencies
     fan_out: int                    # Count of outgoing dependencies
-    high_fan_in: bool               # fan_in > 10
-    high_fan_out: bool              # fan_out > 15
-    is_hub: bool                    # fan_in > 8 AND fan_out > 8
-    cycles_involved: list[list[str]]  # [[A, B, C, A], ...]
-    recommendations: list[str]      # ["Extract interface", ...]
-    evidence: list[str]             # Justifications
+    high_fan_in: bool               # fan_in exceeds threshold (default: > 10)
+    high_fan_out: bool              # fan_out exceeds threshold (default: > 15)
+    is_hub: bool                    # Both fan_in > 8 AND fan_out > 8 (default thresholds)
+    cycles_involved: list[list[str]]  # Circular dependency chains: [[A, B, C, A], ...]
+    recommendations: list[str]      # Actionable refactoring suggestions
+    evidence: list[str]             # Justifications for each pattern
 ```
 
-### Thresholds & Patterns
+### Pattern Detection & Recommendations (Phase 1 Defaults)
 
-| Pattern | Trigger | Recommendation |
-|---------|---------|-----------------|
-| High fan-in | fan_in > 10 | This is a core module; test thoroughly |
-| High fan-out | fan_out > 15 | This module has too many dependencies; consider layering |
-| Hub | fan_in > 8 AND fan_out > 8 | Extract into separate layer or break into smaller modules |
-| Circular dep | A → B → A | Break cycle with interface/abstraction |
+| Pattern | Threshold | Recommendation | Why |
+|---------|-----------|-----------------|-----|
+| High fan-in | fan_in > 10 | Test thoroughly; consider as potential core module | Central modules are riskier to change |
+| High fan-out | fan_out > 15 | Consider layering or breaking into smaller modules | Too many outbound deps indicate poor separation of concerns |
+| Hub | fan_in > 8 AND fan_out > 8 | Extract into separate layer or refactor into focused modules | Hubs combine both high coupling and high dependence |
+| Circular dep | A → B → A | Break cycle with interface/abstraction; avoid runtime init | Cycles prevent independent testing and deployment |
+
+Note: Thresholds (10, 15, 8) are practical defaults for typical Python repositories.
+Larger codebases may need calibration based on scale and domain.
 
 ### Tests (10+ total)
 
@@ -338,21 +447,26 @@ class DependencyHealthReport:
 
 ```bash
 ortho analyze --impact <file>
-  → ImpactAnalyzer.analyze(file_id, depth=3)
-  → Print blast radius, risk_score, dependents
+  → Load graphs, call ImpactAnalyzer.analyze(call_graph, import_graph, file_id, depth=3)
+  → Print blast radius, risk_score, analysis_confidence, dependents
 
 ortho analyze --impact-symbol <symbol>
-  → ImpactAnalyzer.analyze_symbol(symbol_id, depth=3)
-  → Similar output, but for a symbol
+  → Load graphs and symbols, call ImpactAnalyzer.analyze_symbol(...)
+  → Similar output, but for a symbol instead of file
 
 ortho analyze --debt [--module <path>]
-  → DebtScorer.score_all_modules()
+  → Load graphs, symbols, git metadata
+  → Call DebtScorer.score_all_modules(call_graph, import_graph, symbols, git_metadata)
   → Print table: module | total_score | coupling | churn | complexity | coverage
 
 ortho analyze --health [--module <path>]
-  → DependencyHealthAnalyzer.analyze_all_modules()
+  → Load graphs and architecture model
+  → Call DependencyHealthAnalyzer.analyze_all_modules(call_graph, import_graph, architecture)
   → Print: module | fan_in | fan_out | hub | cycles | recommendations
 ```
+
+**Stateless CLI Pattern:** All analyzers are instantiated once per command, all data passed as arguments.
+This follows the stateless architecture of task-008 components.
 
 ### Output Formats
 
@@ -422,11 +536,17 @@ Evidence:
 
 ## Known Limitations (To Mark as xfail if Testing Confirms)
 
-1. **Static analysis confidence:** ImpactAnalyzer cannot resolve dynamic calls (e.g., `getattr(obj, method_name)()`). Confidence < 1.0.
-2. **Churn unavailable:** If git metadata missing, churn_score defaults to 0.0 (neutral).
-3. **Complexity heuristic:** AST depth is a proxy; doesn't account for McCabe complexity or actual logic.
-4. **Debt weights:** Tuned for general Python repos; may not fit all domains (microservices, data pipelines, etc.).
-5. **Performance:** BFS on graphs > 10k symbols may be slow; document O(n) complexity.
+1. **Static analysis confidence:** ImpactAnalyzer cannot resolve dynamic calls (e.g., `getattr(obj, method_name)()`). Analysis confidence < 1.0 in these cases. Risk score and analysis confidence are separate metrics and should never be conflated.
+
+2. **Churn unavailable:** If git metadata missing, churn_score defaults to 0.0 (neutral). This may underestimate debt for modules with no git history.
+
+3. **Complexity heuristic:** AST depth is a proxy for complexity; doesn't account for McCabe cyclomatic complexity, branching logic, or domain-specific patterns.
+
+4. **Debt weights (Phase 1 defaults):** Default weights (0.30 coupling, 0.20 churn, 0.20 complexity, 0.20 coverage, 0.10 other) are tuned for general Python repos. May not fit all domains (microservices, data pipelines, ML codebases). Weights are not changed, but threshold calibration may be needed.
+
+5. **Dependency thresholds (Phase 1 defaults):** Default thresholds (fan_in > 10, fan_out > 15, hub > 8/8) are practical for typical Python projects. Larger repositories may need threshold adjustment based on codebase scale.
+
+6. **Performance:** BFS on graphs > 10k symbols may be slow (O(n + m) where n = symbols, m = edges). Document limits and memoization strategy if needed.
 
 ---
 

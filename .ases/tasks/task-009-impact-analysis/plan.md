@@ -26,10 +26,12 @@ Implement Pillar 3 capabilities for change impact analysis and technical debt sc
 
 **Scope:** Build component that traverses call/import graphs from a changed file to compute affected downstream dependencies.
 
+**Architecture:** Stateless analyzer matching task-008 pattern (no constructor state, all data passed as arguments).
+
 **Inputs:**
-- Changed file ID
 - Call graph (from CallGraphBuilder, task-003)
 - Import graph (from ImportGraphBuilder, task-003)
+- Changed file ID
 - Depth parameter (default 3 hops)
 
 **Outputs:**
@@ -40,13 +42,15 @@ class ImpactReport:
     direct_dependents: list[str]          # Files that directly import/call this file
     transitive_dependents: list[str]      # Reachable within `depth` hops
     risk_score: float                     # 0.0–1.0 based on centrality
+    analysis_confidence: float            # 0.0–1.0 based on resolution quality
     blast_radius: int                     # Count of affected files
     evidence: list[str]                   # Human-readable justifications
 ```
 
 **Implementation:**
-- BFS traversal of import/call edges
-- Centrality scoring (fan-in + fan-out ratio)
+- BFS traversal of import/call edges (stateless)
+- Risk scoring: (fan_in + fan_out) / (2 * num_symbols), clamped to [0.0, 1.0]
+- Confidence scoring: 1.0 - (unresolved_symbols / total_symbols)
 - Cycle detection (ignore cycles in risk computation)
 - Query by file_id or symbol_id
 
@@ -58,11 +62,20 @@ class ImpactReport:
 
 **Scope:** Compute technical debt score per module using 5 dimensions.
 
+**Architecture:** Stateless analyzer matching task-008 pattern (no constructor state, all data passed as arguments).
+
 **Inputs:**
 - Call graph (task-003)
 - Import graph (task-003)
-- File metadata (size, age, churn from git)
-- Symbol registry (task-002)
+- Symbols (task-002)
+- Git metadata (commits_30d, last_modified, size_bytes per file)
+
+**Configuration (Phase 1 Defaults):**
+- Coupling weight: 0.30
+- Churn weight: 0.20
+- Complexity weight: 0.20
+- Test coverage weight: 0.20
+- Other weight: 0.10
 
 **Scoring dimensions:**
 ```python
@@ -70,19 +83,21 @@ class ImpactReport:
 class DebtScore:
     module_id: str
     total_score: float          # 0.0 (clean) — 1.0 (critical), weighted average
-    coupling_score: float       # (fan-in + fan-out) / (module_files * 2), capped at 1.0
-    churn_score: float          # Git commits last 30 days, log scale
-    complexity_score: float     # AST depth / avg function length
-    test_coverage_score: float  # Heuristic: test file presence + imports
+    coupling_score: float       # (fan_in + fan_out) / (module_files * 2), capped at 1.0
+    churn_score: float          # min(1.0, commits_30d / 20), default threshold
+    complexity_score: float     # min(1.0, avg_ast_depth / 8), default threshold
+    test_coverage_score: float  # Heuristic: test file presence in package
     evidence: list[str]         # Justifications per dimension
 ```
 
 **Formulas:**
 - **Coupling:** `(fan_in + fan_out) / (2 * num_files)`, capped at 1.0
-- **Churn:** `min(1.0, commits_30d / 20)` (20 commits = high churn)
-- **Complexity:** `min(1.0, avg_depth / 8)` (depth > 8 = complex)
+- **Churn:** `min(1.0, commits_30d / 20)` (default: 20 commits = high churn)
+- **Complexity:** `min(1.0, avg_ast_depth / 8)` (default: depth > 8 = complex)
 - **Test coverage:** 0.0 if `test_*.py` exists, 0.5 if uncertain, 1.0 if none
-- **Total:** `0.3*coupling + 0.2*churn + 0.2*complexity + 0.2*test_coverage + 0.1*other`
+- **Total:** Apply default weights: `0.3*coupling + 0.2*churn + 0.2*complexity + 0.2*coverage + 0.1*other`
+
+Note: Default thresholds (20 commits, depth 8) work well for typical Python repos. Larger codebases may need calibration.
 
 **Tests:** Unit (8+), property-based (hypothesis, 10+ cases), integration (3+)
 
@@ -92,25 +107,36 @@ class DebtScore:
 
 **Scope:** Flag modules with high fan-in (depended-on by many), high fan-out (depends-on many), or circular dependencies.
 
+**Architecture:** Stateless analyzer matching task-008 pattern (no constructor state, all data passed as arguments).
+
+**Configuration (Phase 1 Defaults):**
+- High fan-in threshold: > 10 dependents
+- High fan-out threshold: > 15 dependencies
+- Hub detection: fan-in > 8 AND fan-out > 8
+
+Note: These are practical defaults for typical Python repos. Larger codebases may need calibration.
+
 **Inputs:**
 - Call graph
 - Import graph
-- Architecture model (from task-008)
+- Architecture model (from task-008, optional)
 
 **Outputs:**
 ```python
 @dataclass
 class DependencyHealthReport:
     module_id: str
-    high_fan_in: bool           # > 10 dependents
-    high_fan_out: bool          # > 15 dependencies
-    is_hub: bool                # Fan-in > 8 AND fan-out > 8
+    fan_in: int                 # Count of incoming dependencies
+    fan_out: int                # Count of outgoing dependencies
+    high_fan_in: bool           # fan_in exceeds threshold (default: > 10)
+    high_fan_out: bool          # fan_out exceeds threshold (default: > 15)
+    is_hub: bool                # Both thresholds exceeded (default: > 8 each)
     cycles_involved: list[list[str]]  # Circular dependency chains
     recommendations: list[str]  # Action items (e.g., "extract interface")
 ```
 
 **Algorithm:**
-- Fan-in/fan-out from import edges
+- Fan-in/fan-out from import edges (stateless)
 - Cycle detection (DFS, track visited nodes)
 - Hub detection (both high in and high out)
 - Recommend extraction/refactoring based on pattern
@@ -148,27 +174,80 @@ ortho analyze --health                           # Dependency health report
 
 ## Architecture & Dependencies
 
+### Stateless Design (Consistent with Task-008)
+
+All three analyzers follow the stateless pattern of task-008:
+- No constructor-based state
+- All data passed as function arguments
+- Deterministic outputs for identical inputs
+- Pure functions enabling parallel processing and testing
+
+### Component Structure
+
 ```
 task-009/
-├── ImpactAnalyzer
-│   ├── Inputs: call_edges, import_edges, file_id, depth
-│   └── Outputs: ImpactReport
-├── DebtScorer
-│   ├── Inputs: call_edges, import_edges, symbols, git_metadata
-│   └── Outputs: DebtScore[]
-├── DependencyHealthAnalyzer
-│   ├── Inputs: call_edges, import_edges, architecture_model
-│   └── Outputs: DependencyHealthReport[]
+├── ImpactAnalyzer (stateless)
+│   ├── Inputs: call_graph, import_graph, file_id, depth
+│   └── Output: ImpactReport (includes risk_score + analysis_confidence)
+├── DebtScorer (stateless)
+│   ├── Inputs: call_graph, import_graph, symbols, git_metadata
+│   ├── Config: DEFAULT_WEIGHTS (0.30, 0.20, 0.20, 0.20, 0.10)
+│   └── Output: DebtScore[]
+├── DependencyHealthAnalyzer (stateless)
+│   ├── Inputs: call_graph, import_graph, architecture_model (optional)
+│   ├── Config: DEFAULT_THRESHOLDS (10, 15, 8, 8)
+│   └── Output: DependencyHealthReport[]
 └── CLI integration (analyze.py + analyze.ts enhancements)
+```
 
-Dependencies:
-  - packages/repo-intelligence/ (graphs, symbols)
+### Dependencies
+
+```
+Inputs from:
+  - packages/repo-intelligence/ (call_edges, import_edges, symbols)
   - packages/arch-intelligence/ (architecture model)
-  - shared/storage/ (SQLite for caching, optional)
-  - gitpython (for churn analysis)
+  - git metadata (via gitpython)
+
+Optional:
+  - shared/storage/ (SQLite for result caching)
+  - packages/arch-intelligence/model_store (for architecture model)
 ```
 
 **No circular dependencies.** All flow downward to shared/.
+
+---
+
+## Architectural Consistency (Task-008 Alignment)
+
+### Stateless Pattern
+Task-009 analyzers match the stateless architecture of task-008 (ArchitectureDetector, LayerDetector, SubsystemDetector).
+This ensures consistent API design across Pillar 3.
+
+**Pattern applied:**
+- No constructor state (e.g., NOT `ImpactAnalyzer(call_graph, import_graph)`)
+- All data passed as arguments (e.g., `analyzer.analyze(call_graph, import_graph, file_id)`)
+- Deterministic, pure functions
+- Enables testing, parallelization, and dependency injection
+
+### Configuration vs Architecture
+Task-009 distinguishes between algorithm (immutable) and configuration (tunable defaults).
+
+**Default configuration (Phase 1):**
+- Debt weights: 0.30 coupling, 0.20 churn, 0.20 complexity, 0.20 coverage, 0.10 other
+- Dependency thresholds: fan_in > 10, fan_out > 15, hub > 8/8
+- Churn threshold: 20 commits/30 days
+- Complexity threshold: AST depth > 8
+
+**Key principle:** Changing configuration does not change the architecture or algorithm.
+Implementation uses documented defaults; future versions may expose configuration via files or CLI.
+
+### Metrics Separation
+Task-009 clearly separates risk_score (engineering impact) from analysis_confidence (analysis certainty).
+
+**Risk Score** — Derived from: Dependency centrality, blast radius, graph connectivity
+**Analysis Confidence** — Limited by: Dynamic dispatch, unresolved symbols, incomplete graphs
+
+These are never interchangeable and are reported separately in all outputs.
 
 ---
 
@@ -178,8 +257,9 @@ Dependencies:
 |------|----------|-----------|
 | Cycle detection expensive on large graphs | Medium | Limit DFS depth to 100 nodes; memoize results |
 | Churn heuristic depends on git history | Medium | Fall back to 0.0 if git unavailable; document assumption |
-| Debt scoring weights are arbitrary | Low | Make weights tunable via config; log evidence per dimension |
-| Impact analysis gives false positives (indirect deps) | Medium | Use `confidence` field; mark static-analysis limitations in output |
+| Debt configuration weights | Low | Document as Phase 1 defaults; algorithm is immutable; future versions may expose tuning |
+| Impact analysis confidence | Medium | Separate analysis_confidence from risk_score; mark static-analysis limitations in output |
+| Dependency thresholds | Medium | Document as Phase 1 defaults for typical repos; larger codebases may need calibration |
 
 ---
 
