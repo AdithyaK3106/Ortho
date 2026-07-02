@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "impact-analysis"
+version = "0.1.0"
+description = "Impact Analysis and Technical Debt Scoring for Ortho (Pillar 3 - Architectural Intelligence)"
+authors = ["Ortho Development Team"]
+license = "MIT"
+packages = [
+    { include = "impact_analysis", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0"
+pytest-cov = "^4.0"
+hypothesis = "^6.0"
+black = "^23.0"
+ruff = "^0.0.270"
+mypy = "^1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
