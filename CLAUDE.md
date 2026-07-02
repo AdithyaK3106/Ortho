@@ -133,10 +133,27 @@ Evidence:
 - `.ases/evidence/task-008/verification-report.md` (detailed analysis)
 - `.ases/evidence/task-008/test-full-*.log` (pytest output)
 
-Recovery Path:
-1. BUILDER refactors implementation to match test API expectations, OR
-2. TEST-DESIGNER revises tests to match builder's minimal API
-3. Re-run VERIFIER Phase C (no GATE replay needed)
+Recovery Path (After Audit):
+1. ✅ ARCHITECT audit: TEST-DESIGNER deviation (Category B)
+2. ⏳ TEST-DESIGNER revises test suite to match specification (stateless API)
+3. ⏳ Re-run VERIFIER Phase C (no GATE replay needed)
+
+Revision Status:
+- ✅ Revised test_layer_detector_revised.py (stateless, parameter-passing): 8/8 PASSING
+- ✅ Revised test_subsystem_detector_revised.py (stateless, parameter-passing): 8/8 PASSING
+- ✅ Revised tests verify compliance with specification (16/16 = 100% pass)
+- ⏳ Original test files still contain old failing tests (need removal)
+
+Path Forward:
+1. Remove original problematic test files (test_layer_detector.py, test_subsystem_detector.py)
+2. Rename revised test files to replace them
+3. Re-run full suite (should show significantly higher pass rate with revised tests only)
+
+Result Summary:
+- ARCHITECT audit: TEST-DESIGNER deviation confirmed (Category B)
+- Revised tests: 16/16 PASSING (100%) ✅
+- Implementation: Correct per specification ✅
+- Next: Clean up old test files, re-run VERIFIER Phase C
 
 **Expected Deliverables:**
 - New package: `packages/arch-intelligence/` (4 modules + store)
