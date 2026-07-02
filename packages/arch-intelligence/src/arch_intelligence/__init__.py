@@ -1,16 +1,19 @@
-"""Architectural Intelligence — Pillar 3."""
+﻿"""Pillar 3: Architectural Intelligence"""
 
-from .detector import ArchitectureDetector
+from .arch_detector import ArchitectureDetector, ArchitectureDetectionResult
 from .layer_detector import LayerDetector
-from .models import ArchitectureModelStore
 from .subsystem_detector import SubsystemDetector
-from .detection_types import ArchStyle, DetectionResult
+from .model_store import ArchitectureModelStore
+from .types import ArchStyle, ArchitectureModel, Layer, Subsystem
 
 __all__ = [
     "ArchitectureDetector",
+    "ArchitectureDetectionResult",
     "LayerDetector",
     "SubsystemDetector",
     "ArchitectureModelStore",
     "ArchStyle",
-    "DetectionResult",
+    "ArchitectureModel",
+    "Layer",
+    "Subsystem",
 ]
