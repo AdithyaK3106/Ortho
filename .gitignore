@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.coverage
+.pytest_cache/
+*.egg-info/
+
+# Node build artifacts (ortho-cli source is tracked under node_modules/)
+dist/
+apps/cli/dist/
+node_modules/*/dist/
+
+# Cloned/scratch repos used for real-repo scan tests
+Repos/
+
+# Ad-hoc test output/reports dropped at repo root
+/ORTHO_CAPABILITIES_SUMMARY.md
+/ORTHO_FEATURE_TEST_REPORT.md
+/TEST_RESULTS_INDEX.md
