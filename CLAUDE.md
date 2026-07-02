@@ -64,6 +64,27 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
+### task-009: Impact Analysis + Debt Scoring (Week 11–12) – GATE 1 COMPLETE
+
+**State:** PLANNER phase complete, ready for ARCHITECT  
+**Workflow:** `.ases/workflows/feature.md`  
+**Started:** 2026-07-02  
+**Phase:** Phase 2 (Reasoning)  
+**Latest commit:** ebdf23c (PLANNER complete)
+
+**GATE 1 Status:** APPROVED (PLANNER artifacts submitted)
+
+**Artifacts:**
+- plan.md (4 atomic tasks, risks, rollback)
+- spec.md (ImpactAnalyzer, DebtScorer, DependencyHealthAnalyzer, CLI integration)
+- rollback-plan.md (failure scenarios, recovery procedures)
+
+**Scope:** Impact analysis (blast radius), debt scoring (multi-dimensional), dependency health (fans/cycles)  
+**Test targets:** 60+ tests, ≥85% coverage  
+**Next:** ARCHITECT reviews and approves at GATE 2
+
+---
+
 ### task-008: Architecture Detection (Week 9â€“10) â€” âŒ GATE 5 FAILED
 
 **State:** VERIFICATION APPROVED (35/35 tests passing, spec-compliant)  

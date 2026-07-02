@@ -324,9 +324,9 @@ All Python packages must pass:
 - ✅ task-006: Complete Python Adapter (Week 3–4) — GATE-6 APPROVED
 - ✅ task-007: Incremental Indexing + ortho scan (Week 5–6) — GATE-6 APPROVED
 
-**Pending Tasks:** 3/5
-- ⏳ task-008: Architecture Detection (Week 9–10)
-- ⏳ task-009: Impact Analysis + Debt Scoring (Week 11–12)
+**In Progress / Pending Tasks:** 3/5
+- ✅ task-008: Architecture Detection (Week 9–10) — GATE-6 APPROVED
+- ⏳ task-009: Impact Analysis + Debt Scoring (Week 11–12) — GATE 1 COMPLETE (PLANNER), awaiting ARCHITECT
 - ⏳ task-010: ADR Awareness + Reporting (Week 13–14)
 
 **Phase 2 Test Results:**
