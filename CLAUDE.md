@@ -64,14 +64,26 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” âœ… GATE 1 APPROVED
+### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” GATE 2 SUBMITTED
 
-**State:** PLANNED â†’ ARCH-REVIEW (ready for ARCHITECT session)  
+**State:** ARCH-REVIEW â†’ READY-TO-BUILD (pending GATE 2 human approval)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)
 
 **GATE 1: Plan Approval â€” âœ… APPROVED** (2026-07-02, human)
+
+**GATE 2: Architecture Approval â€” â³ SUBMITTED, awaiting human review**
+
+**Architecture Review Findings:**
+- âœ“ Module boundaries: 2 new isolated modules (`adr_tracker.py`, `reuse_detector.py`), no circular deps
+- âœ“ Dependency flow: acyclic; `reuse_detector.py` reuses `SymbolExtractor`'s parser (read-only), `adr_tracker.py` has zero repo-intelligence/impact-analysis dependency (stdlib `re`/`pathlib` only)
+- âœ“ API contracts: `ADRTracker.check_adrs()`, `ReuseDetector.find_similar()` both stateless/deterministic, consistent with task-008/009 pattern
+- âœ“ Storage layer verified: `symbols` table already has `file_id` column â€” confirms the CLI's join-by-file-path workaround (documented in spec.md's Known Gap) is sound, no schema change needed
+- âœ“ ADR-009 (ADR cross-reference: regex/text extraction, not markdown AST) and ADR-010 (reuse similarity: AST-type-sequence edit distance, not embeddings) drafted, PROPOSED
+- âš  Two out-of-scope findings recorded (do not block GATE 2, do not expand task-010 scope):
+  1. Two incompatible `Symbol` classes exist across `repo_intelligence` and `impact_analysis` packages (different field sets, same name) â€” pre-existing, task-010 correctly uses the one it was specified against, future consolidation is separately ADR-worthy
+  2. Orphaned dead code in `arch-intelligence` (`detector.py`, `detection_types.py`, `models.py`) â€” never imported outside itself, predates task-008's accepted architecture, flagged for future cleanup
 
 **What This Task Does:**
 Implements the final two Pillar 3 features from the FRD feature table (ADR awareness, reuse
@@ -82,14 +94,19 @@ discovery) and fixes the `ortho analyze --impact` stub that currently loads empt
 - ADRTracker (cross-references `.ases/architecture/adrs/*.md` against the repo tree; OK/STALE/UNLINKED/UNKNOWN)
 - ReuseDetector (AST-type-sequence structural similarity via existing tree-sitter parser, no ML/embeddings)
 - CLI: `ortho analyze --adr-check`, `ortho analyze --reuse`, and `--impact` wired to real `OrthoDatabase` graphs + task-009's `ImpactAnalyzer`
-- ADR-009 (ADR parsing strategy), ADR-010 (reuse similarity algorithm) to be written by ARCHITECT
 
 **Artifacts Approved (GATE 1):**
 - âœ“ `.ases/tasks/task-010-adr-awareness-reporting/plan.md` (5 atomic tasks, risks, repository-independent acceptance criteria)
 - âœ“ `.ases/tasks/task-010-adr-awareness-reporting/spec.md` (fully-specified ADR extraction contract, threshold config policy, benchmark environment, validation baseline)
 - âœ“ `.ases/tasks/task-010-adr-awareness-reporting/rollback-plan.md`
 
-**Next Step:** ARCHITECT session â€” reads plan.md, spec.md, existing ADRs; reviews module boundaries and API contracts for ADRTracker/ReuseDetector; writes `architecture-review.md` and drafts ADR-009 + ADR-010; verdict APPROVED or REJECTED at GATE 2.
+**Artifacts Submitted (GATE 2):**
+- `.ases/tasks/task-010-adr-awareness-reporting/architecture-review.md` (verdict: APPROVED)
+- `.ases/architecture/adrs/ADR-009-adr-cross-reference-strategy.md` (PROPOSED)
+- `.ases/architecture/adrs/ADR-010-reuse-similarity-algorithm.md` (PROPOSED)
+
+**Next Step:** Human reviews architecture-review.md + ADR-009 + ADR-010 at GATE 2. If approved,
+proceed to BUILDER.
 
 **Next Step:** Human reviews plan.md + spec.md + rollback-plan.md at GATE 1. If approved, proceed to ARCHITECT.
 

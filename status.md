@@ -123,12 +123,16 @@
 ## Active Tasks
 
 **Current:** task-010 (ADR Awareness + Reporting, Week 13–14)
-- Status: GATE 1 APPROVED (2026-07-02) — proceeding to ARCHITECT session
+- Status: GATE 2 SUBMITTED (2026-07-02) — architecture-review.md verdict APPROVED, awaiting human sign-off
 - Scope: ADRTracker (ADR-vs-code cross-reference), ReuseDetector (AST structural similarity),
   CLI wiring (`--adr-check`, `--reuse`), fix `--impact` stub to use real graphs
 - Timeline: ~5.5 hours across 5 atomic tasks (see plan.md)
-- Artifacts: `.ases/tasks/task-010-adr-awareness-reporting/`
-- Next: ARCHITECT reviews module boundaries/API contracts, drafts ADR-009 + ADR-010, GATE 2
+- Artifacts: `.ases/tasks/task-010-adr-awareness-reporting/` (plan, spec, rollback-plan, architecture-review)
+- ADRs drafted: ADR-009 (ADR cross-reference strategy), ADR-010 (reuse similarity algorithm) — both PROPOSED
+- Out-of-scope findings from architecture review (not task-010 defects, flagged for future tasks):
+  duplicate `Symbol` types across repo-intelligence/impact-analysis; orphaned dead code in
+  arch-intelligence (`detector.py`/`detection_types.py`/`models.py`)
+- Next: Human approves GATE 2, then BUILDER implements per plan.md's 5 atomic tasks
 
 ---
 
