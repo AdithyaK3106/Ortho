@@ -64,24 +64,35 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-009: Impact Analysis + Debt Scoring (Week 11–12) – GATE 1 COMPLETE
+### task-009: Impact Analysis + Debt Scoring (Week 11–12) – GATE 2 APPROVED
 
-**State:** PLANNER phase complete, ready for ARCHITECT  
+**State:** ARCHITECT review complete, ready for BUILDER  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)  
-**Latest commit:** ebdf23c (PLANNER complete)
+**Latest commit:** cd65bd9 (ARCHITECT GATE 2 APPROVED)
 
-**GATE 1 Status:** APPROVED (PLANNER artifacts submitted)
+**GATE 1: PLANNER** – ✅ APPROVED
+- plan.md, spec.md, rollback-plan.md (all consistent)
+- consistency-verification.md (5 issues resolved)
+
+**GATE 2: ARCHITECT** – ✅ APPROVED
+- architecture-review.md (FRD compliance verified)
+- Stateless pattern consistent with task-008
+- No circular dependencies; all metrics deterministic
+- Risk score and analysis confidence properly separated
+- All acceptance criteria met
 
 **Artifacts:**
-- plan.md (4 atomic tasks, risks, rollback)
-- spec.md (ImpactAnalyzer, DebtScorer, DependencyHealthAnalyzer, CLI integration)
+- plan.md (4 atomic tasks, stateless, risks, rollback)
+- spec.md (stateless APIs, formulas, test metrics, risk vs confidence)
 - rollback-plan.md (failure scenarios, recovery procedures)
+- consistency-verification.md (5 inconsistency resolutions)
+- architecture-review.md (FRD alignment, dependency analysis, risk review)
 
-**Scope:** Impact analysis (blast radius), debt scoring (multi-dimensional), dependency health (fans/cycles)  
+**Scope:** Impact analysis (blast radius), debt scoring (5 dimensions), dependency health (hubs/cycles)  
 **Test targets:** 60+ tests, ≥85% coverage  
-**Next:** ARCHITECT reviews and approves at GATE 2
+**Next:** BUILDER implements 4 atomic tasks (GATE 3)
 
 ---
 
