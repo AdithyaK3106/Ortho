@@ -1,0 +1,12 @@
+﻿pytest : ERROR: 
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence\pyproject.toml: Invalid 
+statement (at line 1, column 1)
+At line:5 char:1
++ pytest packages/arch-intelligence/tests/test_detectors.py -k "test_de ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: C:\Users...ne 1, column 1):String) [], RemoteExc 
+   eption
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+EXIT: 4

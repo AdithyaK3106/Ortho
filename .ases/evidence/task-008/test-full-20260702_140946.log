@@ -1,0 +1,14 @@
+﻿pytest : ERROR: usage: pytest [options] [file_or_dir] [file_or_dir] [...]
+At line:5 char:1
++ pytest packages/arch-intelligence/tests/ -v --cov=packages.arch_intel ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: usage: p...e_or_dir] [...]:String) [], RemoteExc 
+   eption
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+pytest: error: unrecognized arguments: --cov=packages.arch_intelligence
+  inifile: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\pyproject.toml
+  rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+
+EXIT: 4
+TIMESTAMP: 2026-07-02T14:09:47Z

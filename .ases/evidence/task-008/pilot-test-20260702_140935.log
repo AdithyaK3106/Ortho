@@ -1,0 +1,12 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 14 items / 13 deselected / 1 selected
+
+packages/arch-intelligence/tests/test_detectors.py::TestArchitectureDetector::test_detect_layered_pattern PASSED [100%]
+
+====================== 1 passed, 13 deselected in 0.11s =======================
+EXIT: 0
