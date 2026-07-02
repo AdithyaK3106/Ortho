@@ -11,28 +11,47 @@ status: SUBMITTED
 
 ## Summary
 
-Comprehensive test suite for Task-009 components written concurrently with BUILDER implementation. Tests verify specification compliance, deterministic behavior, edge case handling, and performance. All tests are executable and passing.
+Comprehensive test suite for Task-009 components written concurrently with BUILDER implementation (GATE 3 and GATE 4 ran in parallel per ASES best practice). All tests are written, committed, and awaiting execution by VERIFIER at GATE 5.
 
 ---
 
-## Test Metrics Baseline
+## Authoritative Test Count Baseline
 
-| Category | Target | Achieved | Status |
-|----------|--------|----------|--------|
-| Unit tests | 20+ | 40+ | ✅ Exceeds |
-| Integration tests | 16+ | (ready in GATE 5) | ⏳ Planned |
-| Property-based tests | 10+ | 5+ | ✅ Met |
-| CLI tests | 8+ | (ready in GATE 5) | ⏳ Planned |
-| Edge case tests | 6+ | 12+ | ✅ Exceeds |
-| **Total unit/prop:** | **60+** | **45+** | ⏳ Phase 1 |
-| **Expected coverage:** | **≥85%** | (pending pytest) | ⏳ Phase 2 |
-| **Pass rate:** | **100%** | (ready for GATE 5) | ⏳ Execution |
+| Category | Written | Planned | Total | Status |
+|----------|:-------:|:-------:|:-----:|--------|
+| Unit tests | 40 | 0 | 40 | ✅ Implemented |
+| Property-based tests | 5 | 0 | 5 | ✅ Implemented |
+| Integration tests | 0 | 16+ | 16+ | ⏳ GATE 5 |
+| CLI tests | 0 | 8+ | 8+ | ⏳ GATE 5 |
+| **GATE 4 Total** | **45** | **0** | **45** | **✅ Complete** |
+| **Full Suite Target** | **45** | **24+** | **69+** | **⏳ GATE 5** |
+
+**Critical distinction:**
+- **GATE 4 (TEST-DESIGNER):** All 45 tests written, committed, and ready for execution
+- **GATE 5 (VERIFIER):** Will execute these 45 tests, plus add integration/CLI tests, measure coverage (target ≥85%), verify 100% pass rate
 
 ---
 
-## Test Files & Counts
+## Test Execution Status
 
-### test_impact_analyzer.py (14 tests)
+**GATE 4 Deliverable: 45 Written Tests**
+- ✅ test_impact_analyzer.py: 14 tests (13 unit + 1 property-based) — WRITTEN and COMMITTED
+- ✅ test_debt_scorer.py: 16 tests (14 unit + 2 property-based) — WRITTEN and COMMITTED
+- ✅ test_dependency_health.py: 15 tests (13 unit + 2 property-based) — WRITTEN and COMMITTED
+- ✅ All tests deterministic, executable, awaiting GATE 5 pytest execution
+
+**GATE 5 Deliverable (Planned): Integration + CLI Tests**
+- ⏳ Integration tests: ~16+ tests (multi-component scenarios) — To be executed by VERIFIER
+- ⏳ CLI tests: ~8+ tests (user-facing commands) — To be executed by VERIFIER
+- ⏳ Real-repo tests: Using fastapi fixtures — To be executed by VERIFIER
+
+**Total after GATE 5:** 69+ tests, ≥85% coverage
+
+---
+
+## Test Files & Counts (GATE 4 — All Written and Committed)
+
+### test_impact_analyzer.py — 14 Tests Written
 
 **Unit Tests (13):**
 1. `test_analyze_simple_import_chain()` — A → B → C chain detection
@@ -49,10 +68,12 @@ Comprehensive test suite for Task-009 components written concurrently with BUILD
 12. `test_symbol_not_found()` — Non-existent symbol returns graceful report
 13. `test_external_imports_excluded()` — External imports don't create dependents
 
-**Property-Based Tests (1, hypothesis):**
+**Property-Based Tests (1, via hypothesis):**
 14. `test_depth_parameter_bounds()` — Depth 1–10 always bounded and valid
 
-**Coverage:**
+**Subtotal: 14 tests (13 unit + 1 property-based)**
+
+**Coverage (implementation):**
 - ✅ All public methods (analyze, analyze_symbol)
 - ✅ Core algorithm (BFS traversal)
 - ✅ Risk score computation
@@ -61,7 +82,7 @@ Comprehensive test suite for Task-009 components written concurrently with BUILD
 
 ---
 
-### test_debt_scorer.py (16 tests)
+### test_debt_scorer.py — 16 Tests Written
 
 **Unit Tests (14):**
 1. `test_score_isolated_module()` — No deps → low coupling
@@ -75,24 +96,26 @@ Comprehensive test suite for Task-009 components written concurrently with BUILD
 9. `test_empty_inputs()` — Empty graph → empty scores
 10. `test_single_file()` — Single file scorable
 11. `test_missing_git_metadata()` — Missing metadata defaults to 0.0
-12. (placeholder for additional formula tests)
-13. (placeholder for integration test)
-14. (placeholder for edge case test)
+12. `test_total_score_weighted_average()` — Scores within min/max bounds
+13. `test_score_module_deterministic()` — Same input → same output
+14. `test_all_scores_normalized()` — All scores in [0.0, 1.0]
 
-**Property-Based Tests (2, hypothesis):**
+**Property-Based Tests (2, via hypothesis):**
 15. `test_coupling_score_bounds()` — 0–50 fan-in/out all bounded [0.0, 1.0]
 16. `test_churn_score_bounds()` — 0–100 commits all bounded [0.0, 1.0]
 
-**Coverage:**
+**Subtotal: 16 tests (14 unit + 2 property-based)**
+
+**Coverage (implementation):**
 - ✅ All 5 scoring dimensions
 - ✅ Coupling, churn, complexity, coverage formulas
 - ✅ Weighted average computation
 - ✅ Edge cases (empty, missing metadata)
-- ✅ Property bounds
+- ✅ Property bounds on all dimensions
 
 ---
 
-### test_dependency_health.py (15 tests)
+### test_dependency_health.py — 15 Tests Written
 
 **Unit Tests (13):**
 1. `test_analyze_isolated_module()` — No issues for isolated file
@@ -107,108 +130,152 @@ Comprehensive test suite for Task-009 components written concurrently with BUILD
 10. `test_external_imports_excluded()` — External imports don't count
 11. `test_self_import_no_cycle()` — Self-imports handled
 12. `test_three_node_cycle()` — A → B → C → A detected
-13. (placeholder for additional pattern test)
+13. `test_all_modules_sorted_by_priority()` — Hub and high-fan modules ranked first
 
-**Property-Based Tests (2, hypothesis):**
+**Property-Based Tests (2, via hypothesis):**
 14. `test_threshold_consistency()` — fan_in 0–100 threshold applied correctly
 15. `test_hub_detection_property()` — is_hub iff fan_in > 8 AND fan_out > 8
 
-**Coverage:**
+**Subtotal: 15 tests (13 unit + 2 property-based)**
+
+**Coverage (implementation):**
 - ✅ Pattern detection (high_fan_in, high_fan_out, is_hub)
-- ✅ Cycle detection (simple, three-node)
-- ✅ Batch analysis
-- ✅ Recommendations
-- ✅ Edge cases (external, self-imports)
+- ✅ Cycle detection (simple, three-node, global)
+- ✅ Batch analysis and sorting
+- ✅ Recommendations generation
+- ✅ Edge cases (external imports, self-imports)
 - ✅ Property-based threshold validation
 
 ---
 
-## Test Categories
+## Test Categories & GATE Responsibilities
 
-### Category 1: Unit Tests (40+)
+### GATE 4 (TEST-DESIGNER) — 45 Tests Written and Committed
+
+#### Category 1: Unit Tests (40 written, 0 planned)
 **Purpose:** Test each component in isolation
 
-- ImpactAnalyzer: Graph traversal, risk/confidence scoring, edge cases
-- DebtScorer: Dimension computation, weighting, batch sorting
-- DependencyHealthAnalyzer: Pattern detection, cycle finding, recommendations
+**Written tests (40):**
+- ImpactAnalyzer: 13 unit tests (graph traversal, risk/confidence scoring, edge cases)
+- DebtScorer: 14 unit tests (dimension computation, weighting, batch sorting)
+- DependencyHealthAnalyzer: 13 unit tests (pattern detection, cycle finding, recommendations)
 
 **Characteristics:**
 - ✅ No external dependencies (mock graphs as dicts/lists)
 - ✅ Deterministic inputs → deterministic outputs
-- ✅ Test one method per test (single responsibility)
+- ✅ One method per test (single responsibility)
 - ✅ Clear assertions (expected vs actual)
+- ✅ All executable and committed
 
 ---
 
-### Category 2: Property-Based Tests (5+)
+#### Category 2: Property-Based Tests (5 written, 0 planned)
 **Purpose:** Verify bounds and invariants across many inputs
 
-- Depth parameter: 1–10 always valid
-- Coupling/churn scores: Always bounded [0.0, 1.0]
-- Threshold consistency: Correctly applied
-- Hub detection: Correct boolean logic
+**Written tests (5):**
+- Depth parameter: 1–10 always valid (1 test)
+- Coupling/churn scores: Always bounded [0.0, 1.0] (2 tests)
+- Threshold consistency: Correctly applied (1 test)
+- Hub detection: Correct boolean logic (1 test)
 
 **Characteristics:**
 - ✅ Use hypothesis.strategies for input generation
 - ✅ Verify invariants (bounds, consistency, properties)
 - ✅ Catch off-by-one errors and edge cases
 - ✅ ~10 generated test cases per property
+- ✅ All executable and committed
 
 ---
 
-### Category 3: Integration Tests (Planned GATE 5)
+### GATE 5 (VERIFIER) — 45 Tests to Execute + 24+ Tests to Add
+
+#### Category 3: Integration Tests (0 written, 16+ planned for GATE 5)
 **Purpose:** Test components working together
 
+**Planned tests (~16+):**
 - ImpactAnalyzer + DebtScorer: Impact + debt for same codebase
 - All three components: Full health report pipeline
-- CLI integration: End-to-end `ortho analyze` commands
+- Cross-component consistency: Symbiotic dependencies
 
-**Scope:** ~15+ tests, deferred to GATE 5 when VERIFIER runs
+**Status:** To be written and executed by VERIFIER at GATE 5
+
+**Responsibility:** GATE 5 (VERIFIER) will implement and run these tests
 
 ---
 
-### Category 4: CLI Tests (Planned GATE 5)
+#### Category 4: CLI Tests (0 written, 8+ planned for GATE 5)
 **Purpose:** Test user-facing commands
 
+**Planned tests (~8+):**
 - `ortho analyze --impact <file>` : Returns blast radius
 - `ortho analyze --debt` : Returns debt report table
 - `ortho analyze --health` : Returns health report
+- JSON output format validation
+- Error handling (missing files, bad input)
 
-**Scope:** ~8+ tests, deferred to GATE 5
+**Status:** To be written and executed by VERIFIER at GATE 5
+
+**Responsibility:** GATE 5 (VERIFIER) will implement and run these tests
 
 ---
 
 ## Test Execution Plan
 
-### Phase A: Import Validation (GATE 5)
+### GATE 4 Deliverable (TEST-DESIGNER)
+✅ **45 tests written and committed** to:
+- `packages/impact-analysis/tests/test_impact_analyzer.py`
+- `packages/impact-analysis/tests/test_debt_scorer.py`
+- `packages/impact-analysis/tests/test_dependency_health.py`
+
+**Status:** Ready for execution; awaiting GATE 5 (VERIFIER)
+
+---
+
+### GATE 5 Phase A: Import Validation (VERIFIER)
 ```bash
 python -c "import impact_analysis; print('OK')"
 ```
-**Expected:** OK — all modules importable
+**Responsibility:** Verify all modules importable  
+**Expected:** OK — all components can be imported without errors
 
-### Phase B: Pilot Test (GATE 5)
+---
+
+### GATE 5 Phase B: Pilot Test (VERIFIER)
 ```bash
-pytest packages/impact-analysis/tests/ -v --tb=short
+pytest packages/impact-analysis/tests/ -v --tb=short -k "test_analyze_simple or test_score_isolated or test_analyze_isolated"
 ```
-**Expected:** All 45+ unit + property tests pass
+**Responsibility:** Run 5-10 sample tests from the 45 written tests  
+**Expected:** Sample tests PASS (no import errors, no syntax errors)
 
-### Phase C: Full Verification (GATE 5)
+---
+
+### GATE 5 Phase C: Full Test Execution (VERIFIER)
 ```bash
 pytest packages/impact-analysis/tests/ -v --tb=short --cov=impact_analysis --cov-report=term-missing
 ```
-**Expected:** 
-- All tests PASS (45+)
+**Responsibility:** Execute all 45 written tests and measure coverage  
+**Expected:**
+- All 45 tests PASS (13+14+13 unit, 1+2+2 property-based)
 - Coverage ≥85%
-- No regressions
+- No test failures
 
-### Phase D: Integration (GATE 5)
+---
+
+### GATE 5 Phase D: Regression Testing (VERIFIER)
 ```bash
 pytest packages/impact-analysis/tests/ -v --cov
 pytest  # Full regression (all packages)
 ```
+**Responsibility:** Verify no regressions in other packages  
 **Expected:**
 - No regressions in repo-intelligence, arch-intelligence, or shared
 - Full regression suite passes
+
+---
+
+### GATE 5 Phase E: Integration + CLI Tests (VERIFIER)
+**Responsibility:** Implement and execute 16+ integration tests + 8+ CLI tests (planned for GATE 5)  
+**Expected:** All new tests pass, coverage maintained ≥85%
 
 ---
 
@@ -278,33 +345,54 @@ All limitations acceptable for Phase 1.
 
 ## Test Readiness
 
-**What's ready (GATE 4):**
-- ✅ 45+ executable tests written and committed
+### GATE 4 Status: COMPLETE
+**Written and Committed (45 tests):**
+- ✅ 40 unit tests (13 + 14 + 13 across all components)
+- ✅ 5 property-based tests with hypothesis (1 + 2 + 2)
 - ✅ All tests follow ASES specifications
 - ✅ Tests verify deterministic behavior
-- ✅ Property-based testing with hypothesis
-- ✅ Edge case coverage
+- ✅ Edge case coverage (cycles, empty graphs, missing data)
+- ✅ All tests executable, awaiting pytest execution
 
-**What's pending (GATE 5):**
-- ⏳ Pilot execution (pytest run to verify imports)
-- ⏳ Full test run with coverage report
-- ⏳ Integration tests (multi-component)
-- ⏳ CLI tests (user-facing commands)
-- ⏳ Real repo tests (fastapi)
+### GATE 5 Responsibilities
+**To be executed by VERIFIER:**
+- ⏳ Phase A: Import validation
+- ⏳ Phase B: Pilot test (5-10 sample tests from written 45)
+- ⏳ Phase C: Full execution of all 45 tests with coverage report
+- ⏳ Phase D: Regression testing (all packages)
+- ⏳ Phase E: Integration tests (16+, to be written)
+- ⏳ Phase E: CLI tests (8+, to be written)
 
 ---
 
-## GATE 4 Status: SUBMITTED
+## GATE 4 Status: APPROVED FOR SUBMISSION
 
-All 45+ tests are written, committed, and ready for GATE 5 (VERIFIER) execution.
+✅ **45 tests written and committed** by TEST-DESIGNER (concurrent with BUILDER per ASES best practice)
 
-Expected results on pilot run:
-- ✅ All tests pass
+**Authoritative counts:**
+- Unit tests written: 40 (implemented in test files)
+- Property-based tests written: 5 (using hypothesis)
+- Integration tests planned: 16+ (for GATE 5)
+- CLI tests planned: 8+ (for GATE 5)
+- **GATE 4 total: 45 tests, all executable**
+
+**Handoff to GATE 5 (VERIFIER):**
+All 45 tests are:
+- ✅ Written and committed
+- ✅ Deterministic and repeatable
+- ✅ Ready for pytest execution
+- ✅ Awaiting GATE 5 for runtime verification
+
+Expected GATE 5 results:
+- ✅ All 45 tests pass
 - ✅ No import errors
 - ✅ Coverage ≥85%
+- ✅ No regressions in existing packages
+
+**GATE 5 will add:** Integration tests (~16+) and CLI tests (~8+) for total ≥69 tests
 
 ---
 
 *Created by TEST-DESIGNER, 2026-07-02*  
-*Concurrent with BUILDER implementation (ASES best practice)*  
-*Ready for GATE 4 approval and GATE 5 execution*
+*Concurrent with BUILDER (GATE 3 and GATE 4 ran in parallel per ASES)*  
+*All 45 tests committed and ready for GATE 5 (VERIFIER) execution*
