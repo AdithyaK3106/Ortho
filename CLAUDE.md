@@ -64,55 +64,30 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-009: Impact Analysis + Debt Scoring (Week 11–12) – GATE 3 COMPLETE
+### task-010: ADR Awareness + Reporting (Week 13â€“14) â€” GATE 1 SUBMITTED
 
-**State:** BUILDER implementation complete, ready for TEST-DESIGNER  
+**State:** DRAFT â†’ PLANNED (awaiting human approval)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
-**Phase:** Phase 2 (Reasoning)  
-**Latest commit:** 87b9e68 (BUILDER GATE 3 COMPLETE)
+**Phase:** Phase 2 (Reasoning)
 
-**GATE 1: PLANNER** – ✅ APPROVED
-- plan.md, spec.md, rollback-plan.md (all consistent)
-- consistency-verification.md (5 issues resolved)
+**What This Task Does:**
+Implements the final two Pillar 3 features from the FRD feature table (ADR awareness, reuse
+discovery) and fixes the `ortho analyze --impact` stub that currently loads empty graphs
+(`apps/cli/src/commands/analyze.py:31-34`), which blocks the FRD Phase 2 exit criterion.
 
-**GATE 2: ARCHITECT** – ✅ APPROVED
-- architecture-review.md (FRD compliance verified)
-- Stateless pattern consistent with task-008
-- No circular dependencies; all metrics deterministic
-- Risk score and analysis confidence properly separated
-- All acceptance criteria met
+**Key Components:**
+- ADRTracker (cross-references `.ases/architecture/adrs/*.md` against the repo tree; OK/STALE/UNLINKED/UNKNOWN)
+- ReuseDetector (AST-type-sequence structural similarity via existing tree-sitter parser, no ML/embeddings)
+- CLI: `ortho analyze --adr-check`, `ortho analyze --reuse`, and `--impact` wired to real `OrthoDatabase` graphs + task-009's `ImpactAnalyzer`
+- ADR-009 (ADR parsing strategy), ADR-010 (reuse similarity algorithm) to be written by ARCHITECT
 
-**GATE 3: BUILDER** – ✅ COMPLETE
-- implementation-notes.md (all 4 atomic tasks complete)
-- Task 1: ImpactAnalyzer (stateless, BFS, deterministic)
-- Task 2: DebtScorer (5-dim, DEFAULT_WEIGHTS, deterministic)
-- Task 3: DependencyHealthAnalyzer (patterns, DEFAULT_THRESHOLDS, cycles)
-- Task 4: CLI integration (package structure, imports verified)
-- ~1,000 lines of code, 8 source files, 100% spec compliance
-- Zero regressions; all ACs met
+**Artifacts Submitted (GATE 1):**
+- `.ases/tasks/task-010-adr-awareness-reporting/plan.md`
+- `.ases/tasks/task-010-adr-awareness-reporting/spec.md`
+- `.ases/tasks/task-010-adr-awareness-reporting/rollback-plan.md`
 
-**GATE 4: TEST-DESIGNER** – ✅ SUBMITTED (Concurrent with BUILDER)
-- test-plan.md (comprehensive test strategy)
-- test_impact_analyzer.py: 14 tests (13 unit + 1 property-based)
-- test_debt_scorer.py: 16 tests (14 unit + 2 property-based)
-- test_dependency_health.py: 15 tests (13 unit + 2 property-based)
-- ~850 lines of test code, 4 test files
-- 45+ total tests, all executable
-- Property-based tests verify bounds/invariants
-- Edge cases: cycles, empty graphs, missing data, external imports
-- Ready for GATE 4 approval and GATE 5 (VERIFIER) execution
-
-**Artifacts:**
-- plan.md (4 atomic tasks, stateless, risks, rollback)
-- spec.md (stateless APIs, formulas, test metrics, risk vs confidence)
-- rollback-plan.md (failure scenarios, recovery procedures)
-- consistency-verification.md (5 inconsistency resolutions)
-- architecture-review.md (FRD alignment, dependency analysis, risk review)
-
-**Scope:** Impact analysis (blast radius), debt scoring (5 dimensions), dependency health (hubs/cycles)  
-**Test targets:** 60+ tests, ≥85% coverage  
-**Next:** BUILDER implements 4 atomic tasks (GATE 3)
+**Next Step:** Human reviews plan.md + spec.md + rollback-plan.md at GATE 1. If approved, proceed to ARCHITECT.
 
 ---
 
