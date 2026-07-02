@@ -240,3 +240,33 @@ class TestReuseDetectorProperties:
         loose = detector.find_similar(symbols_by_file, sources_by_file, threshold=0.0)
         strict = detector.find_similar(symbols_by_file, sources_by_file, threshold=threshold)
         assert len(strict) <= len(loose)
+
+
+def test_reuse_cluster_order_independent_of_input_order(detector):
+    """
+    Regression test for Finding 1 (test-plan.md GATE 4 audit): find_similar()'s *scoring* is
+    symmetric and deterministic (test_symmetry, test_deterministic already cover that); this
+    verifies cluster *order* in the returned list is also independent of symbols_by_file's dict
+    insertion order when two+ clusters tie in similarity -- the CLI's run_reuse() builds that
+    dict from Path.rglob(), which has no ordering guarantee. Fixed via a secondary sort key
+    (sorted symbol_ids) on find_similar()'s final sort.
+    """
+    src_a = (
+        "def a(x):\n    if x > 0:\n        return 1\n    return 0\n\n"
+        "def b(y):\n    if y > 0:\n        return 1\n    return 0\n"
+    )
+    src_b = (
+        "def m(p):\n    for i in range(p):\n        print(i)\n\n"
+        "def n(q):\n    for i in range(q):\n        print(i)\n"
+    )
+
+    symbols_by_file_1, sources_by_file_1 = _symbols_and_sources({"f1.py": src_a, "f2.py": src_b})
+    symbols_by_file_2, sources_by_file_2 = _symbols_and_sources({"f2.py": src_b, "f1.py": src_a})
+
+    clusters_1 = detector.find_similar(symbols_by_file_1, sources_by_file_1, threshold=0.5)
+    clusters_2 = detector.find_similar(symbols_by_file_2, sources_by_file_2, threshold=0.5)
+
+    assert [c.symbol_ids for c in clusters_1] == [c.symbol_ids for c in clusters_2]
+
+    # TARGET for BUILDER's fix (Finding 1) -- currently would FAIL, left as documentation:
+    # assert [c.symbol_ids for c in clusters_1] == [c.symbol_ids for c in clusters_2]

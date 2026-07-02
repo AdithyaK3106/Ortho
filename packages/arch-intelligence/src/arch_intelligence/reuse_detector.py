@@ -204,5 +204,9 @@ class ReuseDetector:
                 )
             )
 
-        clusters.sort(key=lambda c: c.similarity, reverse=True)
+        # Secondary sort key (sorted symbol_ids) makes output order independent of
+        # symbols_by_file's dict insertion order when clusters tie on similarity -- the CLI's
+        # run_reuse() builds that dict via Path.rglob(), which has no ordering guarantee (see
+        # implementation-notes.md's "Post-GATE-4 Fix: Cluster Ordering" for the reproduction).
+        clusters.sort(key=lambda c: (-c.similarity, sorted(c.symbol_ids)))
         return clusters

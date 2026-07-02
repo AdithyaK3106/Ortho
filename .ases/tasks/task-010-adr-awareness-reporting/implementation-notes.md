@@ -282,6 +282,45 @@ Unchanged since GATE 2 architecture-review.md; no new findings surfaced during i
 
 ---
 
+## Post-GATE-4 Fix: Cluster Ordering (Found by Independent Fresh-Context TEST-DESIGNER Subagent)
+
+**Found by:** a genuinely independent subagent (zero conversation history with BUILDER, spawned
+per the user's explicit correction that TEST-DESIGNER review must not be a relabeled continuation
+of the same session) auditing spec.md, the code, and the existing tests cold.
+
+**Bug:** `ReuseDetector.find_similar()`'s final `clusters.sort(key=lambda c: c.similarity,
+reverse=True)` had no secondary sort key. Python's `sort` is stable, so when two or more clusters
+tied on `similarity`, their relative order in the returned list depended on `symbols_by_file`
+dict insertion order — which `AnalyzeCommand.run_reuse()` builds via `Path.rglob("*.py")`, whose
+enumeration order has no guarantee (filesystem/OS-dependent). Reproduced concretely by the
+subagent: two tied clusters (`similarity == 1.0` each) swap relative position in the output list
+depending only on which file was walked first.
+
+This is distinct from the earlier symmetry bug (score computation) — this is about output
+*ordering*, not score correctness. The similarity values themselves were always correct and
+symmetric; only their presentation order was filesystem-dependent.
+
+**Fix:** Added a secondary sort key — `clusters.sort(key=lambda c: (-c.similarity,
+sorted(c.symbol_ids)))` — making output order fully independent of input dict insertion order.
+Verified against the subagent's exact reproduction case (now identical order regardless of
+insertion order) and strengthened its regression test
+(`test_reuse_cluster_order_independent_of_input_order`) from a weak set-equality assertion to the
+full list-equality assertion, which now passes.
+
+**Test-plan.md:** produced by the subagent at
+`.ases/tasks/task-010-adr-awareness-reporting/test-plan.md` — verdict APPROVED for GATE 4, with
+this finding flagged as a SEND BACK TO BUILDER candidate (now resolved) rather than a test-design
+gap. Also confirmed all spec.md-named tests exist and test what they claim (read every test body,
+not just names), and independently re-ran all four affected package suites, matching this
+document's claimed results exactly.
+
+**Regression check after fix:** arch-intelligence 76/76 (was 75, +1 net: subagent's new test plus
+this fix), apps/cli 16/16 (unchanged), repo-intelligence 85/85 (unchanged), impact-analysis 42/42
+(unchanged). Real-repo scan (arch-intelligence + impact-analysis) still finds 10 clusters, same as
+before the fix.
+
+---
+
 ## Files Created
 
 - `packages/arch-intelligence/src/arch_intelligence/adr_tracker.py`
