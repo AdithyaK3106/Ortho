@@ -64,9 +64,9 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-008: Architecture Detection (Week 9–10) — ✅ GATE 2 APPROVED
+### task-008: Architecture Detection (Week 9–10) — 🔨 BUILDER IN PROGRESS
 
-**State:** READY-TO-BUILD (Awaiting BUILDER to implement Task 1–5)  
+**State:** IMPLEMENTED (BUILDER implementing Task 1–5; TEST-DESIGNER shadowing)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Started:** 2026-07-02  
 **Phase:** Phase 2 (Reasoning)  
@@ -118,7 +118,20 @@ Implement Pillar 3 (Architectural Intelligence): detect repo architecture patter
 - ≥85% code coverage
 - Zero regressions in repo-intelligence + context-hub
 
-**Next Step:** BUILDER implements 5 atomic tasks (Task 1–5). TEST-DESIGNER shadows concurrently (GATE 3 scope review after implementation complete).
+**Implementation Status:**
+- ✓ Task 1: ArchitectureDetector (core pattern matching) — COMPLETE
+- ⏳ Task 2: LayerDetector (topological sort) — IN PROGRESS
+- ⏳ Task 3: SubsystemDetector (Louvain clustering) — IN PROGRESS
+- ⏳ Task 4: ArchitectureModelStore (SQLite persistence) — IN PROGRESS
+- ⏳ Task 5: Integration & CLI command — IN PROGRESS
+
+**TEST-DESIGNER:** Shadowing BUILDER concurrently
+- Writing unit tests as code lands (TDD feedback)
+- Designing 65+ tests (unit + integration + edge cases)
+- Property-based tests (hypothesis) for pattern detection
+- Real-repo scan tests (fastapi, django baseline)
+
+**Next Step:** BUILDER completes Task 1–5 → TEST-DESIGNER finishes test suite → VERIFIER runs full pytest (import validation, pilot, full suite, regression).
 
 ---
 
