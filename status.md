@@ -6,12 +6,13 @@
 **Previous Phase:** Phase 1 Foundation (100% complete, 2026-06-30 to 2026-07-01)  
 **Goal:** Complete Python parsing, call graphs, and incremental indexing. Integrate context hub for search and retrieval.
 
-**Status:** Phase 1 COMPLETE ✅
-- 252/265 tests passing (95%)
+**Status:** Phase 1 COMPLETE ✅ | Phase 2 IN PROGRESS
+- Phase 1: 252/265 tests passing (95%)
+- task-008 (Architecture Detection): GATE 6 APPROVED ✅ (35/35 tests, 100%)
 - All critical bugs fixed (5/5)
 - Dependency versions pinned (prevents conflicts)
-- Test execution policy enforced (no more designed-only tests)
-- Ready to proceed to Phase 2
+- Test execution policy enforced (mandatory pytest, real logs)
+- Ready to proceed with Phase 2 tasks
 
 ---
 
@@ -62,21 +63,22 @@
 
 ---
 
-### Week 5–6 (Extended): Architecture Detection
+### Phase 2, Week 1–2: Architecture Detection (Pillar 3)
 - [x] ArchitectureDetector class (5 pattern styles)
 - [x] LayerDetector (topological sorting, semantic naming)
 - [x] SubsystemDetector (Louvain clustering)
 - [x] ArchitectureModelStore (database persistence)
 - [x] Evidence generation and confidence scoring
+- [x] CLI: `ortho analyze` command
 
-**Status:** GATE-5 APPROVED ✓ (task-005, commit: 5a40d05)
+**Status:** GATE 6 APPROVED ✓ (task-008, commit: 478b24c)
 - Pattern detection: layered, hexagonal, mvc, microservices, flat
-- Layer extraction via topological sort with presentation/business/data naming
-- Subsystem clustering with coupling score calculation
-- Database persistence (save/load/load_latest)
-- 69/72 tests passing (95.8%)
-- 3 non-blocking edge cases (microservices/flat misclassification, minor)
-- All 12 ACs meaningfully tested and passing
+- Layer extraction via topological sort (Kahn's algorithm) with Layer 0/1/2 numbering
+- Subsystem clustering (Louvain, seed=42) with coupling score calculation
+- SQLite persistence (save, load, load_latest, versioning)
+- 35/35 tests passing (100%) after API alignment
+- All 5 ACs fully implemented and verified
+- REVIEWER: Code quality HIGH, spec compliance 100%
 
 ---
 
