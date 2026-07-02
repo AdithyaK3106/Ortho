@@ -1,0 +1,35 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pyproject.toml
+plugins: anyio-4.6.0
+collecting ... collected 0 items / 2 errors
+
+=================================== ERRORS ====================================
+_ ERROR collecting packages/arch-intelligence/tests/test_layer_detector_revised.py _
+ImportError while importing test module 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence\tests\test_layer_detector_revised.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages\arch-intelligence\tests\test_layer_detector_revised.py:4: in <module>
+    from arch_intelligence.layer_detector import LayerDetector, ImportEdge, File
+E   ImportError: cannot import name 'ImportEdge' from 'arch_intelligence.layer_detector' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence\src\arch_intelligence\layer_detector.py)
+_ ERROR collecting packages/arch-intelligence/tests/test_subsystem_detector_revised.py _
+ImportError while importing test module 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence\tests\test_subsystem_detector_revised.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages\arch-intelligence\tests\test_subsystem_detector_revised.py:4: in <module>
+    from arch_intelligence.subsystem_detector import SubsystemDetector, CallEdge, File
+E   ImportError: cannot import name 'CallEdge' from 'arch_intelligence.subsystem_detector' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\arch-intelligence\src\arch_intelligence\subsystem_detector.py)
+=========================== short test summary info ===========================
+ERROR packages/arch-intelligence/tests/test_layer_detector_revised.py
+ERROR packages/arch-intelligence/tests/test_subsystem_detector_revised.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+============================== 2 errors in 0.52s ==============================
+EXIT: 2
