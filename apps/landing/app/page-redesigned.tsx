@@ -91,7 +91,7 @@ function HeroSection() {
           </div>
 
           <div className="space-y-2">
-            <div className="text-amber-600">▸ ortho> scan</div>
+            <div className="text-amber-600">▸ ortho{'>'} scan</div>
             <div className="text-gray-600 ml-6">→ detecting languages...</div>
             <div className="text-gray-600 ml-6">→ parsing 2,244 files via tree-sitter</div>
             <div className="text-gray-600 ml-6">→ 5,124 symbols extracted</div>
@@ -424,7 +424,7 @@ function CLISection() {
 
           {/* Right - Output */}
           <div className="border border-gray-800 p-6 font-mono text-xs bg-black/60">
-            <div className="text-amber-600">ortho> analyze</div>
+            <div className="text-amber-600">ortho{'>'} analyze</div>
             <div className="mt-2 text-green-500">▸ detecting architecture style...</div>
             <div className="text-green-500">✓ style: LAYERED    confidence: 0.87</div>
             <div className="text-green-500">✓ layers detected: 3    (data / business / presentation)</div>
