@@ -28,15 +28,9 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      <body className="bg-background text-text-primary font-sans antialiased">
-        <NoHydrationWarning>
-          {children}
-        </NoHydrationWarning>
+      <body suppressHydrationWarning className="bg-background text-text-primary font-sans antialiased">
+        {children}
       </body>
     </html>
   )
-}
-
-function NoHydrationWarning({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
 }
