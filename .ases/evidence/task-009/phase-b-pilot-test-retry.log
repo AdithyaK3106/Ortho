@@ -1,0 +1,46 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\impact-analysis
+configfile: pyproject.toml
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collecting ... collected 0 items / 3 errors
+
+=================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_debt_scorer.py __________________
+ImportError while importing test module 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\impact-analysis\tests\test_debt_scorer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages\impact-analysis\tests\test_debt_scorer.py:6: in <module>
+    from impact_analysis.debt_scorer import DebtScorer, CallEdge, ImportEdge, Symbol, GitFileMetadata
+E   ModuleNotFoundError: No module named 'impact_analysis'
+______________ ERROR collecting tests/test_dependency_health.py _______________
+ImportError while importing test module 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\impact-analysis\tests\test_dependency_health.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages\impact-analysis\tests\test_dependency_health.py:6: in <module>
+    from impact_analysis.dependency_health import DependencyHealthAnalyzer, CallEdge, ImportEdge
+E   ModuleNotFoundError: No module named 'impact_analysis'
+_______________ ERROR collecting tests/test_impact_analyzer.py ________________
+ImportError while importing test module 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\impact-analysis\tests\test_impact_analyzer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages\impact-analysis\tests\test_impact_analyzer.py:6: in <module>
+    from impact_analysis.impact_analyzer import ImpactAnalyzer, CallEdge, ImportEdge, Symbol
+E   ModuleNotFoundError: No module named 'impact_analysis'
+=========================== short test summary info ===========================
+ERROR packages\impact-analysis\tests\test_debt_scorer.py
+ERROR packages\impact-analysis\tests\test_dependency_health.py
+ERROR packages\impact-analysis\tests\test_impact_analyzer.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!
+============================== 3 errors in 1.56s ==============================

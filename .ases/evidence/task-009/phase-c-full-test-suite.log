@@ -1,0 +1,115 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\impact-analysis
+configfile: pyproject.toml
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collecting ... collected 42 items
+
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_score_isolated_module PASSED [  2%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_score_high_churn_module PASSED [  4%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_score_stable_module PASSED [  7%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_score_hub_module PASSED [  9%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_score_all_modules_sorted PASSED [ 11%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_test_coverage_not_found PASSED [ 14%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_weights_sum_to_one PASSED [ 16%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_evidence_generated FAILED [ 19%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerEdgeCases::test_empty_inputs PASSED [ 21%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerEdgeCases::test_single_file PASSED [ 23%]
+packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerEdgeCases::test_missing_git_metadata PASSED [ 26%]
+packages\impact-analysis\tests\test_debt_scorer.py::test_coupling_score_bounds PASSED [ 28%]
+packages\impact-analysis\tests\test_debt_scorer.py::test_churn_score_bounds FAILED [ 30%]
+packages\impact-analysis\tests\test_debt_scorer.py::test_total_score_weighted_average FAILED [ 33%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_analyze_isolated_module PASSED [ 35%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_analyze_high_fan_in PASSED [ 38%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_analyze_high_fan_out PASSED [ 40%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_analyze_hub_module PASSED [ 42%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_analyze_simple_cycle PASSED [ 45%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_find_global_cycles PASSED [ 47%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_analyze_all_modules PASSED [ 50%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthBasic::test_recommendations_generated PASSED [ 52%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthEdgeCases::test_empty_graph PASSED [ 54%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthEdgeCases::test_external_imports_excluded PASSED [ 57%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthEdgeCases::test_self_import_no_cycle PASSED [ 59%]
+packages\impact-analysis\tests\test_dependency_health.py::TestDependencyHealthEdgeCases::test_three_node_cycle PASSED [ 61%]
+packages\impact-analysis\tests\test_dependency_health.py::test_threshold_consistency PASSED [ 64%]
+packages\impact-analysis\tests\test_dependency_health.py::test_hub_detection_property PASSED [ 66%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_simple_import_chain FAILED [ 69%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_no_dependents PASSED [ 71%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_cycle_handling PASSED [ 73%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_depth_limit FAILED [ 76%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_symbol_level PASSED [ 78%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_with_symbols PASSED [ 80%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_risk_score_high_fan_in FAILED [ 83%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_confidence_with_unresolved_symbols PASSED [ 85%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_evidence_generated PASSED [ 88%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerEdgeCases::test_empty_graphs PASSED [ 90%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerEdgeCases::test_self_import_no_double_count PASSED [ 92%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerEdgeCases::test_symbol_not_found PASSED [ 95%]
+packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerEdgeCases::test_external_imports_excluded PASSED [ 97%]
+packages\impact-analysis\tests\test_impact_analyzer.py::test_depth_parameter_bounds PASSED [100%]
+
+================================== FAILURES ===================================
+_________________ TestDebtScorerBasic.test_evidence_generated _________________
+packages\impact-analysis\tests\test_debt_scorer.py:139: in test_evidence_generated
+    git_metadata={"messy.py": GitFileMetadata(commits_30d=25)},
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: GitFileMetadata.__init__() missing 1 required positional argument: 'file_path'
+___________________________ test_churn_score_bounds ___________________________
+packages\impact-analysis\tests\test_debt_scorer.py:214: in test_churn_score_bounds
+    commits=st.integers(min_value=0, max_value=100),
+               ^^^
+packages\impact-analysis\tests\test_debt_scorer.py:224: in test_churn_score_bounds
+    git_metadata={"active.py": GitFileMetadata(commits_30d=commits)},
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: GitFileMetadata.__init__() missing 1 required positional argument: 'file_path'
+E   Falsifying example: test_churn_score_bounds(
+E       commits=0,  # or any other generated value
+E   )
+______________________ test_total_score_weighted_average ______________________
+packages\impact-analysis\tests\test_debt_scorer.py:232: in test_total_score_weighted_average
+    scores=[st.floats(min_value=0.0, max_value=1.0) for _ in range(5)]
+               ^^^
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\hypothesis\core.py:764: in process_arguments_to_given
+    check_strategy(s, name=k)
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\hypothesis\strategies\_internal\strategies.py:1278: in check_strategy
+    raise InvalidArgument(
+E   hypothesis.errors.InvalidArgument: Expected a SearchStrategy, such as st.sampled_from(scores), but got scores=[floats(min_value=0.0, max_value=1.0), floats(min_value=0.0, max_value=1.0), floats(min_value=0.0, max_value=1.0), floats(min_value=0.0, max_value=1.0), floats(min_value=0.0, max_value=1.0)] (type=list)
+__________ TestImpactAnalyzerBasic.test_analyze_simple_import_chain ___________
+packages\impact-analysis\tests\test_impact_analyzer.py:35: in test_analyze_simple_import_chain
+    assert report.blast_radius == 2  # B and C
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert 1 == 2
+E    +  where 1 = ImpactReport(changed_file_id='A', direct_dependents=['B'], transitive_dependents=['C'], risk_score=0.5, analysis_confidence=1.0, blast_radius=1, evidence=['A imported by 1 file(s) (high fan-in)']).blast_radius
+______________ TestImpactAnalyzerBasic.test_analyze_depth_limit _______________
+packages\impact-analysis\tests\test_impact_analyzer.py:124: in test_analyze_depth_limit
+    assert report_depth3.blast_radius == 3  # B, C, D
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert 2 == 3
+E    +  where 2 = ImpactReport(changed_file_id='A', direct_dependents=['B'], transitive_dependents=['C', 'D'], risk_score=0.5, analysis_confidence=1.0, blast_radius=2, evidence=['A imported by 1 file(s) (high fan-in)']).blast_radius
+_____________ TestImpactAnalyzerBasic.test_risk_score_high_fan_in _____________
+packages\impact-analysis\tests\test_impact_analyzer.py:196: in test_risk_score_high_fan_in
+    assert report.blast_radius >= 4
+E   AssertionError: assert 0 >= 4
+E    +  where 0 = ImpactReport(changed_file_id='A', direct_dependents=['B', 'C', 'D', 'E'], transitive_dependents=[], risk_score=1.0, analysis_confidence=1.0, blast_radius=0, evidence=['A imported by 4 file(s) (high fan-in)']).blast_radius
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.12.3-final-0 _______________
+
+Name                                                                Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------------------------------
+packages\impact-analysis\src\impact_analysis\__init__.py                5      0   100%
+packages\impact-analysis\src\impact_analysis\debt_scorer.py            89      4    96%   110, 112, 198, 217
+packages\impact-analysis\src\impact_analysis\dependency_health.py     106      3    97%   11-13
+packages\impact-analysis\src\impact_analysis\impact_analyzer.py        95      4    96%   60, 164, 185, 187
+packages\impact-analysis\src\impact_analysis\types.py                  41      0   100%
+-------------------------------------------------------------------------------------------------
+TOTAL                                                                 336     11    97%
+=========================== short test summary info ===========================
+FAILED packages\impact-analysis\tests\test_debt_scorer.py::TestDebtScorerBasic::test_evidence_generated
+FAILED packages\impact-analysis\tests\test_debt_scorer.py::test_churn_score_bounds
+FAILED packages\impact-analysis\tests\test_debt_scorer.py::test_total_score_weighted_average
+FAILED packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_simple_import_chain
+FAILED packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_analyze_depth_limit
+FAILED packages\impact-analysis\tests\test_impact_analyzer.py::TestImpactAnalyzerBasic::test_risk_score_high_fan_in
+======================== 6 failed, 36 passed in 3.15s =========================

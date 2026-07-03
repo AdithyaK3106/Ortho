@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Next.js
+.next/
+out/
+*.swp
+*.swo
+
+# Testing
+.coverage
+.nyc_output
+
+# Production
+build/
+dist/
+
+# Misc
+.DS_Store
+*.pem
+.env
+.env.local
+.env.*.local
+
+# Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
