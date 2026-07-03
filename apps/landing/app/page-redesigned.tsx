@@ -628,12 +628,9 @@ export default function HomeRedesigned() {
   return (
     <main className="bg-black text-white relative">
       {/* Three.js animated background - repository graph */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-30">
         <ThreeJSBackground />
       </div>
-
-      {/* Dark overlay to ensure text readability */}
-      <div className="fixed inset-0 z-0 bg-black/70 pointer-events-none" />
 
       {/* Content layers above background */}
       <div className="relative z-10">
