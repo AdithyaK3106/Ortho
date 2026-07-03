@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
+import { ThreeJSBackground } from '@/components/threejs-bg'
 
 /**
  * ORTHO LANDING PAGE — PREMIUM, MINIMAL, ENGINEERING-FOCUSED
@@ -15,6 +16,8 @@ import { useRef } from 'react'
  * - One idea per section
  * - Motion for context, not decoration
  * - Trust, clarity, engineering excellence
+ *
+ * Background: Three.js animated repository graph (nodes + edges)
  */
 
 // ============================================================================
@@ -79,14 +82,14 @@ function HeroSection() {
   return (
     <motion.section
       ref={ref}
-      className="relative min-h-screen flex items-center pt-20 px-8 md:px-12 bg-slate-950 overflow-hidden"
+      className="relative min-h-screen flex items-center pt-20 px-8 md:px-12 overflow-hidden"
       style={{ opacity }}
     >
-      {/* Subtle grid background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(100,116,139,0.05)_1px,transparent_1px)] bg-[length:50px_50px] pointer-events-none" />
+      {/* Overlay to darken background and ensure text readability */}
+      <div className="absolute inset-0 bg-slate-950/50 pointer-events-none" />
 
-      {/* Accent glow (subtle) */}
-      <div className="absolute top-1/2 right-0 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Subtle grid background overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(100,116,139,0.02)_1px,transparent_1px)] bg-[length:50px_50px] pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* Left: Headline & CTA */}
@@ -604,17 +607,25 @@ function Footer() {
 
 export default function HomeRedesigned() {
   return (
-    <main className="bg-slate-950 text-slate-50">
-      <Navbar />
-      <HeroSection />
-      <ProblemsSection />
-      <WorkflowSection />
-      <FeaturesSection />
-      <ASESSection />
-      <ComparisonSection />
-      <RoadmapSection />
-      <FinalCTASection />
-      <Footer />
+    <main className="bg-slate-950 text-slate-50 relative">
+      {/* Three.js animated background persists across entire page */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <ThreeJSBackground />
+      </div>
+
+      {/* Content layers above background */}
+      <div className="relative z-10">
+        <Navbar />
+        <HeroSection />
+        <ProblemsSection />
+        <WorkflowSection />
+        <FeaturesSection />
+        <ASESSection />
+        <ComparisonSection />
+        <RoadmapSection />
+        <FinalCTASection />
+        <Footer />
+      </div>
     </main>
   )
 }
