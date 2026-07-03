@@ -140,7 +140,7 @@ function HeroSection() {
         >
           <div className="mb-4 text-gray-500"># User request</div>
           <div className="mb-4 text-white">
-            <span style={{ color: '#FFA500' }}>$</span> ortho context "Add authentication"
+            <span style={{ color: '#FFA500' }}>{'$'}</span> ortho context "Add authentication"
           </div>
 
           <div className="mb-4 text-gray-500"># Repository scanned</div>
@@ -504,7 +504,7 @@ function CLISection() {
 
           {/* Right: Output */}
           <div className="border border-amber-900/50 p-6 font-mono text-xs leading-relaxed overflow-y-auto" style={{ background: 'rgba(0,0,0,0.6)', color: '#0f0' }}>
-            <div className="text-gray-500">ortho> analyze</div>
+            <div className="text-gray-500">ortho{'>'} analyze</div>
             <div className="mt-2 text-green-500">✓ Repository scanned</div>
             <div className="text-green-500">✓ Architecture detected: LAYERED</div>
             <div className="text-green-500">✓ Confidence: 0.87</div>
