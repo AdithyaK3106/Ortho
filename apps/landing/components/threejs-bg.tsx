@@ -2,102 +2,115 @@
 
 import { useEffect, useRef } from 'react'
 
-/**
- * Three.js animated background - repository graph visualization
- * Shows nodes (files/modules) connected by edges (imports/dependencies)
- * Warm orange accent nodes mixed with white nodes
- */
-
 export function ThreeJSBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const rendererRef = useRef<any>(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current || rendererRef.current) return
 
-    // Dynamically load Three.js from CDN
+    // Load Three.js script
     const script = document.createElement('script')
-    script.src = 'https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js'
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
+    script.async = true
     script.onload = () => {
-      initThreeJS(containerRef.current!)
+      initScene()
     }
-    document.head.appendChild(script)
+    document.body.appendChild(script)
+
+    function initScene() {
+      const THREE = (window as any).THREE
+      if (!THREE) return
+
+      const container = containerRef.current
+      if (!container) return
+
+      const width = window.innerWidth
+      const height = window.innerHeight
+
+      // Scene setup
+      const scene = new THREE.Scene()
+      const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+
+      renderer.setSize(width, height)
+      renderer.setPixelRatio(window.devicePixelRatio)
+      renderer.setClearColor(0x000000, 0)
+      container.appendChild(renderer.domElement)
+      rendererRef.current = renderer
+
+      camera.position.z = 8
+
+      // Create nodes
+      const nodeGroup = new THREE.Group()
+      const geometry = new THREE.SphereGeometry(0.05, 16, 16)
+      const whiteMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+      const orangeMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 })
+
+      const nodes = []
+      for (let i = 0; i < 40; i++) {
+        const material = Math.random() > 0.8 ? orangeMaterial : whiteMaterial
+        const mesh = new THREE.Mesh(geometry, material)
+        mesh.position.set(
+          (Math.random() - 0.5) * 10,
+          (Math.random() - 0.5) * 10,
+          (Math.random() - 0.5) * 10
+        )
+        nodeGroup.add(mesh)
+        nodes.push(mesh)
+      }
+
+      // Create edges
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 })
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const distance = nodes[i].position.distanceTo(nodes[j].position)
+          if (distance < 3) {
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+              nodes[i].position,
+              nodes[j].position
+            ])
+            const line = new THREE.Line(lineGeometry, lineMaterial)
+            nodeGroup.add(line)
+          }
+        }
+      }
+
+      scene.add(nodeGroup)
+
+      // Animation loop
+      const animate = () => {
+        requestAnimationFrame(animate)
+        nodeGroup.rotation.x += 0.0005
+        nodeGroup.rotation.y += 0.001
+        renderer.render(scene, camera)
+      }
+
+      animate()
+
+      // Handle resize
+      const handleResize = () => {
+        const newWidth = window.innerWidth
+        const newHeight = window.innerHeight
+        camera.aspect = newWidth / newHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize(newWidth, newHeight)
+      }
+
+      window.addEventListener('resize', handleResize)
+
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        container.removeChild(renderer.domElement)
+      }
+    }
 
     return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script)
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
       }
     }
   }, [])
 
-  return <div ref={containerRef} className="fixed inset-0 w-full h-full pointer-events-none" />
-}
-
-function initThreeJS(container: HTMLElement) {
-  const THREE = (window as any).THREE
-
-  const devicePixelRatio = window.devicePixelRatio || 1
-  const width = container.clientWidth || window.innerWidth
-  const height = container.clientHeight || window.innerHeight
-
-  const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
-  renderer.setSize(width, height)
-  renderer.setPixelRatio(devicePixelRatio)
-  renderer.setClearColor(0x000000, 0) // Transparent
-  container.appendChild(renderer.domElement)
-
-  // Create a abstract "repository graph" - a cluster of nodes and lines
-  const nodeGroup = new THREE.Group()
-  const nodes = [] as THREE.Mesh[]
-  const nodeCount = 40
-
-  const geo = new THREE.SphereGeometry(0.05, 16, 16)
-  const whitemat = new THREE.MeshBasicMaterial({ color: 0xffffff })
-  const orangeMat = new THREE.MeshBasicMaterial({ color: 0xea580c }) // Ortho warm orange
-
-  for (let i = 0; i < nodeCount; i++) {
-    const mesh = new THREE.Mesh(geo, Math.random() > 0.8 ? orangeMat : whitemat)
-    mesh.position.set(
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
-      (Math.random() - 0.5) * 10,
-    )
-    nodeGroup.add(mesh)
-    nodes.push(mesh)
-  }
-
-  // Connect nodes with lines
-  const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 })
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      if (nodes[i].position.distanceTo(nodes[j].position) < 3) {
-        const points = [nodes[i].position, nodes[j].position]
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(points)
-        const line = new THREE.Line(lineGeo, lineMat)
-        nodeGroup.add(line)
-      }
-    }
-  }
-
-  scene.add(nodeGroup)
-  camera.position.z = 8
-
-  function animate() {
-    requestAnimationFrame(animate)
-    nodeGroup.rotation.y += 0.001
-    nodeGroup.rotation.x += 0.0005
-    renderer.render(scene, camera)
-  }
-
-  window.addEventListener('resize', () => {
-    const w = container.clientWidth || window.innerWidth
-    const h = container.clientHeight || window.innerHeight
-    camera.aspect = w / h
-    camera.updateProjectionMatrix()
-    renderer.setSize(w, h)
-    renderer.setPixelRatio(devicePixelRatio)
-  })
-
-  animate()
+  return <div ref={containerRef} className="w-full h-full" />
 }
