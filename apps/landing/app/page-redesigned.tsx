@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useRef } from 'react'
+import { ThreeJSBackground } from '@/components/threejs-bg'
 
 /**
  * ORTHO LANDING PAGE — EXACT VISUAL REPRODUCTION
@@ -14,6 +15,7 @@ import { useRef } from 'react'
  * - Dark background with warm amber accents
  * - Terminal green for success states
  * - Grid-based composition with architectural precision
+ * - Three.js animated repository graph background
  */
 
 function Navbar() {
@@ -624,18 +626,29 @@ function Footer() {
 
 export default function HomeRedesigned() {
   return (
-    <main className="bg-black text-white">
-      <Navbar />
-      <HeroSection />
-      <ProblemSection />
-      <PipelineSection />
-      <PillarsSection />
-      <ASESSection />
-      <CLISection />
-      <ComparisonSection />
-      <RoadmapSection />
-      <CTA />
-      <Footer />
+    <main className="bg-black text-white relative">
+      {/* Three.js animated background - repository graph */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <ThreeJSBackground />
+      </div>
+
+      {/* Dark overlay to ensure text readability */}
+      <div className="fixed inset-0 z-0 bg-black/70 pointer-events-none" />
+
+      {/* Content layers above background */}
+      <div className="relative z-10">
+        <Navbar />
+        <HeroSection />
+        <ProblemSection />
+        <PipelineSection />
+        <PillarsSection />
+        <ASESSection />
+        <CLISection />
+        <ComparisonSection />
+        <RoadmapSection />
+        <CTA />
+        <Footer />
+      </div>
     </main>
   )
 }
