@@ -1,6 +1,6 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 1.3 — Phase 1 Complete, Phase 2 Complete  
+**Version:** 1.4 — Phase 1 Complete, Phase 2 Complete, Security/Bug-Fix Pass Applied  
 **Started:** 2026-06-30  
 **Current Phase:** Phase 2 COMPLETE — Ready for Phase 3 planning  
 **Previous Phase:** Phase 1 Foundation (100% complete, 2026-06-30 to 2026-07-01)  
@@ -14,6 +14,45 @@
 - All issues resolved (test bugs fixed, type consolidation completed)
 - Phase 2 exit criteria met (architectural style detection, `--impact` blast radius, circular dependency detection)
 - 2 real bugs found and fixed in task-010 via test execution (similarity symmetry, cluster ordering) — see task-010 entry in Completed Tasks
+
+---
+
+## Security & Bug-Fix Pass (2026-07-06)
+
+Whole-repo security scan + broken-code audit. 11 fixes across 8 source files, all test suites
+green afterward (repo-intelligence 85+46xp, context-hub **54/54** — was 53 + 2 known failures,
+arch-intelligence 76, impact-analysis 42, shared/storage 37, apps/cli 16 + jest 6, api-server 7,
+`tsc --noEmit` clean).
+
+**Security:**
+1. API server bound `0.0.0.0` with no auth on a local-first tool → now binds `127.0.0.1` (`apps/api-server/src/main.py`)
+2. Git argument injection: `since_commit` flowed into `git diff` unvalidated (`--option`-shaped refs
+   parsed as flags) → option-shaped refs rejected + `--` terminator (`incremental_indexer.py`)
+3. `shell: true` spawn on Windows re-joined args into an injectable shell string → removed (`scan.ts`)
+4. Re-running `ortho init` truncated `ortho.db`, `vectors.db`, and edited `config.toml` → create-only
+   writes (`wx` flag), existing files kept (`init.ts`)
+
+**Broken code:**
+5. `ArtifactStore` silently lost ALL writes in production: `OrthoDatabase.connection()` opens a new
+   connection per call, so INSERT and commit() ran on different connections (rollback on GC). Tests
+   passed only because the mock shared one connection. Now holds a single connection (`store.py`)
+6. `ortho scan` / `ortho index` spawned nonexistent script paths → both point at the real
+   `scan_cli.py` (`scan.ts`, `index.ts`)
+7. `ortho analyze` (plain) crashed: nonexistent `shared.storage` import, DB object passed where
+   `ArchitectureModelStore` expects a path string, hardcoded empty graphs → loads real graphs from
+   `.ortho/ortho.db`, guards unindexed repos, verified end-to-end (`analyze.py`)
+8. `repo-intelligence/cli.py` crashed as a script (relative imports, wrong `IncrementalIndexer` arity) → fixed
+9. Successful scans exited 1 on Windows: '✓' summary raised `UnicodeEncodeError` on cp1252 consoles
+   → stdout/stderr reconfigured to UTF-8 (`scan_cli.py`)
+10. The 2 "known limitation" git-metadata tests actually fixed: `GitMetadataStore` crashed on
+    `repo_root=None`; test fixture leaked GitPython handles on Windows teardown (`git_metadata.py`, conftest)
+11. `ArchitectureModelStore` never closed connections (locks `.ortho/ortho.db` on Windows) → scoped connections (`model_store.py`)
+
+**Flagged, deliberately not fixed:** `Indexer` doesn't persist to DB (pending Phase 2 integration
+task); `VectorStore` + api-server artifact endpoint are known stubs; `node_modules/` is committed
+to git (junctioned `ortho-cli` mirrors `apps/cli` — needs `.gitignore` cleanup someday);
+`StalenessDetector` follows `../` artifact sources outside the repo root (local single-user tool,
+hash-compare only — low severity).
 
 ---
 
@@ -391,7 +430,8 @@ All Python packages must pass:
 
 ---
 
-*Last updated: 2026-07-02 by BUILDER/VERIFIER/REVIEWER (task-010 closeout)  
-Phase 1 Status: COMPLETE (252/265 tests passing, 95%)  
+*Last updated: 2026-07-06 (security & bug-fix pass — see section at top)  
+Phase 1 Status: COMPLETE  
 Phase 2 Status: COMPLETE — all 5 tasks (006-010) GATE-6 APPROVED  
+Test Status: all suites green, 317 passing, context-hub 54/54 (zero known failures)  
 Next Session: Phase 3 planning*

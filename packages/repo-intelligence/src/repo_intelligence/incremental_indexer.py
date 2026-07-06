@@ -149,9 +149,14 @@ class IncrementalIndexer:
         """
         changed_files: List[ChangedFile] = []
 
+        # Reject option-shaped refs so a value like "--output=..." can't be
+        # parsed by git as a flag (argument injection).
+        if since_commit.startswith("-"):
+            raise NotAGitRepoError(f"Invalid git reference: {since_commit}")
+
         try:
             result = subprocess.run(
-                ["git", "diff", "--name-status", "--diff-filter=AMDR", f"{since_commit}"],
+                ["git", "diff", "--name-status", "--diff-filter=AMDR", since_commit, "--"],
                 cwd=self.repo_root,
                 capture_output=True,
                 text=True,

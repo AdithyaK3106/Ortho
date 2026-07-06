@@ -9,6 +9,18 @@ export async function initCommand(): Promise<void> {
     await fs.mkdir(orthoDir, { recursive: true });
     console.log("✓ Created .ortho/ directory");
 
+    // flag "wx" = create only if missing, so re-running init never wipes an
+    // existing config or database.
+    const writeIfMissing = async (dest: string, content: string): Promise<boolean> => {
+      try {
+        await fs.writeFile(dest, content, { flag: "wx" });
+        return true;
+      } catch (err: any) {
+        if (err.code === "EEXIST") return false;
+        throw err;
+      }
+    };
+
     // Create default config template
     const configDest = join(orthoDir, "config.toml");
     const defaultConfig = `[project]
@@ -29,17 +41,17 @@ default_model = "claude-sonnet-4-6"
 fallback_model = "claude-haiku-4-5-20251001"
 max_tokens = 8192
 `;
-    await fs.writeFile(configDest, defaultConfig);
-    console.log("✓ Created .ortho/config.toml");
+    const configCreated = await writeIfMissing(configDest, defaultConfig);
+    console.log(configCreated ? "✓ Created .ortho/config.toml" : "• .ortho/config.toml already exists, kept");
 
     // Create database files (empty, will be initialized on first use)
     const dbPath = join(orthoDir, "ortho.db");
-    await fs.writeFile(dbPath, "");
-    console.log("✓ Created .ortho/ortho.db");
+    const dbCreated = await writeIfMissing(dbPath, "");
+    console.log(dbCreated ? "✓ Created .ortho/ortho.db" : "• .ortho/ortho.db already exists, kept");
 
     const vectorDbPath = join(orthoDir, "vectors.db");
-    await fs.writeFile(vectorDbPath, "");
-    console.log("✓ Created .ortho/vectors.db");
+    const vecCreated = await writeIfMissing(vectorDbPath, "");
+    console.log(vecCreated ? "✓ Created .ortho/vectors.db" : "• .ortho/vectors.db already exists, kept");
 
     console.log("\n✓ Ortho initialized successfully!");
     console.log("Next: ortho scan");

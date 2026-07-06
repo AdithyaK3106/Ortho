@@ -22,17 +22,52 @@ class AnalyzeCommand:
             LayerDetector,
             SubsystemDetector,
             ArchitectureModelStore,
+            ArchitectureModel,
         )
-        from shared.storage import OrthoDatabase
+        from arch_intelligence.arch_detector import CallEdge, File, ImportEdge, Symbol
 
-        # Load repo data
-        db = OrthoDatabase(self.repo_root)
+        db_path = self.repo_root / ".ortho" / "ortho.db"
+        if not db_path.exists():
+            return {
+                "style": "unknown",
+                "confidence": 0.0,
+                "evidence": ["Repository not indexed (.ortho/ortho.db not found); run `ortho scan` first"],
+                "layers": 0,
+                "subsystems": 0,
+                "model_id": None,
+            }
 
-        # Placeholder: would load actual call/import graphs from database
-        call_graph = []
-        import_graph = []
-        symbols = []
-        files = []
+        # Load real call/import graphs from the indexed database
+        conn = sqlite3.connect(str(db_path))
+        try:
+            conn.row_factory = sqlite3.Row
+            file_rows = conn.execute("SELECT id, rel_path, repo_id FROM files").fetchall()
+            files = [File(id=row["id"], rel_path=row["rel_path"]) for row in file_rows]
+            repo_id = file_rows[0]["repo_id"] if file_rows else "repo"
+
+            symbol_rows = conn.execute("SELECT id, name, file_id FROM symbols").fetchall()
+            symbols = [Symbol(id=r["id"], name=r["name"], file_id=r["file_id"]) for r in symbol_rows]
+
+            call_rows = conn.execute("SELECT caller_id, callee_id, confidence FROM call_edges").fetchall()
+            call_graph = [
+                CallEdge(caller_id=r["caller_id"], callee_id=r["callee_id"], confidence=r["confidence"])
+                for r in call_rows
+            ]
+
+            import_rows = conn.execute(
+                "SELECT importer_file_id, imported_file_id, imported_module, is_external FROM import_edges"
+            ).fetchall()
+            import_graph = [
+                ImportEdge(
+                    importer_file_id=r["importer_file_id"],
+                    imported_file_id=r["imported_file_id"],
+                    imported_module=r["imported_module"],
+                    is_external=bool(r["is_external"]),
+                )
+                for r in import_rows
+            ]
+        finally:
+            conn.close()
 
         # Run detection
         arch_detector = ArchitectureDetector()
@@ -46,9 +81,8 @@ class AnalyzeCommand:
         subsystems = subsystem_detector.detect_subsystems(call_graph, symbols, files)
 
         # Build model
-        from arch_intelligence import ArchitectureModel
         model = ArchitectureModel(
-            repo_id="repo",
+            repo_id=repo_id,
             style=result.style,
             style_confidence=result.confidence,
             layers=layers,
@@ -56,8 +90,8 @@ class AnalyzeCommand:
             evidence=result.evidence,
         )
 
-        # Save model
-        store = ArchitectureModelStore(db)
+        # Save model (store takes the db *path*, not a database object)
+        store = ArchitectureModelStore(str(db_path))
         model_id = store.save(model)
 
         return {

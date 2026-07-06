@@ -9,7 +9,7 @@ export interface IndexOptions {
 export async function indexCommand(options: IndexOptions): Promise<void> {
   const projectRoot = process.cwd();
 
-  const args = ["index"];
+  const args = ["--repo-root", projectRoot];
 
   if (options.watch) {
     args.push("--watch");
@@ -19,7 +19,12 @@ export async function indexCommand(options: IndexOptions): Promise<void> {
     args.push("--verbose");
   }
 
-  const pythonScript = join(__dirname, "../../../packages/repo-intelligence/cli.py");
+  // "index" is an alias for scan — reuse the same entry point. Works from both
+  // src/commands and dist/commands (both are 4 levels below the repo root).
+  const pythonScript = join(
+    __dirname,
+    "../../../../packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
+  );
 
   return new Promise((resolve, reject) => {
     const pythonProcess = spawn("python", [pythonScript, ...args], {

@@ -84,21 +84,25 @@ def temp_git_repo():
     """Create a temporary git repository for git metadata testing."""
     import git
 
-    with tempfile.TemporaryDirectory() as tmpdir:
+    # ignore_cleanup_errors: on Windows, gitpython can hold handles into .git
+    # during teardown, which otherwise fails the whole test as a fixture error
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
         repo = git.Repo.init(tmpdir)
+        try:
+            # Create a sample file and commit
+            sample_file = Path(tmpdir) / "sample.txt"
+            sample_file.write_text("Initial content")
+            repo.index.add([str(sample_file)])
+            repo.index.commit("Initial commit", author=git.Actor("Test", "test@example.com"))
 
-        # Create a sample file and commit
-        sample_file = Path(tmpdir) / "sample.txt"
-        sample_file.write_text("Initial content")
-        repo.index.add([str(sample_file)])
-        repo.index.commit("Initial commit", author=git.Actor("Test", "test@example.com"))
+            # Modify and commit again
+            sample_file.write_text("Modified content")
+            repo.index.add([str(sample_file)])
+            repo.index.commit("Second commit", author=git.Actor("Test", "test@example.com"))
 
-        # Modify and commit again
-        sample_file.write_text("Modified content")
-        repo.index.add([str(sample_file)])
-        repo.index.commit("Second commit", author=git.Actor("Test", "test@example.com"))
-
-        yield Path(tmpdir), "sample.txt"
+            yield Path(tmpdir), "sample.txt"
+        finally:
+            repo.close()
 
 
 @pytest.fixture

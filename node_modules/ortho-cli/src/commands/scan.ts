@@ -21,7 +21,12 @@ interface ScanOptions {
  */
 export async function scanCommand(options: ScanOptions): Promise<void> {
   const cwd = process.cwd();
-  const pythonScript = path.join(__dirname, "../../python/scan_cli.py");
+  // Works from both src/commands (ts-node) and dist/commands (tsc output):
+  // both are 4 levels below the repo root.
+  const pythonScript = path.join(
+    __dirname,
+    "../../../../packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
+  );
 
   // Build Python command arguments
   const pythonArgs = ["--repo-root", cwd];
@@ -40,10 +45,11 @@ export async function scanCommand(options: ScanOptions): Promise<void> {
 
   // Run Python script
   return new Promise((resolve, reject) => {
+    // No shell: spawn with an args array is injection-safe and works for
+    // python.exe on Windows without one.
     const proc = spawn("python", [pythonScript, ...pythonArgs], {
       cwd,
       stdio: "inherit",
-      shell: process.platform === "win32",
     });
 
     proc.on("error", (err) => {

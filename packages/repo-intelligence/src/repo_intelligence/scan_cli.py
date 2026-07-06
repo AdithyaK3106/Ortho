@@ -11,6 +11,11 @@ from repo_intelligence.incremental_indexer import IncrementalIndexer
 
 def setup_logging(verbose: bool = False) -> None:
     """Configure logging for CLI output."""
+    # Windows consoles default to cp1252, which can't encode '✓'/'✗' and made a
+    # successful scan exit 1 while printing its summary.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
         level=level,

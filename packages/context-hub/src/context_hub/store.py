@@ -47,6 +47,10 @@ class ArtifactStore:
         embedding_provider: Optional[EmbeddingProvider] = None,
     ):
         self.db = db
+        # OrthoDatabase.connection() opens a NEW connection per call; grabbing a
+        # fresh one per statement meant INSERTs and commit() ran on different
+        # connections and writes were silently rolled back. Hold one connection.
+        self._conn = db.connection()
         self.repo_id = repo_id
         self.embedding_provider = embedding_provider or NullEmbedding()
         self.vec_store = None
@@ -82,17 +86,17 @@ class ArtifactStore:
         artifact_id = make_artifact_id(self.repo_id, req.title, req.source, content_hash)
 
         # Check if content changed (for versioning)
-        content_changed = check_content_changed(self.db.connection(), artifact_id, content_hash)
+        content_changed = check_content_changed(self._conn, artifact_id, content_hash)
 
         if not content_changed:
             # Content unchanged, return existing artifact_id
             return artifact_id
 
         # Determine version number
-        if content_changed and self.db.connection().execute(
+        if content_changed and self._conn.execute(
             "SELECT COUNT(*) FROM artifacts WHERE id = ?", (artifact_id,)
         ).fetchone()[0] > 0:
-            next_version = get_next_version(self.db.connection(), artifact_id)
+            next_version = get_next_version(self._conn, artifact_id)
         else:
             next_version = 1
 
@@ -101,7 +105,7 @@ class ArtifactStore:
 
         # Insert artifact (synchronous, blocking)
         now = datetime.now().isoformat()
-        self.db.connection().execute(
+        self._conn.execute(
             """
             INSERT INTO artifacts
             (id, repo_id, type, title, content, source, created_at, last_modified,
@@ -125,7 +129,7 @@ class ArtifactStore:
                 next_version,
             ),
         )
-        self.db.connection().commit()
+        self._conn.commit()
 
         # FTS5 automatically synced by trigger (no explicit code needed)
 
@@ -146,7 +150,7 @@ class ArtifactStore:
 
     def get_artifact(self, artifact_id: str) -> Optional[Artifact]:
         """Retrieve latest version of artifact by ID."""
-        row = self.db.connection().execute(
+        row = self._conn.execute(
             "SELECT * FROM artifacts WHERE id = ? ORDER BY version DESC LIMIT 1",
             (artifact_id,),
         ).fetchone()
@@ -155,7 +159,7 @@ class ArtifactStore:
 
     def get_artifact_version(self, artifact_id: str, version: int) -> Optional[Artifact]:
         """Retrieve specific version of artifact."""
-        row = self.db.connection().execute(
+        row = self._conn.execute(
             "SELECT * FROM artifacts WHERE id = ? AND version = ?",
             (artifact_id, version),
         ).fetchone()
@@ -164,7 +168,7 @@ class ArtifactStore:
 
     def get_artifact_history(self, artifact_id: str) -> list[Artifact]:
         """Retrieve all versions of artifact (audit trail)."""
-        rows = self.db.connection().execute(
+        rows = self._conn.execute(
             "SELECT * FROM artifacts WHERE id = ? ORDER BY version ASC",
             (artifact_id,),
         ).fetchall()
@@ -173,10 +177,10 @@ class ArtifactStore:
 
     def delete_artifact(self, artifact_id: str) -> None:
         """Soft delete artifact (remove from database)."""
-        self.db.connection().execute(
+        self._conn.execute(
             "DELETE FROM artifacts WHERE id = ?", (artifact_id,)
         )
-        self.db.connection().commit()
+        self._conn.commit()
 
     @staticmethod
     def _row_to_artifact(row) -> Optional[Artifact]:

@@ -29,4 +29,5 @@ async def create_artifact(name: str = "", content: str = "") -> dict:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Local-first, no auth (CLAUDE.md key decision 4) — never bind beyond loopback
+    uvicorn.run(app, host="127.0.0.1", port=8000)

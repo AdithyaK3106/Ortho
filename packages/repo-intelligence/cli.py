@@ -6,6 +6,9 @@ import sys
 from pathlib import Path
 import time
 
+# Run directly as a script — make the package importable without installation
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 
 def main():
     parser = argparse.ArgumentParser(description="Index Python repository")
@@ -28,9 +31,9 @@ def index_command(watch: bool = False, verbose: bool = False):
     repo_root = Path.cwd()
 
     try:
-        from .call_graph import CallGraphBuilder
-        from .dependency_graph import DependencyGraphBuilder
-        from .module_detector import ModuleDetector
+        from repo_intelligence.call_graph import CallGraphBuilder
+        from repo_intelligence.dependency_graph import DependencyGraphBuilder
+        from repo_intelligence.module_detector import ModuleDetector
 
         python_files = list(repo_root.rglob("*.py"))
 
@@ -56,11 +59,11 @@ def index_command(watch: bool = False, verbose: bool = False):
 def watch_mode(repo_root: Path, verbose: bool = False):
     """Monitor for changes and re-index incrementally."""
     try:
-        from .incremental_indexer import IncrementalIndexer, NotAGitRepoError
+        from repo_intelligence.incremental_indexer import IncrementalIndexer, NotAGitRepoError
 
         print("Watching for changes... (Ctrl+C to exit)")
 
-        indexer = IncrementalIndexer(repo_root, None)
+        indexer = IncrementalIndexer(repo_root)
 
         last_state = None
         while True:

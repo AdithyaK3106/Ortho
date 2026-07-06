@@ -4,6 +4,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 try:
     import git
@@ -21,21 +22,21 @@ class FileChurnMetadata:
     commit_count: int
     lines_added: int
     lines_removed: int
-    last_modified: str
+    last_modified: Optional[str]
 
 
 class GitMetadataStore:
     """Store and retrieve git history for files."""
 
-    def __init__(self, db: sqlite3.Connection, repo_root: Path, repo_id: str):
+    def __init__(self, db: sqlite3.Connection, repo_root: Optional[Path], repo_id: str):
         self.db = db
-        self.repo_root = Path(repo_root)
+        self.repo_root = Path(repo_root) if repo_root is not None else None
         self.repo_id = repo_id
         self.git_repo = self._init_git_repo()
 
     def _init_git_repo(self):
         """Initialize git repository if available."""
-        if not git:
+        if not git or self.repo_root is None:
             return None
 
         try:
