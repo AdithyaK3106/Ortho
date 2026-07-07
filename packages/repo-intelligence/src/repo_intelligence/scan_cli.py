@@ -5,8 +5,19 @@ import sys
 import logging
 from pathlib import Path
 
+# Spawned as a bare script by the TS CLI — never depend on install state
+# (ARCHITECT mandate, task-011; same idiom as arch-intelligence graph_utils).
+_PROJECT_ROOT = Path(__file__).resolve().parents[4]
+for _p in (_PROJECT_ROOT / "shared" / "storage" / "src",
+           _PROJECT_ROOT / "packages" / "repo-intelligence" / "src"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+from storage import OrthoDatabase
+
 from repo_intelligence.indexer import Indexer
 from repo_intelligence.incremental_indexer import IncrementalIndexer
+from repo_intelligence.index_store import IndexStore, mint_repo_id
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -32,6 +43,10 @@ def format_summary(result) -> str:
         f"  Symbols: {result.total_symbols}\n"
         f"  Imports: {result.total_imports}\n"
         f"  Calls: {result.total_calls}\n"
+        f"  Persisted: {result.persisted_symbols} symbols, "
+        f"{result.persisted_imports} imports, "
+        f"{result.persisted_calls} calls "
+        f"({result.persisted_calls_dropped} dropped unresolved)\n"
         f"  Success rate: {result.success_rate:.1f}%"
     )
 
@@ -74,7 +89,13 @@ def main() -> int:
         return 1
 
     try:
-        indexer = Indexer(repo_root)
+        # Persist to .ortho/ortho.db (task-011): migrate schema, then scan+store
+        db = OrthoDatabase(repo_root)
+        db.migrate()
+        store = IndexStore(db, mint_repo_id(repo_root), repo_root)
+        store.ensure_repository(name=repo_root.name)
+
+        indexer = Indexer(repo_root, store=store)
 
         if args.watch:
             # Watch mode

@@ -25,6 +25,11 @@ class IndexResult:
     total_imports: int = 0
     total_calls: int = 0
     errors: List[str] = field(default_factory=list)
+    # Persistence counts (zero unless the Indexer was given an IndexStore)
+    persisted_symbols: int = 0
+    persisted_imports: int = 0
+    persisted_calls: int = 0
+    persisted_calls_dropped: int = 0
 
     @property
     def success_rate(self) -> float:
@@ -47,6 +52,7 @@ class Indexer:
         repo_root: Path,
         exclude_patterns: set[str] | None = None,
         progress_callback: Optional[Callable[[int, int], None]] = None,
+        store=None,
     ) -> None:
         """
         Initialize indexer.
@@ -55,6 +61,8 @@ class Indexer:
             repo_root: Repository root directory
             exclude_patterns: Optional set of additional exclusion patterns
             progress_callback: Optional callback(files_done, total_files) for progress tracking
+            store: Optional IndexStore; when provided, per-file results are persisted
+                   and import targets resolved after the scan (ADR-011)
         """
         self.repo_root = Path(repo_root)
         self.discoverer = FileDiscoverer(repo_root, exclude_patterns)
@@ -62,6 +70,7 @@ class Indexer:
         self.import_builder = ImportGraphBuilder()
         self.call_builder = CallGraphBuilder()
         self.progress_callback = progress_callback
+        self.store = store
         self.error_threshold = 0.9  # Accept up to 10% error rate
 
     def index_repository(self) -> IndexResult:
@@ -109,6 +118,13 @@ class Indexer:
 
         if self.progress_callback:
             self.progress_callback(result.total_files, result.total_files)
+
+        # Second pass: import + cross-file call resolution against the complete
+        # index — order-independent (ADR-011)
+        if self.store is not None:
+            self.store.resolve_import_targets()
+            result.persisted_calls += self.store.calls_rescued
+            result.persisted_calls_dropped -= self.store.calls_rescued
 
         # Log summary
         logger.info(
@@ -185,6 +201,15 @@ class Indexer:
         # Extract calls (requires symbols for context)
         calls = self.call_builder.extract_calls(file_path, source, symbols)
         result.total_calls += len(calls)
+
+        # Persist (single writer: IndexStore, ADR-011)
+        if self.store is not None:
+            rel_path = str(file_path.relative_to(self.repo_root)) if file_path.is_absolute() else str(file_path)
+            persisted = self.store.persist_file(rel_path, symbols, imports, calls)
+            result.persisted_symbols += persisted.symbols_written
+            result.persisted_imports += persisted.imports_written
+            result.persisted_calls += persisted.calls_written
+            result.persisted_calls_dropped += persisted.calls_dropped_unresolved
 
     def can_accept_error_rate(self, result: IndexResult) -> bool:
         """
