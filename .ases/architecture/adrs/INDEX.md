@@ -1,8 +1,8 @@
 # Architecture Decision Record Index
 
-**Last Updated:** 2026-07-02 (task-010 GATE 6 approved)  
+**Last Updated:** 2026-07-07 (task-012 ARCHITECT session)  
 **Maintainer:** ARCHITECT  
-**Total ADRs:** 7
+**Total ADRs:** 10
 
 ---
 
@@ -23,6 +23,9 @@ This index tracks all Architecture Decision Records (ADRs) for ASES. ADRs are pe
 | ADR-005 | Language Adapter Plugin Model | ACCEPTED | 2026-06-30 | Abstract `LanguageAdapter` base class + per-language concrete adapters + registry, over monolithic conditionals or external LSP |
 | ADR-009 | ADR Cross-Reference Strategy | ACCEPTED | 2026-07-02 | `ADRTracker` extracts code references via stdlib regex against raw markdown text (4-rule precedence), not a markdown AST parser — deterministic, zero new dependency |
 | ADR-010 | Reuse Discovery Algorithm | ACCEPTED | 2026-07-02 | `ReuseDetector` measures similarity via AST-node-type-sequence edit distance, not embeddings — deterministic, local-first, consistent with Pillar 3's existing algorithm pattern |
+| ADR-011 | Index Persistence Strategy | ACCEPTED | 2026-07-06 | Minted deterministic symbol IDs (sha256 of repo:path:qualified_name), per-file wipe-and-rewrite transactions, drop-and-count unresolved edges; `IndexStore` is single writer of scan tables |
+| ADR-012 | Canonical Artifacts Schema via Reconciling Migration | ACCEPTED | 2026-07-06 | context-hub schema.py shape is canonical; migration 002 rebuilds artifacts (version column, rowid FTS5, triggers); migration 001 frozen, append-only chain |
+| ADR-013 | Semantic-Router Adoption + Directory Layout (`.ases/agents/` Collision) | ACCEPTED | 2026-07-07 | HuggingFace encoder (BAAI/bge-small-en-v1.5) for intent classification; `.ases/agents/core/` + `.ases/agents/custom/` per FRD resolves collision with existing ASES process-role files; immutable registry pattern for Phase 3 MVP |
 
 ---
 
@@ -46,6 +49,9 @@ Click a link to read the full ADR:
 - [ADR-005: Language Adapter Plugin Model](./ADR-005-language-adapter-plugin-model.md)
 - [ADR-009: ADR Cross-Reference Strategy](./ADR-009-adr-cross-reference-strategy.md)
 - [ADR-010: Reuse Discovery Algorithm](./ADR-010-reuse-similarity-algorithm.md)
+- [ADR-011: Index Persistence Strategy](./ADR-011-index-persistence-strategy.md)
+- [ADR-012: Canonical Artifacts Schema via Reconciling Migration](./ADR-012-canonical-artifacts-schema.md)
+- [ADR-013: Semantic-Router Adoption + Directory Layout (`.ases/agents/` Collision)](./ADR-013-semantic-router-adoption-directory-layout.md)
 
 ---
 
@@ -80,6 +86,13 @@ Numbers are sequential and never reused, even if superseded.
 ---
 
 ## Recent ADR Changes
+
+### 2026-07-07 (task-012 ARCHITECT)
+- ADR-013 ACCEPTED: Semantic-router adoption + directory layout collision resolution (`.ases/agents/core/` + `.ases/agents/custom/` per FRD)
+
+### 2026-07-06 (task-011 ARCHITECT)
+- ADR-011 DRAFT: Index persistence strategy (minted symbol IDs, wipe-and-rewrite, drop-and-count)
+- ADR-012 DRAFT: Canonical artifacts schema (migration 002 reconciles 001's drift with context-hub schema.py)
 
 ### 2026-07-02 (task-010 GATE 6)
 - ADR-009 ACCEPTED: ADR cross-reference strategy (regex/text extraction, not markdown AST)

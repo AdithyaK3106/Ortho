@@ -130,10 +130,11 @@ class AgentRegistry:
         return self._agents.get(name)
 
     def get_agents_by_intent(self, intent_type: str) -> list[Agent]:
-        """Get all agents whose intent_triggers contain intent_type. Sorted by name."""
+        """Get all agents whose intent_triggers contain intent_type (substring match). Sorted by name."""
+        intent_lower = intent_type.lower()
         matching = [
             agent
             for agent in self._agents.values()
-            if intent_type in agent.intent_triggers
+            if any(intent_lower in trigger.lower() for trigger in agent.intent_triggers)
         ]
         return sorted(matching, key=lambda a: a.name)

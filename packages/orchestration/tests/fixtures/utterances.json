@@ -1,0 +1,66 @@
+{
+  "architect": [
+    "write an ADR",
+    "write an ADR for this decision",
+    "design the system",
+    "architectural decision",
+    "database schema design",
+    "system architecture",
+    "evaluate trade-offs",
+    "design decision"
+  ],
+  "coder": [
+    "implement this feature",
+    "write code",
+    "fix the bug",
+    "implement the solution",
+    "code implementation",
+    "add functionality",
+    "write the code"
+  ],
+  "reviewer": [
+    "review this code",
+    "code review",
+    "review the pull request",
+    "check code quality",
+    "review for correctness",
+    "quality gate"
+  ],
+  "tester": [
+    "write tests",
+    "test design",
+    "coverage analysis",
+    "generate test cases",
+    "test planning",
+    "unit tests"
+  ],
+  "analyst": [
+    "impact analysis",
+    "analyze the impact",
+    "debt scoring",
+    "find circular dependencies",
+    "dependency analysis",
+    "impact assessment"
+  ],
+  "documenter": [
+    "write documentation",
+    "document this",
+    "write the README",
+    "document decision",
+    "documentation writing"
+  ],
+  "debugger": [
+    "debug this issue",
+    "trace the error",
+    "analyze the trace",
+    "debugging",
+    "trace analysis"
+  ],
+  "orchestrator": [
+    "run the workflow",
+    "orchestrate the task",
+    "execute",
+    "start the process",
+    "run"
+  ]
+}

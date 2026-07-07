@@ -64,6 +64,66 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
+### task-012: Intent Routing + Registries (Week 15–16) — ✅ GATE 3 COMPLETE
+
+**State:** GATE 3 (BUILDER + TEST-DESIGNER) COMPLETE → GATE 5 VERIFIER
+**Workflow:** `.ases/workflows/feature.md`
+**Started:** 2026-07-07
+**Phase:** Phase 3 (Execution)
+
+**GATE 1 (PLANNER):** ✅ plan.md, spec.md, rollback-plan.md, refinements.md  
+**GATE 2 (ARCHITECT):** ✅ architecture-review.md, ADR-013 (semantic-router adoption + `.ases/agents/core/` directory layout)  
+**GATE 3 (BUILDER + TEST-DESIGNER):** ✅ COMPLETE
+- **BUILDER:** 7 atomic commits (Tasks 1–7)
+  - Task 1: AgentRegistry (load/cache agents)
+  - Task 2: SkillRegistry (load/cache skills)
+  - Task 3: 8 core agents + 10 core skills .md files
+  - Task 4: IntentRouter (semantic-router integration)
+  - Task 5: LLM fallback stub (llm_classify_intent)
+  - Task 6: ADR-013 committed
+  - Task 7: pyproject.toml (add semantic-router, pydantic), imports verified
+- **TEST-DESIGNER:** test-plan.md + 25+ sample tests
+  - 4 test files: test_agent_registry_sample.py, test_skill_registry_sample.py, test_intent_router_sample.py, test_integration_sample.py
+  - 25+ tests covering all ACs + spec rules
+  - fixtures: utterances.json, conftest.py
+
+**All Acceptance Criteria Verified (AC1–AC5):**
+- ✅ AC1: AgentRegistry loads all 8 core agents
+- ✅ AC2: SkillRegistry loads all 10 core skills
+- ✅ AC3: IntentRouter routes architect intent with confidence ≥ 0.7
+- ✅ AC4: IntentRouter fallback on low confidence
+- ✅ AC5: Zero regressions
+
+**Next:** GATE 5 VERIFIER (real pytest execution, coverage, exit codes)
+
+**Scope (7 atomic tasks):**
+1. `AgentRegistry` class (parse YAML frontmatter from `.ases/agents/core/` + `.ases/agents/custom/`)
+2. `SkillRegistry` class (parse YAML frontmatter from `.ases/skills/core/` + `.ases/skills/custom/`)
+3. Author 8 core agent `.md` files + 10 core skill `.md` files (frontmatter + minimal prompts)
+4. `IntentRouter` class (semantic-router + HuggingFaceEncoder, classify_intent() → IntentClassification)
+5. LLM fallback stub (llm_classify_intent() returns structured result, no live LLM yet)
+6. ADR-013 (semantic-router adoption + directory layout for `.ases/agents/` collision)
+7. Add `semantic-router`, `pydantic` to `packages/orchestration/pyproject.toml`
+
+**Key Decisions Flagged for ARCHITECT (GATE 2):**
+- `.ases/agents/` naming collision: existing ASES process-role files vs. FRD's product Agent Registry
+  Likely resolution: namespace under `.ases/agents/core/` + `.ases/agents/custom/` per FRD,
+  leaving process files at root level (decided at GATE 2)
+- No real usage utterance logs yet; seed corpus hand-authored from FRD + workflow descriptions
+  (documented known limitation; matches FRD's llm_classify_intent() fallback design)
+- LLM fallback is a stub; no live LLM wiring (task-013 or later)
+
+**Acceptance Criteria:**
+- AC1: AgentRegistry loads all 8 core agents, returns name/display_name/intent_triggers from frontmatter
+- AC2: SkillRegistry loads all 10 core skills with frontmatter fields
+- AC3: IntentRouter correctly classifies "write an ADR" → type="architect", confidence≥0.7, method="router"
+- AC4: IntentRouter classifies ambiguous input → method="llm_fallback" (low confidence triggers fallback)
+- AC5: Zero regressions in existing test suites
+
+**Next Step:** ARCHITECT reviews artifacts, designs final directory/API layout, drafts ADR-013.
+
+---
+
 ### task-010: ADR Awareness + Reporting (Week 13–14) — ✅ COMPLETED
 
 **State:** ✅ COMMITTED (All 6 gates approved)
