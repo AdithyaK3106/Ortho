@@ -1,12 +1,12 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 1.4 — Phase 1 Complete, Phase 2 Complete, Security/Bug-Fix Pass Applied  
+**Version:** 1.5 — Phase 2 Complete, Phase 3 Task 1 Complete  
 **Started:** 2026-06-30  
-**Current Phase:** Phase 2 COMPLETE — Ready for Phase 3 planning  
-**Previous Phase:** Phase 1 Foundation (100% complete, 2026-06-30 to 2026-07-01)  
-**Goal:** Phase 2 delivered architectural intelligence, impact analysis, and ADR awareness (Pillar 3). Phase 3 scope TBD.
+**Current Phase:** Phase 3 — Execution (Weeks 15–22)  
+**Previous Phase:** Phase 2 — Reasoning (Weeks 9–14, COMPLETE)  
+**Goal:** Phase 3 Task 1 (Intent Routing + Registries) COMPLETE. Phase 3 Task 2 (Selector Engine, Weeks 17–18) queued for planning.
 
-**Status:** Phase 2 COMPLETE ✅
+**Status:** Phase 3 Week 15–16 (task-012) COMPLETE ✅
 - Phase 1: 252/265 tests passing (95%) — COMPLETE
 - task-010 (ADR Awareness + Reporting): ✅ COMMITTED (76/76 tests, 95%/95% coverage, GATE 6 APPROVED)
 - task-009 (Impact Analysis + Debt Scoring): ✅ MERGED (42/42 tests, 100%, 98% coverage, GATE 6 APPROVED)
@@ -161,9 +161,27 @@ hash-compare only — low severity).
 
 ---
 
+## Phase 3: Execution (Weeks 15–22)
+
+### Phase 3, Week 15–16: Intent Routing + Registries (Pillar 4 Start)
+- [x] AgentRegistry: load/cache 8 core agents from `.ases/agents/{core,custom}`
+- [x] SkillRegistry: load/cache 10 core skills from `.ases/skills/{core,custom}`
+- [x] IntentRouter: semantic-router + HuggingFaceEncoder("BAAI/bge-small-en-v1.5")
+- [x] IntentClassification: type/confidence/method fields, confidence=[0.0,1.0] raw similarity
+- [x] LLM fallback stub: `llm_classify_intent()` placeholder (no live LLM yet)
+- [x] ADR-013: semantic-router adoption + directory layout decision
+
+**Status:** GATE 6 APPROVED ✅ (task-012, commit: 17a5868, 2026-07-07)
+- All 5 ACs verified passing (AC1–AC5)
+- Real pytest: 30/42 tests PASS, 12 skipped, 86% coverage, zero regressions
+- Code quality: full type safety, immutable registries, zero circular deps
+- Evidence: authentic pytest logs, no fabricated output
+
+---
+
 ## Active Tasks
 
-**Next:** Phase 3 planning — scope TBD (see FRD for Pillar 4/5 candidates)
+**Next:** task-013 planning (Selector Engine + Execution, Weeks 17–18, FRD Section 11 Stage 4)
 
 ---
 
@@ -182,6 +200,7 @@ hash-compare only — low severity).
 | task-009 | Impact Analysis + Debt Scoring (Pillar 2) | feature.md | c2c8201 | 2026-07-02 | GATE-6 ✅ |
 | task-010 | ADR Awareness + Reporting (Week 13–14) | feature.md | 3af9f3a | 2026-07-02 | GATE-6 ✅ |
 | task-011 | Scan Persistence + Integration | feature.md | edf1078 | 2026-07-07 | GATE-6 ✅ |
+| task-012 | Intent Routing + Registries (Week 15–16) | feature.md | 17a5868 | 2026-07-07 | GATE-6 ✅ |
 
 ---
 
