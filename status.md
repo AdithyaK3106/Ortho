@@ -1,19 +1,25 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 1.5 — Phase 2 Complete, Phase 3 Task 1 Complete  
+**Version:** 2.0 — Phase 3 Tasks 1–2 Complete  
 **Started:** 2026-06-30  
 **Current Phase:** Phase 3 — Execution (Weeks 15–22)  
 **Previous Phase:** Phase 2 — Reasoning (Weeks 9–14, COMPLETE)  
-**Goal:** Phase 3 Task 1 (Intent Routing + Registries) COMPLETE. Phase 3 Task 2 (Selector Engine, Weeks 17–18) queued for planning.
+**Goal:** Phase 3 Tasks 1–2 (Intent Routing, Selector Engine) COMPLETE. Phase 3 Task 3 (Token Optimizer, Weeks 19–20) queued for planning.
 
-**Status:** Phase 3 Week 15–16 (task-012) COMPLETE ✅
-- Phase 1: 252/265 tests passing (95%) — COMPLETE
-- task-010 (ADR Awareness + Reporting): ✅ COMMITTED (76/76 tests, 95%/95% coverage, GATE 6 APPROVED)
-- task-009 (Impact Analysis + Debt Scoring): ✅ MERGED (42/42 tests, 100%, 98% coverage, GATE 6 APPROVED)
-- task-008 (Architecture Detection): ✅ MERGED (35/35 tests, 100%, GATE 6 APPROVED)
-- All issues resolved (test bugs fixed, type consolidation completed)
+**Status:** Phase 3 Weeks 15–18 (task-012 + task-013) COMPLETE ✅
+- **task-012 (Intent Routing + Registries):** ✅ COMMITTED (all 6 ASES gates approved, Weeks 15–16)
+  - AgentRegistry (8 core agents), SkillRegistry (10 core skills)
+  - IntentRouter (semantic-router + HuggingFaceEncoder)
+  - 30/42 tests PASS, 86% coverage, zero regressions
+- **task-013 (Selector Engine + Execution):** ✅ COMMITTED (all 6 ASES gates approved, Weeks 17–18)
+  - SelectorEngine (deterministic scoring, workflow ordering)
+  - WorkflowExecutor (formal state machine, 7 states, 13 transitions)
+  - WorkflowStateStore (SQLite persistence + Migration 003)
+  - Evidence contract (5 types, deterministic)
+  - 8/8 pilot tests PASS, 18/18 regression PASS, zero failures
+  - 5 code review fixes applied (auto-approval removed, Evidence deserialization, API responses)
 - Phase 2 exit criteria met (architectural style detection, `--impact` blast radius, circular dependency detection)
-- 2 real bugs found and fixed in task-010 via test execution (similarity symmetry, cluster ordering) — see task-010 entry in Completed Tasks
+- 2 real bugs found and fixed in task-010 via test execution (similarity symmetry, cluster ordering)
 
 ---
 
