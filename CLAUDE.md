@@ -64,6 +64,68 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
+### task-013: Selector Engine + Execution (Week 17–18) — ✅ GATE 1 APPROVED
+
+**State:** PLANNED → ARCH-REVIEW (GATE 1 approved 2026-07-07)  
+**Workflow:** `.ases/workflows/feature.md`  
+**Phase:** Phase 3 (Execution)
+
+**GATE 1 Approval Status:**
+- ✅ plan.md approved (5 atomic tasks, formal definitions, risk mitigations)
+- ✅ spec.md approved (5 formal definitions: workflow ordering, state machine, approval semantics, evidence contract, migration ownership)
+- ✅ rollback-plan.md approved (local/published, migration cleanup explicit)
+- ✅ refinement-summary.md (all ambiguities resolved)
+- ✅ consistency-checklist.md (all definitions cross-validated)
+
+**What This Task Does:**
+Implements Selector Engine (Stage 4, FRD §11.4) + Workflow Executor (runtime):
+- SelectorEngine: Pure Python agent/skill scoring (deterministic per formal algorithm)
+- ExecutionPlan: Deterministic workflow ordering (stages → score desc → name asc)
+- WorkflowExecutor: Formal state machine (7 states, 13 transitions, terminal states explicit)
+- Approval Gates: Before execution, per-gate independent, rejection terminal, 300s timeout
+- CLI Commands: `ortho run`, `ortho status`, `ortho approve`, `ortho reject`, `ortho history`
+- SQLite: workflow_runs, execution_steps, approval_gates tables (Migration 003)
+- Evidence: One per step, deterministic structure, 5 types (agent_execution, approval_gate, rejection, timeout, error)
+
+**5 Atomic Tasks (scope unchanged):**
+1. SelectorEngine (score_agents, score_skills, deterministic)
+2. ExecutionPlan builder (formal workflow ordering algorithm)
+3. WorkflowExecutor + WorkflowStateStore (state machine, approval gates)
+4. Step runner (Evidence generation per contract)
+5. CLI integration (5 commands)
+
+**Expected Test Metrics:** 44+ tests (unit 27+, integration 10+, property 5+, real-repo 2+), ≥85% coverage
+
+**GATE 2 Completion (ARCHITECT):**
+- ✅ architecture-review.md (APPROVED)
+  - Module boundaries: acyclic, clean separation (selector, executor, state_store, step_runner, evidence_collector)
+  - API contracts: clear and testable (SelectorEngine, WorkflowExecutor, Evidence)
+  - Data flow: deterministic execution (workflow ordering algorithm, state machine, evidence generation)
+  - Schema: append-only, resumable (workflow_runs, execution_steps, approval_gates)
+  - Determinism verified: ordering (stage/score/name), state transitions, evidence generation
+  - Security: acceptable (input validation deferred to token optimizer, approval gate enforced, state persisted locally)
+  - Extensibility: custom agents supported, workflow ordering flexible, evidence schema extensible
+- ✅ ADR-014 (Pure Python Selector) drafted
+  - Decision: No LLM in SelectorEngine (pure Python scoring per FRD §11.4)
+  - Consequences: deterministic, fast, testable, offline-capable (vs. less flexible than LLM)
+  - Alternatives considered: LLM-based (rejected, non-deterministic), hybrid (rejected, duplication), threshold matching (rejected, insufficient), ML (deferred)
+  - Status: Proposed (ready for human approval)
+
+**Status:**
+- ✅ GATE 1: PLANNER (plan.md, spec.md, rollback-plan.md) — APPROVED
+- ✅ GATE 2: ARCHITECT (architecture-review.md, ADR-014) — APPROVED
+- ✅ GATE 3: BUILDER (5 atomic tasks, 13 files) — COMPLETE (implementation-notes.md ready)
+- ✅ GATE 4: TEST-DESIGNER (44+ tests, 4 test files) — COMPLETE (test-plan.md ready)
+- ✅ GATE 5: VERIFIER (import validation PASS, pilot tests 8/8 PASS, regression 18/18 PASS, zero regressions) — VERIFIED
+- ⏳ GATE 6: REVIEWER (independent code review pending)
+
+**Parallel Execution (GATE 3 + GATE 4):**
+- BUILDER session: Implementing 5 atomic tasks (granular commits)
+- TEST-DESIGNER session (fresh context): Writing 44+ tests concurrently
+- Both complete independently; TEST-DESIGNER should be done before BUILDER finishes (tests shadow implementation)
+
+---
+
 ### task-012: Intent Routing + Registries (Week 15–16) — ✅ COMMITTED (All 6 Gates Approved)
 
 **State:** ✅ COMMITTED (Commit 17a5868)

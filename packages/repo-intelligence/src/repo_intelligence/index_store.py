@@ -45,6 +45,11 @@ class IndexStore:
         self.db = db
         self.repo_id = repo_id
         self.repo_root = Path(repo_root)
+        # Cross-file call candidates: (file_id, caller_id, callee_name, lineno, confidence).
+        # Resolved in the second pass against the COMPLETE symbol table so results
+        # never depend on scan order (ADR-011 determinism rule).
+        self._pending_calls: list[tuple] = []
+        self.calls_rescued = 0
 
     def ensure_repository(self, name: str, primary_language: str = "python") -> None:
         """INSERT OR IGNORE the repositories row; refresh indexed_at."""
@@ -75,10 +80,10 @@ class IndexStore:
         """Wipe-and-rewrite all rows for one file in a single transaction.
 
         Idempotent: persisting the same inputs twice yields identical rows.
-        Call edges resolve against this file's symbols plus symbols already
-        persisted for this repo; unresolved edges are dropped and counted.
-        # ponytail: cross-file calls to files later in (sorted) scan order drop;
-        # upgrade path is a buffered repo-wide second pass if edge recall matters.
+        Call edges resolve intra-file here; cross-file candidates are buffered
+        and resolved in resolve_import_targets() against the complete index,
+        so results never depend on scan order. Unresolved edges are dropped
+        and counted, never guessed.
         """
         rel_path = rel_path.replace("\\", "/")
         file_id = _mint(self.repo_id, rel_path)
@@ -112,21 +117,17 @@ class IndexStore:
                     )
                 )
 
-            # Repo-wide qualified-name map from already-persisted symbols (unique names only —
-            # ambiguous matches are never guessed).
-            repo_map: dict[str, Optional[str]] = {}
-            for qname, sym_id in conn.execute(
-                "SELECT qualified_name, id FROM symbols WHERE repo_id = ? AND file_id != ?",
-                (self.repo_id, file_id),
-            ):
-                repo_map[qname] = None if qname in repo_map else sym_id
-
+            # Intra-file resolution ONLY at persist time — matching against
+            # "symbols persisted so far" made re-scans non-idempotent (first
+            # langchain scan wrote 17750 call edges, second 18402). Cross-file
+            # candidates are buffered for the order-independent second pass.
             def resolve(name: Optional[str]) -> Optional[str]:
                 if not name:
                     return None
-                if name in minted:
-                    return minted[name]
-                return repo_map.get(name) or None
+                return minted.get(name)
+
+            # Re-persisting a file invalidates its previously buffered candidates.
+            self._pending_calls = [p for p in self._pending_calls if p[0] != file_id]
 
             call_rows = []
             dropped = 0
@@ -139,8 +140,16 @@ class IndexStore:
                     prefix = edge.caller_name.rsplit(".", 1)[0] if "." in edge.caller_name else ""
                     if prefix:
                         callee_id = resolve(f"{prefix}.{callee_name[len('self.'):]}")
-                if caller_id is None or callee_id is None:
+                if caller_id is None:
                     dropped += 1
+                    continue
+                if callee_id is None:
+                    # Unresolved at persist time (true for this file in isolation);
+                    # the second pass may still rescue it repo-wide.
+                    dropped += 1
+                    self._pending_calls.append(
+                        (file_id, caller_id, callee_name, edge.lineno, edge.confidence)
+                    )
                     continue
                 call_rows.append((caller_id, callee_id, edge.lineno, edge.confidence))
 
@@ -214,12 +223,16 @@ class IndexStore:
         )
 
     def resolve_import_targets(self) -> None:
-        """Second pass: map imported_module dotted paths to repo files.
+        """Second pass: resolve cross-file references against the complete index.
 
         Runs after all files are persisted, so resolution never depends on scan
-        order. "pkg.mod" resolves to pkg/mod.py or pkg/mod/__init__.py; leading
-        dots in relative imports resolve against the importer's directory.
-        Unresolved imports stay is_external=1 — never guessed.
+        order. Two jobs:
+        1. Imports: "pkg.mod" resolves to pkg/mod.py or pkg/mod/__init__.py;
+           leading dots resolve against the importer's directory. Unresolved
+           imports stay is_external=1 — never guessed.
+        2. Buffered call candidates: callee qualified names that are UNIQUE
+           across the repo's symbols resolve to call edges (ambiguous names are
+           skipped — deterministic). Rescued count is exposed as calls_rescued.
         """
         conn = self.db.connection()
         try:
@@ -248,6 +261,29 @@ class IndexStore:
                 "UPDATE import_edges SET imported_file_id = ?, is_external = 0 WHERE id = ?",
                 updates,
             )
+
+            # Rescue buffered cross-file calls: unique qualified names only.
+            unique_map: dict[str, Optional[str]] = {}
+            for qname, sym_id in conn.execute(
+                "SELECT qualified_name, id FROM symbols WHERE repo_id = ?", (self.repo_id,)
+            ):
+                unique_map[qname] = None if qname in unique_map else sym_id
+
+            rescued_rows = []
+            for _file_id, caller_id, callee_name, lineno, confidence in self._pending_calls:
+                callee_id = unique_map.get(callee_name)
+                if callee_id:
+                    rescued_rows.append((caller_id, callee_id, lineno, confidence))
+            conn.executemany(
+                """
+                INSERT INTO call_edges (caller_id, callee_id, call_site_line, confidence)
+                VALUES (?, ?, ?, ?)
+                """,
+                rescued_rows,
+            )
+            self._pending_calls = []
+            self.calls_rescued = len(rescued_rows)
+
             conn.commit()
         finally:
             conn.close()
