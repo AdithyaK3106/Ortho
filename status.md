@@ -163,9 +163,7 @@ hash-compare only — low severity).
 
 ## Active Tasks
 
-**Next:** task-011 (TBD — Phase 3 planning)
-- Status: Not started
-- Scope: TBD
+**Next:** Phase 3 planning — scope TBD (see FRD for Pillar 4/5 candidates)
 
 ---
 
@@ -183,6 +181,7 @@ hash-compare only — low severity).
 | task-008 | Architecture Detection (Pillar 3) | feature.md | 478b24c | 2026-07-02 | GATE-6 ✓ |
 | task-009 | Impact Analysis + Debt Scoring (Pillar 2) | feature.md | c2c8201 | 2026-07-02 | GATE-6 ✅ |
 | task-010 | ADR Awareness + Reporting (Week 13–14) | feature.md | 3af9f3a | 2026-07-02 | GATE-6 ✅ |
+| task-011 | Scan Persistence + Integration | feature.md | edf1078 | 2026-07-07 | GATE-6 ✅ |
 
 ---
 
@@ -213,16 +212,16 @@ index of all 7 accepted ADRs.
 
 ## Verification Status (Phase 1 + Phase 2)
 
-| Check | Task-001 | Task-002-003 | Task-004 | Task-005 | Task-006 | Task-007 | Task-008 | Task-009 | Task-010 |
-|-------|----------|----------|----------|----------|---------|---------|----------|----------|----------|
-| Build | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
-| Types | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ (tsc --noEmit) |
-| Lint | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | N/A (ruff unavailable in env) |
-| Unit Tests | 50/50 | 31+48xp | 53/55 | 68/72 | 31+46xp | 85+46xp | 35/35 | 42/42 | 76/76 + 16/16 |
-| Real-Repo Scan | N/A | N/A | N/A | N/A | PASS ✓ | PASS ✓ | N/A | N/A | PASS ✓ (10 clusters found) |
-| Integration | PASS ✓ | PASS ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ |
-| Code Review | N/A | N/A | APPROVED | APPROVED | APPROVED ✓ | APPROVED ✓ | APPROVED ✓ | APPROVED ✅ | APPROVED ✅ (fresh subagent) |
-| Coverage | N/A | 89% | 87% | 92% | N/A | N/A | 98% | 97% | 95%/95% |
+| Check | Task-001 | Task-002-003 | Task-004 | Task-005 | Task-006 | Task-007 | Task-008 | Task-009 | Task-010 | Task-011 |
+|-------|----------|----------|----------|----------|---------|---------|----------|----------|----------|----------|
+| Build | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
+| Types | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ |
+| Lint | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | PASS ✓ | N/A | N/A |
+| Unit Tests | 50/50 | 31+48xp | 53/55 | 68/72 | 31+46xp | 85+46xp | 35/35 | 42/42 | 76+16 | 71 PASS, 1 XFAIL |
+| Real-Repo Scan | N/A | N/A | N/A | N/A | PASS ✓ | PASS ✓ | N/A | N/A | PASS ✓ (10 clusters) | PASS ✓ (3 files, idempotent) |
+| Integration | PASS ✓ | PASS ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ | VERIFIED ✓ |
+| Code Review | N/A | N/A | APPROVED | APPROVED | APPROVED ✓ | APPROVED ✓ | APPROVED ✓ | APPROVED ✅ | APPROVED ✅ | APPROVED ✅ |
+| Coverage | N/A | 89% | 87% | 92% | N/A | N/A | 98% | 97% | 95%/95% | 89% (core) |
 
 *Task-007: 85 PASSED, 1 SKIPPED, 12 XFAILED, 46 XPASSED (total 144 tests in repo-intelligence suite).
 *Task-010: arch-intelligence 76/76 (adr_tracker.py + reuse_detector.py, 95%/95% coverage), apps/cli
@@ -430,8 +429,57 @@ All Python packages must pass:
 
 ---
 
-*Last updated: 2026-07-06 (security & bug-fix pass — see section at top)  
+---
+
+## Task-011: Scan Persistence + Integration ✅ COMPLETE
+
+**Date:** 2026-07-07  
+**Status:** GATE-6 APPROVED — Ready for merge
+
+**What This Task Does:**
+- Scans now persist results to `.ortho/ortho.db` (SQLite, all-in-one file per repo)
+- Index is reusable across CLI commands (analyze, context)
+- End-to-end: `ortho scan` → `ortho analyze --impact` → `ortho context add/search`
+- Re-scans are deterministic (order-independent, ADR-011)
+
+**Key Implementation:**
+- IndexStore: deterministic symbol ID minting, wipe-and-rewrite persistence
+- Indexer wiring: per-file persistence + cross-file call resolution (two-pass)
+- Migration 002: reconciles 001's schema drift, adds schema_migrations ledger
+- context.py: CLI bridge (add/search artifacts via BM25)
+
+**Determinism Fix (Critical):**
+- **Problem:** First scan wrote 17,750 calls, re-scan wrote 18,402 calls (non-idempotent)
+- **Root cause:** Call resolution at persist_file() time matched against "symbols persisted so far" (order-dependent window)
+- **Solution:** Deferred cross-file call resolution to `resolve_import_targets()` (second pass after all files indexed). Buffered unresolved calls, resolved against complete symbol table.
+- **Result:** Re-scans now idempotent (18,402 calls both times)
+
+**Test Results:**
+- 72 tests delivered (58+ spec baseline)
+- 71 PASSED, 1 XFAILED (FTS trigger edge case, documented)
+- 89% coverage on core module (exceeds ≥85%)
+- Zero regressions (285 existing tests all green)
+- Pilot tests (6) all passing
+
+**All 6 ASES Gates:** ✅ APPROVED
+1. PLANNER: spec.md approved
+2. ARCHITECT: ADR-011 + ADR-012 approved
+3. BUILDER: 5 tasks committed
+4. TEST-DESIGNER: 72 tests written, test-plan.md
+5. VERIFIER: pilot + full suite + regression verified
+6. REVIEWER: code + test audit approved
+
+**Commits:**
+- 40a4b2c — Task 1: IndexStore + ADR-011
+- 02ec5ab — Task 2: Indexer wiring + determinism fix
+- 95112ae — Task 3: Migration 002 + schema_migrations ledger
+- edf1078 — Tasks 4–5: context.py + end-to-end proof
+
+---
+
+*Last updated: 2026-07-07 (task-011 complete, GATE-6 APPROVED)  
 Phase 1 Status: COMPLETE  
 Phase 2 Status: COMPLETE — all 5 tasks (006-010) GATE-6 APPROVED  
-Test Status: all suites green, 317 passing, context-hub 54/54 (zero known failures)  
+Phase 2.5 Status: COMPLETE — task-011 (Scan Persistence + Integration) GATE-6 APPROVED  
+Test Status: all suites green, 343+ tests passing, zero known failures  
 Next Session: Phase 3 planning*
