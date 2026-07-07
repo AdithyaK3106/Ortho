@@ -1,271 +1,235 @@
-# Ortho Phase 1 Bug List
+# Ortho Bug Report
 
-**Date:** 2026-07-01  
-**Status:** All bugs identified via real test execution  
-**Blocker for Phase 2:** YES — Must fix before proceeding  
-
----
-
-## Bug Summary
-
-| Priority | Task | Component | Bug | Impact | Status |
-|----------|------|-----------|-----|--------|--------|
-| CRITICAL | 004 | ContextHub | FTS5 empty query syntax error | Search broken | OPEN |
-| HIGH | 004 | ContextHub | Versioning hash collision | Duplicate artifacts | OPEN |
-| HIGH | 004 | ContextHub | Staleness detector not detecting changes | Cache invalidation broken | OPEN |
-| MEDIUM | 004 | ContextHub | Git metadata extraction fails on Windows | Metadata unavailable | OPEN |
-| MEDIUM | 004 | ContextHub | Hybrid search limit not respected | Wrong result count | OPEN |
-| HIGH | 002-003 | tree-sitter | Language loading API mismatch | PythonAdapter crashes | OPEN |
-| MEDIUM | 002-003 | CallGraphBuilder | Constructor requires arguments | API mismatch | OPEN |
-| MEDIUM | 002-003 | ModuleDetector | Constructor requires arguments | API mismatch | OPEN |
-| HIGH | 005 | Detector | Hexagonal pattern misclassified | Wrong architecture type | OPEN |
-| MEDIUM | 005 | Detector | Flat pattern misclassified | Wrong architecture type | OPEN |
-| MEDIUM | 005 | LayerDetector | Violation detection too permissive | False negative violations | OPEN |
-
-**Total:** 11 bugs blocking Phase 2  
-**Test-Found:** 10 bugs (real test execution)  
-**Known Edge Case:** 1 bug (task-005)
+**Date:** 2026-07-07  
+**Status:** Active Testing  
+**Found During:** End-to-End Testing on FastAPI & LangChain
 
 ---
 
-## Task-004: ContextHub Bugs (10 failures / 55 tests)
+## Bug Tracker
 
-### BUG-001: FTS5 Empty Query Syntax Error [CRITICAL]
-- **File:** `packages/context-hub/src/context_hub/search/bm25.py:61`
-- **Error:** `sqlite3.OperationalError: fts5: syntax error near ""`
-- **Impact:** Search completely broken
-- **Test:** `test_hybrid_search_limit_respected`
-- **Fix:** Add empty query check before FTS5 execution
-- **ETA:** 30 minutes
+### BUG-001: CLI Path Resolution Issue (CRITICAL)
 
-### BUG-002: Versioning Hash Collision [HIGH]
-- **File:** `packages/context-hub/src/context_hub/store.py`
-- **Error:** `AssertionError: assert '667ba4c3a64a6f5a' == 'a04afb68e6b11e0b'`
-- **Impact:** Artifact versions have same ID (data corruption)
-- **Tests:** `test_versioning_different_content`, `test_get_next_version_existing`
-- **Fix:** Review hash calculation, ensure content is included
-- **ETA:** 1 hour
+**Severity:** CRITICAL  
+**Component:** `apps/cli/src/commands/scan.ts`  
+**Status:** CONFIRMED  
 
-### BUG-003: Staleness Detector Not Working [HIGH]
-- **File:** `packages/context-hub/src/context_hub/staleness.py`
-- **Error:** `AssertionError: False is True` (not detecting changes)
-- **Impact:** Cache invalidation broken
-- **Tests:** `test_staleness_file_deleted`, `test_staleness_content_unchanged`, `test_staleness_content_changed`
-- **Fix:** Review staleness detection logic and hash comparison
-- **ETA:** 1 hour
+**Description:**
+When running `ortho scan` from a different directory (e.g., `Repos/fastapi`), the CLI cannot find the Python script path because `__dirname` resolves relative to the compiled module location, not the current working directory.
 
-### BUG-004: Git Metadata Extraction Fails [MEDIUM]
-- **File:** `packages/context-hub/src/context_hub/git_metadata.py`
-- **Error:** `PermissionError: [WinError 32] temp dir cleanup fails on Windows`
-- **Impact:** Git history unavailable, temp directory leak
-- **Test:** `test_get_file_churn_with_commits`
-- **Fix:** Use proper context manager for temp dir cleanup
-- **ETA:** 45 minutes
+**Error:**
+```
+python: can't open file 'C:\Users\urbra\OneDrive\Desktop\Projects\ortho\apps\cli\python\scan_cli.py': [Errno 2] No such file or directory
+```
 
-### BUG-005: Hybrid Search Limit Ignored [MEDIUM]
-- **File:** `packages/context-hub/src/context_hub/search/hybrid.py`
-- **Error:** Result count exceeds limit parameter
-- **Impact:** Wrong number of results returned
-- **Test:** `test_hybrid_search_limit_respected`
-- **Fix:** Apply limit after RRF merge
-- **ETA:** 30 minutes
+**Root Cause:**
+In `scan.ts` line 26-29, the path calculation uses `__dirname`:
+```typescript
+const pythonScript = path.join(
+  __dirname,
+  "../../../../packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
+);
+```
 
-### BUG-006: Artifact History Missing [MEDIUM]
-- **File:** `packages/context-hub/src/context_hub/store.py`
-- **Error:** `AssertionError: assert 1 == 3` (only 1 version)
-- **Impact:** Version history incomplete
-- **Test:** `test_get_artifact_history`
-- **Fix:** Fix versioning logic (depends on BUG-002)
-- **ETA:** 30 minutes
+When compiled, `__dirname` points to `dist/commands/`, but the relative path calculation assumes it's relative to `src/commands/`. This works when running from the Ortho root but fails from other directories.
 
-### BUG-007: Specific Version Retrieval Returns None [MEDIUM]
-- **File:** `packages/context-hub/src/context_hub/store.py`
-- **Error:** `AttributeError: 'NoneType' object has no attribute 'version'`
-- **Impact:** Can't retrieve specific versions
-- **Test:** `test_get_artifact_specific_version`
-- **Fix:** Check query logic
-- **ETA:** 45 minutes
+**Expected Behavior:**
+- CLI should find Python scripts regardless of current working directory
+- Path resolution should be absolute or relative to the CLI installation
+
+**Fix Approach:**
+1. Use `process.env.ORTHO_ROOT` (if set) or
+2. Use `require.main.filename` to get the entry point and calculate from there
+3. Or hardcode the absolute path to the installed Ortho location
+
+**Similar Issues:**
+- `index.ts` (analyze.ts, index.ts commands likely have same issue)
+
+**Test Case:**
+```bash
+cd C:/Users/urbra/OneDrive/Desktop/Projects/ortho/Repos/fastapi
+node ../../apps/cli/dist/index.js scan
+# Expected: Success
+# Actual: "can't open file" error
+```
 
 ---
 
-## Task 002-003: Python Adapter Bugs (9 failures / 106 tests)
+### BUG-002: Module Import Structure (HIGH)
 
-### BUG-008: tree-sitter-languages API Mismatch [HIGH]
-- **File:** `packages/repo-intelligence/src/repo_intelligence/adapters/python_adapter.py:31`
-- **Error:** `TypeError: __init__() takes exactly 1 argument (2 given)`
-- **Impact:** PythonAdapter crashes, can't parse Python
-- **Tests:** 6 tests (all PythonAdapter initialization)
-- **Fix:** Update tree-sitter-languages to compatible version
-- **ETA:** 30 minutes
+**Severity:** HIGH  
+**Component:** `packages/repo-intelligence`, all packages  
+**Status:** CONFIRMED
 
-### BUG-009: CallGraphBuilder Constructor Mismatch [MEDIUM]
-- **File:** `packages/repo-intelligence/src/repo_intelligence/call_graph.py`
-- **Error:** Requires (repo_root, python_files) but tests expect no args
-- **Impact:** API mismatch, tests fail
-- **Tests:** `test_import_call_graph_builder`, `test_builder_initialization`
-- **Fix:** Update tests to pass required arguments
-- **ETA:** 30 minutes
+**Description:**
+Python modules cannot be imported as `from packages.repo_intelligence import X` because the package structure doesn't match the import path. Tests that directly import modules fail.
 
-### BUG-010: ModuleDetector Constructor Mismatch [MEDIUM]
-- **File:** `packages/repo-intelligence/src/repo_intelligence/module_detector.py`
-- **Error:** Requires repo_root but tests expect no args
-- **Impact:** API mismatch, tests fail
-- **Tests:** `test_detector_initialization`, `test_detector_can_scan_directory`
-- **Fix:** Update tests to pass repo_root argument
-- **ETA:** 30 minutes
+**Error:**
+```python
+ModuleNotFoundError: No module named 'packages.repo_intelligence'
+```
 
----
+**Root Cause:**
+The `packages/` directory is not a proper Python package. The `__init__.py` files either don't exist or don't properly export submodules.
 
-## Task-005: Architecture Detection Bugs (4 failures / 53 tests)
+**Expected Behavior:**
+```python
+from packages.repo_intelligence import SymbolExtractor
+from packages.arch_intelligence import ArchitectureDetector
+```
 
-### BUG-011: Hexagonal Pattern Misclassified [HIGH]
-- **File:** `packages/arch-intelligence/src/arch_intelligence/detector.py`
-- **Error:** `AssertionError: Expected 'hexagonal', got 'layered'`
-- **Cause:** Hexagonal score (0.91) < Layered (0.95)
-- **Impact:** All hexagonal architectures detected as layered
-- **Tests:** `test_hexagonal_fixture_detects_as_hexagonal`, `test_hexagonal_confidence_breakdown_shows_hexagonal_highest`
-- **Fix:** Adjust hexagonal pattern detection scoring
-- **ETA:** 2 hours
+**Current Behavior:**
+Requires full path:
+```python
+from packages.repo_intelligence.src.repo_intelligence.symbol_extractor import SymbolExtractor
+```
 
-### BUG-012: Flat Pattern Misclassified [MEDIUM]
-- **File:** `packages/arch-intelligence/src/arch_intelligence/detector.py`
-- **Error:** `AssertionError: Expected 'flat', got 'layered'`
-- **Cause:** Flat detection too weak
-- **Impact:** Flat architectures detected as layered
-- **Test:** `test_flat_fixture_detects_as_flat`
-- **Fix:** Increase flat pattern detection sensitivity
-- **ETA:** 1.5 hours
-
-### BUG-013: Layer Violations Too Permissive [MEDIUM]
-- **File:** `packages/arch-intelligence/src/arch_intelligence/layer_detector.py`
-- **Error:** `AssertionError: Expected ≤1 violations, got 9`
-- **Cause:** Violation detection threshold too high
-- **Impact:** Invalid cross-layer imports not detected
-- **Test:** `test_layered_fixture_has_minimal_violations`
-- **Fix:** Tighten layer hierarchy validation rules
-- **ETA:** 1.5 hours
+**Fix Approach:**
+1. Add proper `__init__.py` to `packages/` with `__path__` declaration
+2. Or install packages via Poetry: `pip install -e .`
+3. Or document the correct import paths in README
 
 ---
 
-## Fix Strategy & Timeline
+### BUG-003: Python Script Path Mismatch in CLI (HIGH)
 
-### Phase 1: Critical Path (5 hours)
-1. BUG-008 (tree-sitter) — 30 min → 6 tests unblocked
-2. BUG-001 (FTS5) — 30 min → 1 test unblocked
-3. BUG-002 (versioning) — 1 hour → 3 tests unblocked
-4. BUG-011 (hexagonal) — 2 hours → 2 tests unblocked
-5. BUG-012 (flat) — 1.5 hours → 1 test unblocked
+**Severity:** HIGH  
+**Component:** `apps/cli/src/commands/`  
+**Status:** CONFIRMED
 
-**Result:** 80%+ pass rate, ready for Phase 2
+**Description:**
+CLI looks for Python scripts in wrong locations. The actual scripts are in `packages/repo_intelligence/src/repo_intelligence/scan_cli.py` but the CLI searches in `apps/cli/python/` or other locations.
 
-### Phase 2: High Priority (4.5 hours)
-6. BUG-003 (staleness) — 1 hour
-7. BUG-009 (CallGraphBuilder) — 30 min
-8. BUG-010 (ModuleDetector) — 30 min
-9. BUG-013 (layer violations) — 1.5 hours
+**Error:**
+```
+python: can't open file 'C:\Users\urbra\...\apps\cli\python\scan_cli.py'
+```
 
-**Result:** 90%+ pass rate
+**Expected Behavior:**
+CLI should find scripts in their actual locations within the `packages/` directory.
 
-### Phase 3: Polish (2.5 hours)
-10. BUG-004 (git metadata) — 45 min
-11. BUG-005 (hybrid limit) — 30 min
-12. BUG-006 (artifact history) — 30 min (depends on BUG-002)
-13. BUG-007 (specific version) — 45 min
-
-**Result:** 95%+ pass rate
+**Fix Approach:**
+1. Update all path calculations in CLI commands to point to correct locations
+2. Or copy/symlink scripts to a standard location
 
 ---
 
-## Phase 2 Readiness Checklist
+### BUG-004: Unicode Encoding Issue in Python Output (MEDIUM)
 
-### Code Quality
-- [ ] All 11 bugs fixed or marked xfail
-- [ ] Task-001: npm installed, tsc compiles
-- [ ] Task-002-003: ≥80% test pass rate (48+/106)
-- [ ] Task-004: ≥80% test pass rate (44+/55)
-- [ ] Task-005: ≥95% test pass rate (50+/53)
+**Severity:** MEDIUM  
+**Component:** Python CLI scripts  
+**Status:** CONFIRMED
 
-### Documentation
-- [ ] All dependencies documented in pyproject.toml
-- [ ] All builds verified (tsc, mypy, ruff)
-- [ ] This BUGS.md updated with fixes
+**Description:**
+When printing symbols like `✓`, `✗` from Python, Windows console (cp1252 encoding) fails to encode Unicode characters.
 
-### Testing
-- [ ] Real pytest execution for all tasks
-- [ ] No designed-only tests
-- [ ] Evidence logs stored in .ases/evidence/
+**Error:**
+```
+UnicodeEncodeError: 'charmap' codec can't encode character '✗' in position 0
+```
 
-**Estimated time to Phase 2 readiness:** 12 hours
+**Fix Approach:**
+1. Add `export PYTHONIOENCODING=utf-8` before running
+2. Or use ASCII fallback: `[OK]` instead of `✓`
 
 ---
 
----
+### BUG-005: Missing CLI Commands in Index (MEDIUM)
 
-## Task-009: Impact Analysis + Debt Scoring Test Failures ✅ RESOLVED
+**Severity:** MEDIUM  
+**Component:** `apps/cli/src/index.ts`  
+**Status:** SUSPECTED
 
-**Date:** 2026-07-02  
-**Phase:** GATE 5 VERIFIER Execution  
-**Status:** ✅ **42/42 tests passing (100%)**, 97% code coverage, zero regressions  
-**Verification Date:** 2026-07-02 (final run)
+**Description:**
+The new task-013 commands (`run`, `status`, `approve`, `reject`, `history`) may not be registered in the main CLI entry point.
 
-### BUG-014: GitFileMetadata Constructor Missing file_path [RESOLVED]
-- **File:** `packages/impact-analysis/tests/test_debt_scorer.py` (lines 72, 140, 224)
-- **Error:** `TypeError: __init__() missing required positional argument: 'file_path'`
-- **Fix:** Added `file_path="test.py"` (or module-specific) to all GitFileMetadata instantiations
-  - test_score_hub_module: Added `file_path="B"`
-  - test_test_coverage_not_found: Added `file_path="core.py"`
-  - test_evidence_generated: Added `file_path="messy.py"`
-  - test_churn_score_bounds: Added `file_path="active.py"`
-- **Status:** ✅ FIXED — all 4 instantiations corrected
+**Error:**
+Likely `Unknown command` when trying `ortho run`
 
-### BUG-015: Hypothesis Strategy Syntax Error [RESOLVED]
-- **File:** `packages/impact-analysis/tests/test_debt_scorer.py` (line 231-233)
-- **Error:** `InvalidArgument: Cannot infer a strategy for <class 'list'>`
-- **Fix:** Replaced invalid list comprehension `[st.floats(...) for _ in range(5)]` with proper hypothesis strategy:
-  ```python
-  @given(scores=st.lists(st.floats(min_value=0.0, max_value=1.0), min_size=5, max_size=5))
-  ```
-- **Status:** ✅ FIXED — test_total_score_weighted_average now passing
+**Expected Behavior:**
+```bash
+ortho run "analyze architecture"
+ortho status
+ortho approve
+ortho reject
+ortho history
+```
 
-### BUG-016: ImpactAnalyzer blast_radius Test Expectations [RESOLVED]
-- **File:** `packages/impact-analysis/tests/test_impact_analyzer.py` (lines 13-37, 83-124, 174-197)
-- **Root Cause:** Tests had incorrect expectations about blast_radius semantics
-  - Tests expected blast_radius to count both direct AND transitive dependents
-  - Implementation correctly counts only transitive dependents (per spec)
-- **Fix:** Corrected test expectations per BFS implementation:
-  - `test_analyze_simple_import_chain()`: blast_radius=1 (C only, transitive via B)
-  - `test_analyze_depth_limit()`: depth=1→1, depth=2→2, depth=3→2 (matches hop limits)
-  - `test_risk_score_high_fan_in()`: Changed assertion to check direct_dependents instead of blast_radius
-- **Status:** ✅ FIXED — all 3 tests corrected and passing
+**Test Case:**
+```bash
+node apps/cli/dist/index.js help
+# Should list: run, status, approve, reject, history
+```
 
 ---
 
-## Test Execution Summary (GATE 5)
+### BUG-006: Python Module Path in Compiled CLI (MEDIUM)
 
-| Phase | Result | Count | Status |
-|-------|--------|-------|--------|
-| A: Import Validation | ✅ PASS | 1/1 | Package imports successfully |
-| B: Pilot Tests | ✅ PASS | 7/7 | All sample tests passing |
-| C: Full Suite | ✅ PASS | 42/42 | **ALL TESTS PASSING** (100%) |
-| D: Regression | ✅ PASS | 120/120 | No regressions in other packages |
+**Severity:** MEDIUM  
+**Component:** `apps/cli/dist/commands/`  
+**Status:** CONFIRMED
 
-**Code Coverage:** 97% (646 statements, 17 missed — excellent)  
-**Other Packages:** 0 regressions (clean integration)  
-**Final Status:** ✅ **GATE 5 VERIFICATION APPROVED**
+**Description:**
+The compiled JavaScript files may have incorrect path calculations due to TypeScript compilation. The `__dirname` context is lost during compilation.
+
+**Expected Behavior:**
+CLI works from any directory after being built.
+
+**Fix Approach:**
+1. Use `path.resolve(__dirname, ...)` with proper testing
+2. Or update paths dynamically based on `process.env.ORTHO_ROOT`
 
 ---
 
-## Evidence Trail
+## Summary Table
 
-- Real test execution logs: `.ases/evidence/task-009/`
-  - verification-report.md (full findings)
-  - phase-a-import-check.log
-  - phase-b-pilot-test-final.log
-  - phase-c-full-test-suite.log
-  - phase-d-regression-packages-only.log
-- Test results summary:
-  - Task-004: 44 pass, 10 fail, 1 error (80%)
-  - Task-005: 49 pass, 4 fail (92.5%)
-  - Task-002-003: 4 pass, 9 fail (31%)
-  - Task-009: 36 pass, 6 fail (85.7%) ← GATE 5 EXECUTION
+| Bug ID | Component | Severity | Status | Blocker |
+|--------|-----------|----------|--------|---------|
+| BUG-001 | CLI scan.ts | CRITICAL | CONFIRMED | YES |
+| BUG-002 | Package imports | HIGH | CONFIRMED | YES |
+| BUG-003 | CLI script paths | HIGH | CONFIRMED | YES |
+| BUG-004 | Unicode output | MEDIUM | CONFIRMED | NO |
+| BUG-005 | CLI commands | MEDIUM | SUSPECTED | MAYBE |
+| BUG-006 | Path resolution | MEDIUM | CONFIRMED | YES |
 
+---
+
+## Blockers for Testing
+
+**Current Status:** ❌ **BLOCKED**
+
+Cannot proceed with end-to-end testing due to:
+1. ✗ CLI path resolution broken (BUG-001, BUG-003, BUG-006)
+2. ✗ Python imports broken (BUG-002)
+3. ✗ Cannot run `ortho scan` or `ortho analyze` from test repos
+
+**Required Fixes Before Testing:**
+1. Fix `scan.ts` path calculation
+2. Fix `analyze.ts` path calculation  
+3. Fix `index.ts` path calculation
+4. Verify all task-013 commands are registered
+5. Test CLI works from external directories
+
+**Recommended Fix Order:**
+1. **FIRST:** Fix BUG-001 (CLI path resolution) - blocks all scanning
+2. **SECOND:** Fix BUG-003 (Python script paths) - blocks command execution
+3. **THIRD:** Fix BUG-005 (CLI command registration) - verify new commands work
+4. **FOURTH:** Fix BUG-002 (Python imports) - allows direct Python testing
+5. **FIFTH:** Fix BUG-004 (Unicode) - output formatting
+
+---
+
+## Test Environment
+
+**OS:** Windows 11  
+**Python:** 3.12.3  
+**Node.js:** 11.14.1  
+**Test Repos:**
+- FastAPI (98MB)
+- LangChain (623MB)
+
+**Test Date:** 2026-07-07
+
+---
+
+*Last updated: 2026-07-07 during end-to-end testing*
