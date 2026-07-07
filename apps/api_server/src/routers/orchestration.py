@@ -3,11 +3,11 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
-from packages.orchestration.src.intent.router import IntentRouter
+from packages.orchestration.src.orchestration.intent.router import IntentRouter
 from packages.orchestration.src.selector.engine import SelectorEngine
 from packages.orchestration.src.executor.workflow_executor import WorkflowExecutor
 from packages.orchestration.src.executor.state_store import WorkflowStateStore
-from packages.shared.storage.database import OrthoDatabase
+from shared.storage.src.storage.database import OrthoDatabase
 from pathlib import Path
 
 
@@ -41,7 +41,7 @@ _intent_router: Optional[IntentRouter] = None
 _selector_engine: Optional[SelectorEngine] = None
 _executor: Optional[WorkflowExecutor] = None
 _state_store: Optional[WorkflowStateStore] = None
-_current_approval_callback: Optional[callable] = None
+_current_workflow_run_id: Optional[str] = None  # Track current workflow for /approve, /reject, /status
 
 
 def init_orchestration(
@@ -53,12 +53,13 @@ def init_orchestration(
     skill_registry,
 ):
     """Initialize orchestration state (call on app startup)."""
-    global _db, _intent_router, _selector_engine, _executor, _state_store
+    global _db, _intent_router, _selector_engine, _executor, _state_store, _current_workflow_run_id
     _db = db
     _intent_router = intent_router
     _selector_engine = selector_engine
     _executor = executor
     _state_store = WorkflowStateStore(db)
+    _current_workflow_run_id = None
 
 
 @router.post("/run")
@@ -119,75 +120,37 @@ async def run_workflow(request: RunRequest, background_tasks: BackgroundTasks):
             token_budget=budget,
         )
 
-        # Step 3: Create workflow run (awaiting_approval if human_approval_required, else execute)
+        # Step 3: Create workflow run in pending state
+        # The workflow will pause at approval gates and must be resumed via /api/approve or /api/reject
+        global _current_workflow_run_id
         repo_id = "repo-default"  # TODO: get from context
 
-        if plan.human_approval_required:
-            # Create run in awaiting_approval state (human must approve via /api/approve)
-            workflow_run = _state_store.create_run(repo_id, plan.intent_class, plan)
-            _state_store.update_run_status(workflow_run.id, "awaiting_approval")
+        workflow_run = _state_store.create_run(repo_id, plan.intent_class, plan)
+        _current_workflow_run_id = workflow_run.id  # Track for /approve, /reject, /status
 
-            return {
-                "plan": {
-                    "intent_class": plan.intent_class,
-                    "steps": [
-                        {
-                            "step_id": s.step_id,
-                            "agent_name": s.agent_name,
-                            "skill_names": s.skill_names,
-                            "approval_gate": s.approval_gate,
-                        }
-                        for s in plan.steps
-                    ],
-                    "total_estimated_tokens": plan.total_estimated_tokens,
-                    "human_approval_required": plan.human_approval_required,
-                },
-                "workflow_run": {
-                    "id": workflow_run.id,
-                    "intent_class": workflow_run.intent_class,
-                    "status": workflow_run.status,
-                    "started_at": workflow_run.started_at,
-                    "completed_at": workflow_run.completed_at,
-                }
+        return {
+            "plan": {
+                "intent_class": plan.intent_class,
+                "steps": [
+                    {
+                        "step_id": s.step_id,
+                        "agent_name": s.agent_name,
+                        "skill_names": s.skill_names,
+                        "approval_gate": s.approval_gate,
+                    }
+                    for s in plan.steps
+                ],
+                "total_estimated_tokens": plan.total_estimated_tokens,
+                "human_approval_required": plan.human_approval_required,
+            },
+            "workflow_run": {
+                "id": workflow_run.id,
+                "intent_class": workflow_run.intent_class,
+                "status": workflow_run.status,
+                "started_at": workflow_run.started_at,
+                "completed_at": workflow_run.completed_at,
             }
-        else:
-            # No approval required: execute immediately in background
-            def execute_plan_no_approval():
-                def approval_callback(workflow_run):
-                    return True
-
-                _executor.execute(
-                    plan=plan,
-                    repo_id=repo_id,
-                    on_approval_gate=approval_callback,
-                )
-
-            workflow_run = _state_store.create_run(repo_id, plan.intent_class, plan)
-            background_tasks.add_task(execute_plan_no_approval)
-
-            return {
-                "plan": {
-                    "intent_class": plan.intent_class,
-                    "steps": [
-                        {
-                            "step_id": s.step_id,
-                            "agent_name": s.agent_name,
-                            "skill_names": s.skill_names,
-                            "approval_gate": s.approval_gate,
-                        }
-                        for s in plan.steps
-                    ],
-                    "total_estimated_tokens": plan.total_estimated_tokens,
-                    "human_approval_required": plan.human_approval_required,
-                },
-                "workflow_run": {
-                    "id": workflow_run.id,
-                    "intent_class": workflow_run.intent_class,
-                    "status": workflow_run.status,
-                    "started_at": workflow_run.started_at,
-                    "completed_at": workflow_run.completed_at,
-                }
-            }
+        }
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -199,37 +162,77 @@ async def get_status():
     if not _state_store:
         raise HTTPException(status_code=500, detail="Orchestration not initialized")
 
-    # TODO: Get current workflow run from session/context
-    return {"workflow_run": None}
+    global _current_workflow_run_id
+    if not _current_workflow_run_id:
+        return {"workflow_run": None}
+
+    try:
+        workflow_run = _state_store.get_run(_current_workflow_run_id)
+        return {
+            "workflow_run": {
+                "id": workflow_run.id,
+                "intent_class": workflow_run.intent_class,
+                "status": workflow_run.status,
+                "started_at": workflow_run.started_at,
+                "completed_at": workflow_run.completed_at,
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.post("/approve")
 async def approve_workflow(request: ApproveRequest):
-    """POST /api/approve — Approve pending approval gate."""
-    if not _state_store:
+    """POST /api/approve — Approve pending approval gate and resume workflow."""
+    if not _executor or not _state_store:
         raise HTTPException(status_code=500, detail="Orchestration not initialized")
 
-    # TODO: Implement approval logic
-    return {
-        "workflow_run": {
-            "status": "running",
+    global _current_workflow_run_id
+    if not _current_workflow_run_id:
+        raise HTTPException(status_code=400, detail="No workflow run in progress")
+
+    try:
+        # Resume workflow with approval decision
+        workflow_run = _executor.resume(_current_workflow_run_id, approval_given=True)
+
+        return {
+            "workflow_run": {
+                "id": workflow_run.id,
+                "intent_class": workflow_run.intent_class,
+                "status": workflow_run.status,
+                "started_at": workflow_run.started_at,
+                "completed_at": workflow_run.completed_at,
+            }
         }
-    }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/reject")
 async def reject_workflow(request: RejectRequest):
-    """POST /api/reject — Reject workflow."""
-    if not _state_store:
+    """POST /api/reject — Reject pending approval gate and mark workflow as failed."""
+    if not _executor or not _state_store:
         raise HTTPException(status_code=500, detail="Orchestration not initialized")
 
-    # TODO: Implement rejection logic
-    return {
-        "workflow_run": {
-            "status": "rejected",
-            "completed_at": "",
+    global _current_workflow_run_id
+    if not _current_workflow_run_id:
+        raise HTTPException(status_code=400, detail="No workflow run in progress")
+
+    try:
+        # Resume workflow with rejection decision
+        workflow_run = _executor.resume(_current_workflow_run_id, approval_given=False)
+
+        return {
+            "workflow_run": {
+                "id": workflow_run.id,
+                "intent_class": workflow_run.intent_class,
+                "status": workflow_run.status,
+                "started_at": workflow_run.started_at,
+                "completed_at": workflow_run.completed_at,
+            }
         }
-    }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/history")

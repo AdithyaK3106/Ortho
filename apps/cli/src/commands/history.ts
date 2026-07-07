@@ -21,7 +21,7 @@ export const historyCommand = new Command()
       if (options.id) {
         params.append("id", options.id);
       } else {
-        params.append("limit", options.limit);
+        params.append("limit", options.limit || "10");
       }
 
       const response = await fetch(

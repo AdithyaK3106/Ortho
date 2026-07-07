@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { join } from "path";
+import { join, resolve, dirname } from "path";
 
 export interface IndexOptions {
   watch?: boolean;
@@ -19,11 +19,14 @@ export async function indexCommand(options: IndexOptions): Promise<void> {
     args.push("--verbose");
   }
 
-  // "index" is an alias for scan — reuse the same entry point. Works from both
-  // src/commands and dist/commands (both are 4 levels below the repo root).
-  const pythonScript = join(
-    __dirname,
-    "../../../../packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
+  // "index" is an alias for scan — reuse the same entry point.
+  // BUG-001 FIX: Use require.main.filename for robust path resolution
+  const entryPoint = require.main?.filename || __filename;
+  const entryDir = dirname(entryPoint);
+  const repoRoot = resolve(entryDir, "../../..");  // dist -> cli -> apps -> root
+  const pythonScript = resolve(
+    repoRoot,
+    "packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
   );
 
   return new Promise((resolve, reject) => {

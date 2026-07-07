@@ -13,11 +13,13 @@ export const analyzeCommand = new Command()
   .action(async (options): Promise<void> => {
     const { spawn } = require("child_process");
     const cwd = process.cwd();
-    // __dirname is src/commands in dev (ts-node) but dist/commands once compiled by tsc,
-    // which does not copy .py files. Resolve to the source tree explicitly either way.
-    const pythonScript = __dirname.includes(`${path.sep}dist${path.sep}`)
-      ? path.join(__dirname, "..", "..", "src", "commands", "analyze.py")
-      : path.join(__dirname, "analyze.py");
+
+    // BUG-003 FIX: Use require.main.filename for robust path resolution
+    // This ensures path works regardless of where CLI is run from
+    const entryPoint = require.main?.filename || __filename;
+    const entryDir = path.dirname(entryPoint);
+    const repoRoot = path.resolve(entryDir, "../../..");  // dist -> cli -> apps -> root
+    const pythonScript = path.resolve(repoRoot, "apps/cli/src/commands/analyze.py");
 
     const pythonArgs = ["--repo-root", cwd];
     if (options.impact) {

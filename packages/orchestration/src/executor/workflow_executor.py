@@ -72,10 +72,9 @@ class WorkflowExecutor:
             workflow_run.status = "running"
             self.state_store.update_run_status(run_id, "running")
 
-            step_start_time = datetime.utcnow()  # Track step timing for error evidence
-
             # Execute steps
             for step in plan.steps:
+                step_start_time = datetime.utcnow()  # Track per-step timing for evidence
                 # If approval gate required: pause and wait for human decision
                 if step.approval_gate:
                     workflow_run.status = "awaiting_approval"
@@ -140,6 +139,7 @@ class WorkflowExecutor:
                         status="error",
                         error_message=str(e),
                         created_at=step_start_time.isoformat(),
+                        completed_at=error_time.isoformat(),
                         duration_ms=duration_ms,
                     )
                     self.state_store.append_evidence(run_id, step.step_id, error_evidence)

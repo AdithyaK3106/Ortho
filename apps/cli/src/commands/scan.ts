@@ -21,11 +21,20 @@ interface ScanOptions {
  */
 export async function scanCommand(options: ScanOptions): Promise<void> {
   const cwd = process.cwd();
-  // Works from both src/commands (ts-node) and dist/commands (tsc output):
-  // both are 4 levels below the repo root.
-  const pythonScript = path.join(
-    __dirname,
-    "../../../../packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
+
+  // BUG-001 FIX: Use require.main.filename to find entry point instead of __dirname
+  // This ensures path resolution works regardless of where CLI is run from.
+  // When compiled, __dirname points to dist/ but require.main.filename points to the entry point (index.js)
+  const entryPoint = require.main?.filename || __filename;
+  const entryDir = path.dirname(entryPoint);
+
+  // Calculate repo root: entry point is in apps/cli/dist/index.js
+  // So we need to go up 4 levels: dist -> cli -> apps -> ortho-root
+  const repoRoot = path.resolve(entryDir, "../../..");
+
+  const pythonScript = path.resolve(
+    repoRoot,
+    "packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
   );
 
   // Build Python command arguments

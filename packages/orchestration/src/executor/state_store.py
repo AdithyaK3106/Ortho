@@ -315,31 +315,37 @@ class WorkflowStateStore:
 
     @staticmethod
     def _deserialize_evidence(data: dict) -> Any:  # Evidence
-        """Deserialize JSON dict to Evidence dataclass."""
+        """Deserialize JSON dict to Evidence dataclass per spec.md §3.3.
+
+        Ensures Evidence is always deserialized into Evidence dataclass instances,
+        never exposed as raw dictionaries internally.
+        """
         from packages.orchestration.src.executor.evidence_collector import Evidence, EvidenceType
 
-        # Map evidence_type string back to enum
+        # Map evidence_type string back to enum (stored as lowercase value, e.g., "agent_execution")
         evidence_type_str = data.get("evidence_type", "agent_execution")
         try:
-            evidence_type = EvidenceType[evidence_type_str.upper()]
-        except (KeyError, AttributeError):
+            # Try to match by value (e.g., "agent_execution" matches EvidenceType.AGENT_EXECUTION)
+            evidence_type = EvidenceType(evidence_type_str)
+        except ValueError:
+            # Fallback to AGENT_EXECUTION if unrecognized
             evidence_type = EvidenceType.AGENT_EXECUTION
 
         return Evidence(
-            step_id=data.get("step_id"),
-            step_name=data.get("step_name"),
+            step_id=data.get("step_id", ""),
+            step_name=data.get("step_name", ""),
             evidence_type=evidence_type,
-            system_prompt=data.get("system_prompt"),
-            user_message=data.get("user_message"),
-            agent_output=data.get("agent_output"),
+            system_prompt=data.get("system_prompt", ""),
+            user_message=data.get("user_message", ""),
+            agent_output=data.get("agent_output", ""),
             input_tokens=data.get("input_tokens", 0),
             output_tokens=data.get("output_tokens", 0),
             total_tokens=data.get("total_tokens", 0),
             approval_decision=data.get("approval_decision"),
             approval_reason=data.get("approval_reason"),
-            created_at=data.get("created_at"),
+            created_at=data.get("created_at", ""),
             completed_at=data.get("completed_at"),
             duration_ms=data.get("duration_ms", 0),
-            status=data.get("status"),
+            status=data.get("status", "success"),
             error_message=data.get("error_message"),
         )

@@ -238,11 +238,32 @@ class SelectorEngine:
         return stage_map
 
     def _semantic_similarity(self, text1: str, text2: str) -> float:
-        """Simple keyword-based semantic similarity (0.0-1.0).
+        """PLACEHOLDER: Token-based semantic similarity (Jaccard distance).
 
-        Counts matching words (case-insensitive). Placeholder for more sophisticated embedding-based similarity later.
+        This is an intentional placeholder implementation using simple Jaccard similarity on
+        whitespace-separated tokens. It is NOT production-quality semantic similarity.
+
+        Current behavior (Placeholder):
+        - Splits text on whitespace (case-insensitive)
+        - Returns Jaccard similarity: |intersection| / |union| of word sets
+        - Deterministic for exact same input text
+        - Fragile to punctuation, unicode, formatting variations
+
+        Limitations (Why This is a Placeholder):
+        - No word embeddings or semantic understanding
+        - Sensitive to tokenization (punctuation treated as part of token)
+        - No linguistic knowledge (synonyms, stemming, etc.)
+
+        Future Implementation:
+        Replace with embedding-based similarity in a future task
+        (e.g., using sentence-transformers, HuggingFace models, or similar).
+        This will provide actual semantic similarity rather than token overlap.
+
+        Spec Compliance:
+        This placeholder maintains the pure Python, deterministic design per spec.md §11.4.
+        It correctly implements the required scoring formula while keeping the implementation
+        simple and testable during Phase 1 (task-013).
         """
-        # ponytail: simple word tokenization, replace with embedding-based similarity (e.g. HuggingFace encoder) if accuracy insufficient
         words1 = set(text1.lower().split())
         words2 = set(text2.lower().split())
 
