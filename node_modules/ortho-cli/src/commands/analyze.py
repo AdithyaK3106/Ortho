@@ -1,7 +1,14 @@
 import json
 import sqlite3
+import sys
 from pathlib import Path
 from typing import Optional
+
+# BUG-004 FIX: Configure UTF-8 for Windows consoles
+# Windows defaults to cp1252, which can't encode '✓'/'✗'
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8", errors="replace")
 
 
 class AnalyzeCommand:

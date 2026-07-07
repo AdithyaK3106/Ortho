@@ -5,6 +5,12 @@ import { initCommand } from "./commands/init";
 import { indexCommand } from "./commands/index";
 import { scanCommand } from "./commands/scan";
 import { analyzeCommand } from "./commands/analyze";
+// BUG-005 FIX: Import task-013 workflow commands
+import { runCommand } from "./commands/run";
+import { statusCommand } from "./commands/status";
+import { approveCommand } from "./commands/approve";
+import { rejectCommand } from "./commands/reject";
+import { historyCommand } from "./commands/history";
 
 program.name("ortho").description("AI Engineering Platform CLI").version("0.1.0");
 
@@ -37,5 +43,12 @@ program
   });
 
 program.addCommand(analyzeCommand);
+
+// BUG-005 FIX: Register task-013 workflow commands
+program.addCommand(runCommand);
+program.addCommand(statusCommand);
+program.addCommand(approveCommand);
+program.addCommand(rejectCommand);
+program.addCommand(historyCommand);
 
 program.parse(process.argv);
