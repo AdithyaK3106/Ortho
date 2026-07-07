@@ -6,6 +6,9 @@ authors = ["urbra <urbrain369@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+semantic-router = "^0.0.24"
+pydantic = "^2.0"
+pyyaml = "^6.0"
 
 [build-system]
 requires = ["poetry-core"]
