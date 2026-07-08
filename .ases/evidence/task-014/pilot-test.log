@@ -1,0 +1,25 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collecting ... collected 5 items
+
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetBasics::test_token_budget_remaining_property PASSED [ 20%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_exact_boundary PASSED [ 40%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextDeterminism::test_assemble_determinism_identical_inputs PASSED [ 60%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetEdgeCases::test_token_budget_zero_total PASSED [ 80%]
+packages/token-optimizer/tests/test_budget.py::TestBudgetExceededError::test_budget_exceeded_error_is_exception PASSED [100%]
+
+============================== warnings summary ===============================
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextDeterminism::test_assemble_determinism_identical_inputs
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextDeterminism::test_assemble_determinism_identical_inputs
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\src\token_optimizer\assembler.py:83: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    assembled_at=datetime.utcnow().isoformat(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 5 passed, 2 warnings in 0.60s ========================
+EXIT: 0
+TIMESTAMP: 2026-07-08T10:23:35Z

@@ -1,0 +1,234 @@
+# Complete Test List — task-014 Token-Optimizer (78 tests)
+
+## test_budget.py (18 tests) — TokenBudget Arithmetic & Mutability
+
+### Basics (5 tests)
+1. test_token_budget_remaining_property
+2. test_token_budget_remaining_zero
+3. test_token_budget_can_fit_positive
+4. test_token_budget_can_fit_negative
+5. test_token_budget_can_fit_boundary_exact
+
+### Consume (9 tests)
+6. test_token_budget_consume_increments_used
+7. test_token_budget_consume_in_place_mutation ⭐
+8. test_token_budget_consume_exact_boundary
+9. test_token_budget_consume_one_over_raises ⭐
+10. test_token_budget_consume_over_budget_idempotent
+11. test_token_budget_consume_zero
+12. test_token_budget_consume_accumulates
+13. test_token_budget_consume_exhaustion
+14. test_token_budget_consume_large_amount
+
+### Field Preservation (3 tests)
+15. test_token_budget_total_immutable
+16. test_token_budget_model_preserved
+17. test_token_budget_model_various_values
+
+### Isolation (2 tests)
+18. test_token_budget_multiple_instances_isolated ⭐
+19. test_token_budget_multiple_operations_no_shared_state
+
+### Edge Cases (1 test)
+20. test_token_budget_zero_total
+21. test_token_budget_already_exhausted_on_creation
+22. test_token_budget_very_large_values
+23. test_token_budget_dataclass_fields
+
+### BudgetExceededError (3 tests)
+24. test_budget_exceeded_error_is_exception
+25. test_budget_exceeded_error_raised_on_overflow
+26. test_budget_exceeded_error_message_meaningful
+
+---
+
+## test_assembler.py (16 tests) — Context Assembly & Determinism
+
+### Determinism (2 tests)
+1. test_assemble_determinism_identical_inputs ⭐
+2. test_assemble_determinism_triple_run ⭐
+
+### Budget Mutability (3 tests)
+3. test_assemble_budget_mutated_in_place ⭐
+4. test_assemble_budget_reference_same_instance
+5. test_assemble_budget_consumed_tokens_equal_included_sum
+
+### Greedy Packing (5 tests)
+6. test_assemble_greedy_respects_budget_hard_ceiling ⭐
+7. test_assemble_single_chunk_exceeds_budget_not_included ⭐
+8. test_assemble_empty_budget_no_chunks_included
+9. test_assemble_empty_artifact_set
+10. test_assemble_budget_zero
+
+### Tie-Breaking (3 tests)
+11. test_assemble_tie_breaking_relevance_then_token_count ⭐
+12. test_assemble_tie_breaking_final_tiebreaker_artifact_id ⭐
+13. test_assemble_tie_breaking_relevance_only (implied)
+
+### Package Contract (4 tests)
+14. test_assemble_package_has_workflow_run_id
+15. test_assemble_package_has_step_id
+16. test_assemble_package_has_uuid_id
+17. test_assemble_package_assembled_at_is_iso_timestamp
+
+### Chunk Conversion (2 tests)
+18. test_assemble_all_chunks_returned_not_silently_dropped ⭐
+19. test_assemble_chunk_source_type_is_artifact
+20. test_assemble_chunk_token_count_from_artifact
+
+---
+
+## test_prompt.py (14 tests) — Prompt Assembly & Format
+
+### Determinism (2 tests)
+1. test_assemble_prompt_determinism_identical_inputs ⭐
+2. test_assemble_prompt_determinism_three_runs ⭐
+
+### Ordering (2 tests)
+3. test_assemble_prompt_chunk_ordering_by_id_ascending ⭐
+4. test_assemble_prompt_ordering_independent_of_package_order ⭐
+
+### Format (3 tests)
+5. test_assemble_prompt_format_fixed_delimiter ⭐
+6. test_assemble_prompt_only_included_chunks ⭐
+7. test_assemble_prompt_empty_included_set ⭐
+8. test_assemble_prompt_no_escaping_in_content
+
+### Duplicates (2 tests)
+9. test_assemble_prompt_duplicate_source_ids_all_included ⭐
+10. test_assemble_prompt_duplicate_with_same_content
+
+### System Prompt (2 tests)
+11. test_assemble_prompt_system_from_agent
+12. test_assemble_prompt_skills_injected_in_system
+
+### Edge Cases (3 tests)
+13. test_assemble_prompt_newline_handling_in_content
+14. test_assemble_prompt_empty_content
+15. test_assemble_prompt_special_characters_in_content
+16. test_assemble_prompt_various_source_types
+
+---
+
+## test_property.py (8 tests) — Hypothesis-Based Invariants
+
+### Budget Invariants (4 tests)
+1. test_remaining_always_nonnegative
+2. test_remaining_equals_total_minus_used
+3. test_consume_increments_used_correctly
+4. test_can_fit_matches_consume_success
+
+### Assembler Invariants (2 tests)
+5. test_included_tokens_never_exceed_budget
+6. test_chunk_id_always_present
+
+### Package Invariants (1 test)
+7. test_context_package_ids_preserved
+
+### Prompt Invariants (1 test)
+8. test_prompt_respects_included_flag
+
+### Determinism Invariants (3 tests)
+9. test_budget_remaining_deterministic
+10. test_consume_sequence_deterministic
+11. test_assembler_output_deterministic
+
+### Boundary Invariants (4 tests)
+12. test_can_fit_zero_always_true
+13. test_consume_zero_is_idempotent
+14. test_consume_exact_remaining_succeeds
+15. test_consume_remaining_plus_one_fails
+
+---
+
+## test_integration.py (10 tests) — End-to-End & Backward Compatibility
+
+### Assembler → Prompt Integration (3 tests)
+1. test_assembler_output_valid_input_to_prompt_assembler ⭐
+2. test_end_to_end_workflow ⭐
+3. test_multiple_steps_with_fresh_budget ⭐
+
+### Consistency (3 tests)
+4. test_included_chunks_appear_in_prompt ⭐
+5. test_excluded_chunks_not_in_prompt ⭐
+6. test_budget_state_visible_after_assembly ⭐
+
+### Backward Compatibility (1 test)
+7. test_token_budget_backward_compatible_with_mock
+
+### Error Handling (2 tests)
+8. test_budget_exceeded_during_assembly
+9. test_empty_artifact_set_handles_gracefully
+
+---
+
+## test_edge_cases.py (12 tests) — Boundary Conditions
+
+### TokenBudget Edge Cases (5 tests)
+1. test_budget_zero_total ⭐
+2. test_budget_created_exhausted ⭐
+3. test_budget_huge_values ⭐
+4. test_budget_model_field_empty_string
+5. test_budget_isolation_no_global_state
+
+### Assembler Edge Cases (5 tests)
+6. test_assemble_empty_search_results ⭐
+7. test_assemble_zero_budget ⭐
+8. test_assemble_single_chunk_exactly_fits ⭐
+9. test_assemble_single_chunk_exceeds_budget ⭐
+10. test_assemble_very_large_content (implied)
+
+### Prompt Edge Cases (5 tests)
+11. test_prompt_no_included_chunks ⭐
+12. test_prompt_chunk_with_empty_content ⭐
+13. test_prompt_chunk_with_newlines_in_content ⭐
+14. test_prompt_very_large_content ⭐
+15. test_prompt_special_characters_preserved ⭐
+
+### Type Handling (3 tests)
+16. test_context_chunk_relevance_score_extremes
+17. test_context_package_iso_timestamp_format
+18. test_context_chunk_all_source_types ⭐
+
+### Concurrency Hints (2 tests)
+19. test_budget_no_thread_safety_guarantee
+20. test_assemble_context_same_budget_sequential_calls
+
+---
+
+## SUMMARY
+
+**Total Tests:** 78
+**Categories:** 6 (budget, assembler, prompt, property, integration, edge-cases)
+**Hard Tests (⭐):** 35+ (designed to catch real bugs)
+**Property-Based:** 15+ (hypothesis-generated examples)
+**Coverage Target:** ≥85%
+**Pass Rate Target:** 100% (or documented xfail)
+
+## Key Hard Tests (If These Pass, Implementation Is Likely Correct)
+
+⭐ test_token_budget_consume_in_place_mutation — Catches copying bug
+⭐ test_token_budget_consume_one_over_raises — Catches off-by-one
+⭐ test_token_budget_multiple_instances_isolated — Catches shared state
+⭐ test_assemble_determinism_identical_inputs — Catches non-determinism
+⭐ test_assemble_budget_mutated_in_place — Catches budget copying
+⭐ test_assemble_greedy_respects_budget_hard_ceiling — Catches overflow
+⭐ test_assemble_tie_breaking_relevance_then_token_count — Catches wrong sort
+⭐ test_assemble_all_chunks_returned_not_silently_dropped — Catches silent drops
+⭐ test_assemble_prompt_chunk_ordering_by_id_ascending — Catches wrong ordering
+⭐ test_assemble_prompt_format_fixed_delimiter — Catches format violations
+⭐ test_assemble_prompt_only_included_chunks — Catches included logic
+⭐ test_assemble_prompt_duplicate_source_ids_all_included — Catches dedup
+⭐ test_assembler_output_valid_input_to_prompt_assembler — Catches type breaks
+⭐ test_end_to_end_workflow — Catches full pipeline breaks
+⭐ test_budget_zero_total — Catches edge case crashes
+⭐ test_assemble_empty_search_results — Catches empty-list crashes
+⭐ test_assemble_single_chunk_exactly_fits — Catches boundary bugs
+⭐ test_prompt_no_included_chunks — Catches empty-message handling
+⭐ test_prompt_very_large_content — Catches content truncation
+⭐ test_context_chunk_all_source_types — Catches type validation
+
+---
+
+*Test suite design complete — ready for BUILDER implementation*
+*VERIFIER will execute all tests and report results*

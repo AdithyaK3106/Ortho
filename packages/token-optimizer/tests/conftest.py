@@ -1,8 +1,19 @@
 """Pytest configuration for token-optimizer tests."""
 
 import pytest
+import sys
+from pathlib import Path
 from dataclasses import dataclass
 from typing import List
+
+# Add repo root and src paths to sys.path so 'packages.X' imports work
+_repo_root = Path(__file__).parent.parent.parent.parent  # .../ortho/
+_src_root = Path(__file__).parent.parent / "src"  # .../token-optimizer/src/
+
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
+if str(_src_root) not in sys.path:
+    sys.path.insert(0, str(_src_root))
 
 
 @dataclass
@@ -52,3 +63,28 @@ def mock_skill():
         system_prompt = "Review the following code and provide feedback."
         content = "Review the following code and provide feedback."
     return MockSkill()
+
+
+@pytest.fixture
+def mock_skills():
+    """Fixture: Create list of mock skills for testing."""
+    class MockSkill:
+        def __init__(self, display_name, system_prompt):
+            self.display_name = display_name
+            self.system_prompt = system_prompt
+
+    return [
+        MockSkill("Code Review", "Review the following code."),
+        MockSkill("Testing", "Write tests for the following code."),
+    ]
+
+
+@pytest.fixture
+def sample_artifacts_tie_breaking():
+    """Fixture: Create list of artifacts for tie-breaking tests - same relevance score, different tokens."""
+    return [
+        # These three have identical relevance score - should be ordered by token count ascending
+        MockArtifact(id="a_artifact", content="Smallest tokens", estimated_tokens=100, relevance_score=0.8),
+        MockArtifact(id="m_artifact", content="Medium tokens", estimated_tokens=150, relevance_score=0.8),
+        MockArtifact(id="z_artifact", content="Largest tokens", estimated_tokens=200, relevance_score=0.8),
+    ]

@@ -1,0 +1,336 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\urbra\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collecting ... collected 77 items
+
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextDeterminism::test_assemble_determinism_identical_inputs PASSED [  1%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextBudgetMutability::test_assemble_budget_mutated_in_place PASSED [  2%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextBudgetMutability::test_assemble_budget_reference_same_instance PASSED [  3%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextGreedyPacking::test_assemble_greedy_respects_budget_hard_ceiling PASSED [  5%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextGreedyPacking::test_assemble_empty_artifact_set FAILED [  6%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextTieBreaking::test_assemble_tie_breaking_relevance_then_token_count ERROR [  7%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextPackageContract::test_assemble_package_has_workflow_run_id PASSED [  9%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextPackageContract::test_assemble_package_has_step_id PASSED [ 10%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextPackageContract::test_assemble_all_chunks_returned PASSED [ 11%]
+packages/token-optimizer/tests/test_assembler.py::TestAssembleContextChunkConversion::test_assemble_chunk_source_type_is_artifact PASSED [ 12%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetBasics::test_token_budget_remaining_property PASSED [ 14%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetBasics::test_token_budget_remaining_zero PASSED [ 15%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetBasics::test_token_budget_can_fit_positive PASSED [ 16%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetBasics::test_token_budget_can_fit_negative PASSED [ 18%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetBasics::test_token_budget_can_fit_boundary_exact PASSED [ 19%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_increments_used PASSED [ 20%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_in_place_mutation PASSED [ 22%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_exact_boundary PASSED [ 23%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_one_over_raises PASSED [ 24%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_accumulates PASSED [ 25%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_exhaustion PASSED [ 27%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetConsume::test_token_budget_consume_zero PASSED [ 28%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetIsolation::test_token_budget_multiple_instances_isolated PASSED [ 29%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetEdgeCases::test_token_budget_zero_total PASSED [ 31%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetEdgeCases::test_token_budget_already_exhausted PASSED [ 32%]
+packages/token-optimizer/tests/test_budget.py::TestTokenBudgetEdgeCases::test_token_budget_very_large_values PASSED [ 33%]
+packages/token-optimizer/tests/test_budget.py::TestBudgetExceededError::test_budget_exceeded_error_is_exception PASSED [ 35%]
+packages/token-optimizer/tests/test_budget.py::TestBudgetExceededError::test_budget_exceeded_error_raised PASSED [ 36%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTokenBudgetEdgeCases::test_budget_zero_total PASSED [ 37%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTokenBudgetEdgeCases::test_budget_created_exhausted PASSED [ 38%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTokenBudgetEdgeCases::test_budget_huge_values PASSED [ 40%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTokenBudgetEdgeCases::test_budget_model_field_empty_string PASSED [ 41%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTokenBudgetEdgeCases::test_budget_isolation_no_global_state PASSED [ 42%]
+packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_empty_search_results FAILED [ 44%]
+packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_zero_budget FAILED [ 45%]
+packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_single_chunk_exactly_fits FAILED [ 46%]
+packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_single_chunk_exceeds_budget FAILED [ 48%]
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_no_included_chunks ERROR [ 49%]
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_chunk_with_empty_content ERROR [ 50%]
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_chunk_with_newlines_in_content ERROR [ 51%]
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_very_large_content ERROR [ 53%]
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_special_characters_preserved ERROR [ 54%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_chunk_relevance_score_extremes PASSED [ 55%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_package_iso_timestamp_format PASSED [ 57%]
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_chunk_all_source_types PASSED [ 58%]
+packages/token-optimizer/tests/test_edge_cases.py::TestConcurrencyHints::test_budget_no_thread_safety_guarantee PASSED [ 59%]
+packages/token-optimizer/tests/test_edge_cases.py::TestConcurrencyHints::test_assemble_context_same_budget_sequential_calls PASSED [ 61%]
+packages/token-optimizer/tests/test_integration.py::TestAssemblerToPromptIntegration::test_assembler_output_valid_input_to_prompt_assembler ERROR [ 62%]
+packages/token-optimizer/tests/test_integration.py::TestAssemblerToPromptIntegration::test_end_to_end_workflow ERROR [ 63%]
+packages/token-optimizer/tests/test_integration.py::TestAssemblerToPromptIntegration::test_multiple_steps_with_fresh_budget ERROR [ 64%]
+packages/token-optimizer/tests/test_integration.py::TestAssemblerPromptConsistency::test_included_chunks_appear_in_prompt ERROR [ 66%]
+packages/token-optimizer/tests/test_integration.py::TestAssemblerPromptConsistency::test_excluded_chunks_not_in_prompt ERROR [ 67%]
+packages/token-optimizer/tests/test_integration.py::TestAssemblerPromptConsistency::test_budget_state_visible_after_assembly ERROR [ 68%]
+packages/token-optimizer/tests/test_integration.py::TestRegressionInvariants::test_placeholder_no_new_errors_in_existing_tests PASSED [ 70%]
+packages/token-optimizer/tests/test_integration.py::TestRegressionInvariants::test_token_budget_backward_compatible_with_mock PASSED [ 71%]
+packages/token-optimizer/tests/test_integration.py::TestErrorHandlingIntegration::test_budget_exceeded_during_assembly PASSED [ 72%]
+packages/token-optimizer/tests/test_integration.py::TestErrorHandlingIntegration::test_empty_artifact_set_handles_gracefully FAILED [ 74%]
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptDeterminism::test_assemble_prompt_determinism_identical_inputs ERROR [ 75%]
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptOrdering::test_assemble_prompt_chunk_ordering_by_id_ascending ERROR [ 76%]
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_format_fixed_delimiter ERROR [ 77%]
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_only_included_chunks ERROR [ 79%]
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_empty_included_set ERROR [ 80%]
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptDuplicateHandling::test_assemble_prompt_duplicate_source_ids_all_included ERROR [ 81%]
+packages/token-optimizer/tests/test_property.py::TestBudgetInvariants::test_remaining_always_nonnegative PASSED [ 83%]
+packages/token-optimizer/tests/test_property.py::TestBudgetInvariants::test_remaining_equals_total_minus_used PASSED [ 84%]
+packages/token-optimizer/tests/test_property.py::TestBudgetInvariants::test_consume_increments_used_correctly PASSED [ 85%]
+packages/token-optimizer/tests/test_property.py::TestBudgetInvariants::test_can_fit_matches_consume_success PASSED [ 87%]
+packages/token-optimizer/tests/test_property.py::TestAssemblerInvariants::test_included_tokens_never_exceed_budget PASSED [ 88%]
+packages/token-optimizer/tests/test_property.py::TestAssemblerInvariants::test_chunk_id_always_present PASSED [ 89%]
+packages/token-optimizer/tests/test_property.py::TestAssemblerInvariants::test_context_package_ids_preserved PASSED [ 90%]
+packages/token-optimizer/tests/test_property.py::TestPromptAssemblerInvariants::test_prompt_respects_included_flag PASSED [ 92%]
+packages/token-optimizer/tests/test_property.py::TestDeterminismInvariants::test_budget_remaining_deterministic PASSED [ 93%]
+packages/token-optimizer/tests/test_property.py::TestDeterminismInvariants::test_consume_sequence_deterministic PASSED [ 94%]
+packages/token-optimizer/tests/test_property.py::TestBoundaryInvariants::test_can_fit_zero_always_true PASSED [ 96%]
+packages/token-optimizer/tests/test_property.py::TestBoundaryInvariants::test_consume_zero_is_idempotent PASSED [ 97%]
+packages/token-optimizer/tests/test_property.py::TestBoundaryInvariants::test_consume_exact_remaining_succeeds PASSED [ 98%]
+packages/token-optimizer/tests/test_property.py::TestBoundaryInvariants::test_consume_remaining_plus_one_fails PASSED [100%]
+
+=================================== ERRORS ====================================
+_ ERROR at setup of TestAssembleContextTieBreaking.test_assemble_tie_breaking_relevance_then_token_count _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_assembler.py, line 140
+      @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
+      def test_assemble_tie_breaking_relevance_then_token_count(self, sample_artifacts_tie_breaking):
+E       fixture 'sample_artifacts_tie_breaking' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_assembler.py:140
+_ ERROR at setup of TestPromptAssemblerEdgeCases.test_prompt_no_included_chunks _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py, line 206
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_prompt_no_included_chunks(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:206
+_ ERROR at setup of TestPromptAssemblerEdgeCases.test_prompt_chunk_with_empty_content _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py, line 229
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_prompt_chunk_with_empty_content(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:229
+_ ERROR at setup of TestPromptAssemblerEdgeCases.test_prompt_chunk_with_newlines_in_content _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py, line 251
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_prompt_chunk_with_newlines_in_content(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:251
+_ ERROR at setup of TestPromptAssemblerEdgeCases.test_prompt_very_large_content _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py, line 272
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_prompt_very_large_content(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:272
+_ ERROR at setup of TestPromptAssemblerEdgeCases.test_prompt_special_characters_preserved _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py, line 295
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_prompt_special_characters_preserved(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:295
+_ ERROR at setup of TestAssemblerToPromptIntegration.test_assembler_output_valid_input_to_prompt_assembler _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py, line 27
+      @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
+      def test_assembler_output_valid_input_to_prompt_assembler(
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py:27
+_ ERROR at setup of TestAssemblerToPromptIntegration.test_end_to_end_workflow _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py, line 51
+      @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
+      def test_end_to_end_workflow(
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py:51
+_ ERROR at setup of TestAssemblerToPromptIntegration.test_multiple_steps_with_fresh_budget _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py, line 85
+      @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
+      def test_multiple_steps_with_fresh_budget(
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py:85
+_ ERROR at setup of TestAssemblerPromptConsistency.test_included_chunks_appear_in_prompt _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py, line 124
+      @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
+      def test_included_chunks_appear_in_prompt(
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py:124
+_ ERROR at setup of TestAssemblerPromptConsistency.test_excluded_chunks_not_in_prompt _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py, line 146
+      @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
+      def test_excluded_chunks_not_in_prompt(
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py:146
+_ ERROR at setup of TestAssemblerPromptConsistency.test_budget_state_visible_after_assembly _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py, line 173
+      @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
+      def test_budget_state_visible_after_assembly(
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_integration.py:173
+_ ERROR at setup of TestAssemblePromptDeterminism.test_assemble_prompt_determinism_identical_inputs _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py, line 27
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_assemble_prompt_determinism_identical_inputs(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:27
+_ ERROR at setup of TestAssemblePromptOrdering.test_assemble_prompt_chunk_ordering_by_id_ascending _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py, line 58
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_assemble_prompt_chunk_ordering_by_id_ascending(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:58
+_ ERROR at setup of TestAssemblePromptFormat.test_assemble_prompt_format_fixed_delimiter _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py, line 98
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_assemble_prompt_format_fixed_delimiter(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:98
+_ ERROR at setup of TestAssemblePromptFormat.test_assemble_prompt_only_included_chunks _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py, line 118
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_assemble_prompt_only_included_chunks(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:118
+_ ERROR at setup of TestAssemblePromptFormat.test_assemble_prompt_empty_included_set _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py, line 147
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_assemble_prompt_empty_included_set(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:147
+_ ERROR at setup of TestAssemblePromptDuplicateHandling.test_assemble_prompt_duplicate_source_ids_all_included _
+file C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py, line 172
+      @pytest.mark.skipif(assemble_prompt is None, reason="prompt assembler not implemented")
+      def test_assemble_prompt_duplicate_source_ids_all_included(self, mock_agent, mock_skills):
+E       fixture 'mock_skills' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, mock_agent, mock_artifact_store, mock_skill, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:172
+================================== FAILURES ===================================
+______ TestAssembleContextGreedyPacking.test_assemble_empty_artifact_set ______
+packages\token-optimizer\tests\test_assembler.py:120: in test_assemble_empty_artifact_set
+    from conftest import MockArtifactStore
+E   ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+__________ TestAssemblerEdgeCases.test_assemble_empty_search_results __________
+packages\token-optimizer\tests\test_edge_cases.py:85: in test_assemble_empty_search_results
+    from conftest import MockArtifactStore
+E   ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+______________ TestAssemblerEdgeCases.test_assemble_zero_budget _______________
+packages\token-optimizer\tests\test_edge_cases.py:105: in test_assemble_zero_budget
+    pkg = assemble_context(
+packages\token-optimizer\src\token_optimizer\assembler.py:48: in assemble_context
+    artifacts = artifact_store.search(query, repo_id=repo_id)
+                ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'NoneType' object has no attribute 'search'
+_______ TestAssemblerEdgeCases.test_assemble_single_chunk_exactly_fits ________
+packages\token-optimizer\tests\test_edge_cases.py:123: in test_assemble_single_chunk_exactly_fits
+    from conftest import MockArtifactStore, MockArtifact
+E   ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+______ TestAssemblerEdgeCases.test_assemble_single_chunk_exceeds_budget _______
+packages\token-optimizer\tests\test_edge_cases.py:164: in test_assemble_single_chunk_exceeds_budget
+    from conftest import MockArtifactStore, MockArtifact
+E   ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+___ TestErrorHandlingIntegration.test_empty_artifact_set_handles_gracefully ___
+packages\token-optimizer\tests\test_integration.py:256: in test_empty_artifact_set_handles_gracefully
+    from conftest import MockArtifactStore
+E   ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+============================== warnings summary ===============================
+packages/token-optimizer/tests/test_assembler.py: 11 warnings
+packages/token-optimizer/tests/test_edge_cases.py: 2 warnings
+packages/token-optimizer/tests/test_integration.py: 1 warning
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\src\token_optimizer\assembler.py:83: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    assembled_at=datetime.utcnow().isoformat(),
+
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_chunk_relevance_score_extremes
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:326: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_package_iso_timestamp_format
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:348: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_chunk_all_source_types
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:366: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.12.3-final-0 _______________
+
+Name                                                        Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------------
+packages\token-optimizer\src\token_optimizer\__init__.py        5      0   100%
+packages\token-optimizer\src\token_optimizer\assembler.py      16      0   100%
+packages\token-optimizer\src\token_optimizer\budget.py         17      0   100%
+packages\token-optimizer\src\token_optimizer\prompt.py         19     17    11%   37-64
+packages\token-optimizer\src\token_optimizer\types.py          19      0   100%
+-----------------------------------------------------------------------------------------
+TOTAL                                                          76     17    78%
+=========================== short test summary info ===========================
+FAILED packages/token-optimizer/tests/test_assembler.py::TestAssembleContextGreedyPacking::test_assemble_empty_artifact_set - ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+FAILED packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_empty_search_results - ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+FAILED packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_zero_budget - AttributeError: 'NoneType' object has no attribute 'search'
+FAILED packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_single_chunk_exactly_fits - ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+FAILED packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_single_chunk_exceeds_budget - ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+FAILED packages/token-optimizer/tests/test_integration.py::TestErrorHandlingIntegration::test_empty_artifact_set_handles_gracefully - ImportError: cannot import name 'MockArtifactStore' from 'conftest' (C:\Users\urbra\OneDrive\Desktop\Projects\ortho\conftest.py)
+ERROR packages/token-optimizer/tests/test_assembler.py::TestAssembleContextTieBreaking::test_assemble_tie_breaking_relevance_then_token_count
+ERROR packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_no_included_chunks
+ERROR packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_chunk_with_empty_content
+ERROR packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_chunk_with_newlines_in_content
+ERROR packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_very_large_content
+ERROR packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_special_characters_preserved
+ERROR packages/token-optimizer/tests/test_integration.py::TestAssemblerToPromptIntegration::test_assembler_output_valid_input_to_prompt_assembler
+ERROR packages/token-optimizer/tests/test_integration.py::TestAssemblerToPromptIntegration::test_end_to_end_workflow
+ERROR packages/token-optimizer/tests/test_integration.py::TestAssemblerToPromptIntegration::test_multiple_steps_with_fresh_budget
+ERROR packages/token-optimizer/tests/test_integration.py::TestAssemblerPromptConsistency::test_included_chunks_appear_in_prompt
+ERROR packages/token-optimizer/tests/test_integration.py::TestAssemblerPromptConsistency::test_excluded_chunks_not_in_prompt
+ERROR packages/token-optimizer/tests/test_integration.py::TestAssemblerPromptConsistency::test_budget_state_visible_after_assembly
+ERROR packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptDeterminism::test_assemble_prompt_determinism_identical_inputs
+ERROR packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptOrdering::test_assemble_prompt_chunk_ordering_by_id_ascending
+ERROR packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_format_fixed_delimiter
+ERROR packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_only_included_chunks
+ERROR packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_empty_included_set
+ERROR packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptDuplicateHandling::test_assemble_prompt_duplicate_source_ids_all_included
+============ 6 failed, 53 passed, 17 warnings, 18 errors in 6.36s =============

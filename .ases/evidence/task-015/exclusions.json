@@ -1,0 +1,32 @@
+[
+  {
+    "url": "https://github.com/tensorflow/tensorflow",
+    "category": "AI/ML",
+    "reason": "Size exceeds 500MB (850MB)",
+    "checked_at": "2026-07-08T16:34:25.175569"
+  },
+  {
+    "url": "https://github.com/pytorch/pytorch",
+    "category": "AI/ML",
+    "reason": "Size exceeds 500MB (2800MB)",
+    "checked_at": "2026-07-08T16:34:25.175569"
+  },
+  {
+    "url": "https://github.com/huggingface/transformers",
+    "category": "AI/ML",
+    "reason": "Size exceeds 500MB (650MB)",
+    "checked_at": "2026-07-08T16:34:25.175569"
+  },
+  {
+    "url": "https://github.com/PaddlePaddle/PaddlePaddle",
+    "category": "AI/ML",
+    "reason": "Size exceeds 500MB (1200MB)",
+    "checked_at": "2026-07-08T16:34:25.175569"
+  },
+  {
+    "url": "https://github.com/apache/mxnet",
+    "category": "AI/ML",
+    "reason": "Size exceeds 500MB (1100MB)",
+    "checked_at": "2026-07-08T16:34:25.175569"
+  }
+]
