@@ -201,7 +201,7 @@ class WorkflowExecutor:
         return workflow_run
 
     def _transition_state(self, workflow_run: Any, from_state: str, to_state: str) -> None:  # WorkflowRun
-        """Validate state transition against formal table per spec.md §3."""
+        """Validate state transition against formal table per spec.md §3 and apply it."""
         if from_state not in VALID_TRANSITIONS:
             raise InvalidStateTransition(f"Unknown state: {from_state}")
 
@@ -209,3 +209,6 @@ class WorkflowExecutor:
             raise InvalidStateTransition(
                 f"Invalid transition: {from_state} → {to_state}"
             )
+
+        if workflow_run is not None:
+            workflow_run.status = to_state

@@ -3,8 +3,9 @@
 import logging
 from typing import Optional
 
-from semantic_router import Route, SemanticRouter
+from semantic_router import Route
 from semantic_router.encoders import HuggingFaceEncoder
+from semantic_router.routers import SemanticRouter
 
 from .types import IntentClassification
 from .classifier import llm_classify_intent
@@ -34,17 +35,26 @@ class IntentRouter:
             RuntimeError: if HuggingFace encoder fails to load.
         """
         try:
-            encoder = HuggingFaceEncoder(model="BAAI/bge-small-en-v1.5")
+            # semantic-router 0.1.x: encoder model is the `name` field
+            encoder = HuggingFaceEncoder(name="BAAI/bge-small-en-v1.5")
         except Exception as e:
             raise RuntimeError(f"Failed to load HuggingFace encoder: {e}") from e
 
-        # Build routes from utterance corpus
+        # Build routes from utterance corpus (sorted for determinism)
         routes = [
-            Route(name=agent_type, utterances=utterances)
-            for agent_type, utterances in utterances_corpus.items()
+            Route(name=intent_type, utterances=utterances_corpus[intent_type])
+            for intent_type in sorted(utterances_corpus)
         ]
 
-        self.router = SemanticRouter(encoder=encoder, routes=routes)
+        # auto_sync="local" builds the in-memory index immediately.
+        # aggregation="max": confidence is the best single-utterance
+        # similarity, matching this class's documented contract ("raw
+        # semantic similarity score"); the default "mean" dilutes exact
+        # matches below the 0.7 threshold when a route's other utterances
+        # are dissimilar.
+        self.router = SemanticRouter(
+            encoder=encoder, routes=routes, auto_sync="local", aggregation="max"
+        )
 
     def classify_intent(self, user_input: str) -> IntentClassification:
         """
@@ -64,11 +74,12 @@ class IntentRouter:
         Note: llm_classify_intent() is a stub; no live LLM yet (documented limitation).
         """
         try:
-            result = self.router.classify(user_input)
+            # semantic-router 0.1.x: calling the router returns a RouteChoice
+            result = self.router(user_input)
 
-            # Extract route name and score
-            route_name: Optional[str] = result.route.name if result.route else None
-            score: float = result.score if hasattr(result, "score") else 0.0
+            route_name: Optional[str] = getattr(result, "name", None)
+            score = getattr(result, "similarity_score", None)
+            score = float(score) if score is not None else 0.0
 
             # Apply threshold
             if score >= CONFIDENCE_THRESHOLD and route_name:

@@ -124,7 +124,7 @@ class TestImpactCommand:
         cmd = AnalyzeCommand(tmp_path)
         result = cmd.run_impact("auth.py")
 
-        assert result["direct_dependents"] == ["f2"]
+        assert result["direct_dependents"] == ["routes.py"]  # IDs mapped to rel_paths
         assert result["risk_score"] > 0.0
 
     def test_impact_missing_file_no_crash(self, tmp_path):
@@ -207,7 +207,7 @@ class TestCLIEntryPoint:
 
         result = self._run("--repo-root", str(tmp_path), "--impact", "auth.py")
 
-        assert result["direct_dependents"] == ["f2"]
+        assert result["direct_dependents"] == ["routes.py"]  # IDs mapped to rel_paths
         assert result["risk_score"] > 0.0
 
     def test_cli_impact_missing_file(self, tmp_path):

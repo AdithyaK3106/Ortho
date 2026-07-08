@@ -271,13 +271,14 @@ def test_resume_from_terminal_noop(executor, mock_state_store):
 # Property-Based Tests
 # ============================================================================
 
-from hypothesis import given, strategies as st
+from hypothesis import HealthCheck, given, settings, strategies as st
 
 
 @given(
     from_state=st.sampled_from(list(VALID_TRANSITIONS.keys())),
 )
-@settings(max_examples=100)
+# executor fixture is stateless (mock registries), safe to reuse across examples
+@settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_state_transitions_deterministic(executor, from_state):
     """Property: valid transitions are deterministic."""
     # For each state, attempting same transition twice should have same result

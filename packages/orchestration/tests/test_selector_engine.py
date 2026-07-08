@@ -1,9 +1,54 @@
 """Unit tests for SelectorEngine (score_agents, score_skills, build_plan)."""
 
 import pytest
+from dataclasses import dataclass, field
+from typing import Optional
+
 from packages.orchestration.src.selector.engine import SelectorEngine, ExecutionPlan, ExecutionStep
-from packages.orchestration.src.intent.router import IntentClassification, AgentManifest, SkillManifest, AgentRegistry, SkillRegistry
-from packages.shared.types import TokenBudget
+
+
+# Local test doubles. The original imports pointed at modules that never existed
+# (packages.orchestration.src.intent.router, packages.shared.types) — this file
+# tests SelectorEngine against mocks, so the containers live here.
+
+@dataclass
+class IntentClassification:
+    type: str
+    confidence: float
+    method: str
+    raw_text: str = ""
+
+
+@dataclass
+class AgentManifest:
+    name: str
+    display_name: str
+    description: str
+    intent_triggers: list
+    skills_preferred: list
+    priority: str
+    requires_context: list
+
+
+@dataclass
+class SkillManifest:
+    name: str
+    display_name: str
+    description: str
+    agent_types: list
+    intent_triggers: list
+    estimated_tokens: int
+
+
+@dataclass
+class TokenBudget:
+    total: int
+    used: int
+    model: str
+
+    @property
+    def remaining(self) -> int:
+        return self.total - self.used
 
 
 class MockAgentRegistry:
@@ -137,7 +182,8 @@ def test_score_agents_context_penalty(selector, intent_feature_dev):
     scores_with_context = selector.score_agents(intent_feature_dev, ["architecture_model"])
 
     assert scores_with_context["architect"] > scores_without_context["architect"]
-    assert scores_with_context["architect"] - scores_without_context["architect"] >= 0.2
+    # Tolerance for IEEE float arithmetic: 1.3 - 1.1 == 0.19999999999999996
+    assert scores_with_context["architect"] - scores_without_context["architect"] == pytest.approx(0.2)
 
 
 def test_score_agents_zero_floor(selector, intent_analysis):
@@ -271,13 +317,19 @@ def test_build_plan_human_approval_required(selector, intent_feature_dev, intent
 # Property-Based Tests (hypothesis)
 # ============================================================================
 
-from hypothesis import given, strategies as st, settings
+from hypothesis import HealthCheck, given, strategies as st, settings
+
+# The selector/intent fixtures are read-only mocks, so reusing them across
+# hypothesis examples is safe; suppress the function-scoped-fixture check.
+_FIXTURE_OK = settings(
+    max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture]
+)
 
 
 @given(
     score=st.floats(min_value=0.0, max_value=2.0),
 )
-@settings(max_examples=50)
+@_FIXTURE_OK
 def test_agent_scores_non_negative(selector, score):
     """Property: agent scores are always non-negative."""
     # Just verify our scoring floor works
@@ -287,7 +339,7 @@ def test_agent_scores_non_negative(selector, score):
 @given(
     budget=st.integers(min_value=100, max_value=50000)
 )
-@settings(max_examples=50)
+@_FIXTURE_OK
 def test_plan_respects_budget(selector, intent_feature_dev, budget):
     """Property: plan total tokens ≤ budget."""
     token_budget = TokenBudget(total=budget, used=0, model="claude-sonnet")

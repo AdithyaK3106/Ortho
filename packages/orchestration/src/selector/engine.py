@@ -71,7 +71,15 @@ class SelectorEngine:
             score = 0.0
 
             # Intent trigger match: +1.0
-            if intent.type in agent.intent_triggers:
+            # Triggers in .ases agent manifests (task-012) are natural-language phrases,
+            # so exact membership never fires. Match with the same substring semantics as
+            # AgentRegistry.get_agents_by_intent, and treat an agent named in the intent's
+            # workflow stages (spec.md §1) as triggered by definition.
+            intent_lower = intent.type.lower()
+            if (
+                any(intent_lower in trigger.lower() for trigger in agent.intent_triggers)
+                or agent.name in WORKFLOW_STAGES.get(intent.type, [])
+            ):
                 score += 1.0
 
             # Priority weight: +{0.3|0.15|0.0}
@@ -187,16 +195,22 @@ class SelectorEngine:
             remaining_budget = token_budget.remaining - total_tokens
             skill_scores = self.score_skills(agent, intent, remaining_budget)
 
-            selected_skills = [
-                name for name, score in skill_scores.items()
-                if score > 0.3
-            ]
-
-            # Sum skill tokens
-            skills_tokens = sum(
-                self.skills.get_skill(skill_name).estimated_tokens
-                for skill_name in selected_skills
-            )
+            # Greedy selection in deterministic order (score desc, name asc),
+            # accumulating tokens so the plan total never exceeds the budget.
+            # (Per-skill hard-exclude alone let multiple skills each fit the
+            # remaining budget individually while overshooting it together.)
+            selected_skills = []
+            skills_tokens = 0
+            for skill_name, score in sorted(
+                skill_scores.items(), key=lambda kv: (-kv[1], kv[0])
+            ):
+                if score <= 0.3:
+                    continue
+                cost = self.skills.get_skill(skill_name).estimated_tokens
+                if total_tokens + skills_tokens + cost > token_budget.remaining:
+                    continue
+                selected_skills.append(skill_name)
+                skills_tokens += cost
             total_tokens += skills_tokens
 
             step = ExecutionStep(

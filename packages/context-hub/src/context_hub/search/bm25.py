@@ -28,8 +28,15 @@ class BM25Search:
         if not query or not query.strip():
             return []
 
+        # Quote each term so FTS5 treats user input as plain text, not query
+        # syntax: unquoted `tool-calling` parses as a column filter and raises
+        # "no such column: calling"; quoting also neutralizes AND/OR/NEAR/*.
+        fts_query = " ".join(
+            '"{}"'.format(term.replace('"', '""')) for term in query.split()
+        )
+
         where_clauses = []
-        params = [query]
+        params = [fts_query]
 
         if type_filter:
             placeholders = ",".join(["?" for _ in type_filter])

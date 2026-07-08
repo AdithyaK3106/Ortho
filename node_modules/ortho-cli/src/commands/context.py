@@ -155,7 +155,14 @@ def _main() -> None:
         else:
             sys.exit(1)
 
-        print(json.dumps(result))
+        if args.action == "search" and getattr(args, "format", "json") == "text":
+            results = result.get("results", [])
+            if not results:
+                print("No results.")
+            for r in results:
+                print(f"{r['relevance_score']:.3f}  [{r['type']}]  {r['title']}  ({r['artifact_id']})")
+        else:
+            print(json.dumps(result))
         sys.exit(0)
     except Exception as e:
         print(json.dumps({"error": str(e)}), file=sys.stderr)

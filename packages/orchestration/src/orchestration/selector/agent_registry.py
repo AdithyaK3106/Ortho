@@ -125,6 +125,9 @@ class AgentRegistry:
         """
         return sorted(self._agents.values(), key=lambda a: a.name)
 
+    # SelectorEngine (task-013) calls all_agents(); keep both names as one method.
+    all_agents = list_agents
+
     def get_agent(self, name: str) -> Optional[Agent]:
         """Get agent by name from cache, or None if not found or skipped due to validation error."""
         return self._agents.get(name)

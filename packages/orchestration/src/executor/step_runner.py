@@ -140,7 +140,10 @@ def _assemble_system_prompt(agent: any, skills: list) -> str:
         prompt += "\n\n## Available Skills\n\n"
         for skill in skills:
             prompt += f"### {skill.display_name}\n"
-            prompt += f"{skill.content}\n\n"
+            # Real Skill manifests (task-012) carry the .md body as system_prompt;
+            # older test doubles used .content. Accept either.
+            body = getattr(skill, "content", None) or getattr(skill, "system_prompt", "")
+            prompt += f"{body}\n\n"
 
     return prompt
 

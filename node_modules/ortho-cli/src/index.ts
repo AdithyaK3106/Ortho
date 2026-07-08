@@ -11,6 +11,7 @@ import { statusCommand } from "./commands/status";
 import { approveCommand } from "./commands/approve";
 import { rejectCommand } from "./commands/reject";
 import { historyCommand } from "./commands/history";
+import { contextCommand } from "./commands/context";
 
 program.name("ortho").description("AI Engineering Platform CLI").version("0.1.0");
 
@@ -50,5 +51,6 @@ program.addCommand(statusCommand);
 program.addCommand(approveCommand);
 program.addCommand(rejectCommand);
 program.addCommand(historyCommand);
+program.addCommand(contextCommand);
 
 program.parse(process.argv);

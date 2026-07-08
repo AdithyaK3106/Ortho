@@ -124,6 +124,9 @@ class SkillRegistry:
         """
         return sorted(self._skills.values(), key=lambda s: s.name)
 
+    # SelectorEngine (task-013) calls all_skills(); keep both names as one method.
+    all_skills = list_skills
+
     def get_skill(self, name: str) -> Optional[Skill]:
         """Get skill by name from cache, or None if not found or skipped due to validation error."""
         return self._skills.get(name)

@@ -12,6 +12,9 @@ class ArchStyle(str, Enum):
     MVC = "mvc"
     MICROSERVICES = "microservices"
     FLAT = "flat"
+    # Returned when no style reaches the evidence threshold — the detector
+    # never guesses (see arch_detector._EVIDENCE_THRESHOLD).
+    UNKNOWN = "unknown"
 
 
 @dataclass

@@ -88,11 +88,14 @@ class TestFullPipeline:
         layers = layer_detector.extract_layers(import_graph, files)
         subsystems = subsystem_detector.detect_subsystems(call_graph, [], files)
 
-        # Verify detection
+        # Verify detection. UNKNOWN is a legitimate outcome: four files in a
+        # single `services/` directory is not sufficient evidence for any
+        # style, and the detector never guesses.
         assert detection_result.style in {
             ArchStyle.MICROSERVICES,
             ArchStyle.LAYERED,
             ArchStyle.FLAT,
+            ArchStyle.UNKNOWN,
         }
         assert 0.3 <= detection_result.confidence <= 1.0
 

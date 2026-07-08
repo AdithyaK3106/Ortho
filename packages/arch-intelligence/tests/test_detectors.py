@@ -69,16 +69,12 @@ class TestArchitectureDetector:
         assert 0.0 <= result.confidence <= 1.0
 
     def test_style_is_valid(self, detector):
-        """Test that detected style is one of the 5 patterns."""
+        """Test that detected style is a valid ArchStyle (UNKNOWN allowed:
+        the detector never guesses on empty/insufficient evidence)."""
         result = detector.detect([], [], [], [])
-        valid_styles = {
-            ArchStyle.LAYERED,
-            ArchStyle.HEXAGONAL,
-            ArchStyle.MVC,
-            ArchStyle.MICROSERVICES,
-            ArchStyle.FLAT,
-        }
-        assert result.style in valid_styles
+        assert result.style in set(ArchStyle)
+        # Empty input has no evidence for any style
+        assert result.style == ArchStyle.UNKNOWN
 
     def test_evidence_not_empty(self, detector):
         """Test that evidence list is populated."""
@@ -187,15 +183,10 @@ class TestEdgeCases:
     """Edge case tests."""
 
     def test_empty_graphs(self, detector):
-        """Test handling of empty graphs."""
+        """Test handling of empty graphs: no evidence → UNKNOWN, not a guess."""
         result = detector.detect([], [], [], [])
-        assert result.style in {
-            ArchStyle.LAYERED,
-            ArchStyle.HEXAGONAL,
-            ArchStyle.MVC,
-            ArchStyle.MICROSERVICES,
-            ArchStyle.FLAT,
-        }
+        assert result.style == ArchStyle.UNKNOWN
+        assert result.confidence == 0.0
 
     def test_single_file(self, detector):
         """Test handling of single-file repos."""

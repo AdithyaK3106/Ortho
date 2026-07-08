@@ -1,5 +1,4 @@
-import { spawn } from "child_process";
-import * as path from "path";
+import { runPython } from "./pybridge";
 
 interface ScanOptions {
   watch?: boolean;
@@ -20,25 +19,7 @@ interface ScanOptions {
  *   ortho scan --verbose          # Verbose output
  */
 export async function scanCommand(options: ScanOptions): Promise<void> {
-  const cwd = process.cwd();
-
-  // BUG-001 FIX: Use require.main.filename to find entry point instead of __dirname
-  // This ensures path resolution works regardless of where CLI is run from.
-  // When compiled, __dirname points to dist/ but require.main.filename points to the entry point (index.js)
-  const entryPoint = require.main?.filename || __filename;
-  const entryDir = path.dirname(entryPoint);
-
-  // Calculate repo root: entry point is in apps/cli/dist/index.js
-  // So we need to go up 4 levels: dist -> cli -> apps -> ortho-root
-  const repoRoot = path.resolve(entryDir, "../../..");
-
-  const pythonScript = path.resolve(
-    repoRoot,
-    "packages/repo-intelligence/src/repo_intelligence/scan_cli.py"
-  );
-
-  // Build Python command arguments
-  const pythonArgs = ["--repo-root", cwd];
+  const pythonArgs = ["--repo-root", process.cwd()];
 
   if (options.watch) {
     pythonArgs.push("--watch");
@@ -52,25 +33,8 @@ export async function scanCommand(options: ScanOptions): Promise<void> {
     pythonArgs.push("--verbose");
   }
 
-  // Run Python script
-  return new Promise((resolve, reject) => {
-    // No shell: spawn with an args array is injection-safe and works for
-    // python.exe on Windows without one.
-    const proc = spawn("python", [pythonScript, ...pythonArgs], {
-      cwd,
-      stdio: "inherit",
-    });
-
-    proc.on("error", (err) => {
-      reject(new Error(`Failed to spawn Python: ${err.message}`));
-    });
-
-    proc.on("exit", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Scan failed with exit code ${code}`));
-      }
-    });
-  });
+  return runPython(
+    "packages/repo-intelligence/src/repo_intelligence/scan_cli.py",
+    pythonArgs
+  );
 }

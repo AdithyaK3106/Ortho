@@ -1,7 +1,18 @@
-﻿"""Core architecture pattern detection."""
+"""Core architecture pattern detection.
 
+Evidence-driven scoring: each style is scored from independent, generic
+structural signals (directory vocabulary, import-graph shape, component
+independence, entry points, framework usage). Every fired signal produces a
+human-readable evidence line; competing scores are always reported; if no
+style reaches the evidence threshold the detector returns UNKNOWN instead of
+guessing. All signals are ecosystem-level conventions — nothing is keyed to a
+specific repository.
+"""
+
+from collections import Counter
 from dataclasses import dataclass
 from typing import Optional
+
 from .types import ArchStyle, ArchitectureDetectionResult
 
 
@@ -34,6 +45,198 @@ class File:
     rel_path: str
 
 
+# ---------------------------------------------------------------------------
+# Generic architecture vocabulary (software-engineering conventions, not
+# repository names). Matched against directory segments and file stems.
+# ---------------------------------------------------------------------------
+
+PRESENTATION_TOKENS = frozenset({
+    "api", "apis", "routes", "routers", "routing", "views", "controllers",
+    "handlers", "endpoints", "web", "rest", "graphql", "ui", "cli",
+    "presentation", "interfaces", "middleware",
+})
+BUSINESS_TOKENS = frozenset({
+    "services", "service", "domain", "core", "business", "logic",
+    "usecases", "use_cases", "application", "workflows", "managers",
+})
+DATA_TOKENS = frozenset({
+    "db", "database", "data", "models", "repositories", "repository",
+    "persistence", "storage", "dao", "orm", "schemas", "migrations",
+    "infrastructure", "entities",
+})
+LAYER_BANDS = (PRESENTATION_TOKENS, BUSINESS_TOKENS, DATA_TOKENS)
+
+HEX_PORT_TOKENS = frozenset({"ports", "port"})
+HEX_ADAPTER_TOKENS = frozenset({"adapters", "adapter"})
+HEX_CORE_TOKENS = frozenset({"domain", "core"})
+HEX_SUPPORT_TOKENS = frozenset({"infrastructure", "infra", "application"})
+
+MVC_MODEL_TOKENS = frozenset({"models", "model"})
+MVC_VIEW_TOKENS = frozenset({"views", "view", "templates"})
+MVC_CONTROLLER_TOKENS = frozenset({"controllers", "controller"})
+MVC_FRAMEWORKS = frozenset({"django", "flask", "pyramid", "web2py", "masonite"})
+
+WEB_FRAMEWORKS = frozenset({
+    "django", "flask", "fastapi", "tornado", "sanic", "bottle", "pyramid",
+    "starlette", "aiohttp", "falcon", "litestar", "quart",
+})
+MESSAGING_RPC_MODULES = frozenset({
+    "grpc", "grpcio", "kafka", "aiokafka", "confluent_kafka", "pika",
+    "celery", "nats", "zmq", "pyzmq", "kombu", "faststream",
+})
+ENTRY_POINT_STEMS = frozenset({
+    "main", "__main__", "app", "application", "wsgi", "asgi", "manage",
+    "server", "run", "cli",
+})
+# Top-level dirs that are containers for components in common monorepo
+# layouts (contain no code directly, only component subtrees).
+_EVIDENCE_THRESHOLD = 0.45
+_MAX_CONFIDENCE = 0.95
+
+
+class _Signals:
+    """Precomputed structural signals shared by all style scorers."""
+
+    def __init__(self, call_graph, import_graph, symbols, files):
+        self.files = files
+        self.n_files = len(files)
+        self.paths = {f.id: f.rel_path.replace("\\", "/") for f in files}
+
+        # Structure tokens: every directory segment and file stem, lowercased.
+        self.dir_tokens = Counter()
+        self.stem_tokens = Counter()
+        for p in self.paths.values():
+            parts = p.lower().split("/")
+            for seg in parts[:-1]:
+                self.dir_tokens[seg] += 1
+            stem = parts[-1].rsplit(".", 1)[0]
+            self.stem_tokens[stem] += 1
+        self.all_tokens = set(self.dir_tokens) | set(self.stem_tokens)
+
+        # Internal / external imports
+        self.internal_imports = [
+            e for e in import_graph
+            if e.imported_file_id and e.imported_file_id in self.paths
+            and e.importer_file_id in self.paths
+        ]
+        self.external_modules = Counter(
+            e.imported_module.split(".")[0].lower()
+            for e in import_graph
+            if e.is_external and e.imported_module
+        )
+
+        # Components: top-level directories; container dirs holding no code
+        # directly but >=2 code subtrees are expanded one level (generic
+        # monorepo layout, e.g. libs/<pkg>, packages/<pkg>).
+        self.component_of = {}
+        top_direct = Counter()   # files directly under a top dir
+        top_children = {}        # top dir -> {child dir}
+        for fid, p in self.paths.items():
+            parts = p.split("/")
+            top = parts[0] if len(parts) > 1 else "."
+            if len(parts) == 2:
+                top_direct[top] += 1
+            if len(parts) > 2:
+                top_children.setdefault(top, set()).add(parts[1])
+        expand = {
+            top for top, children in top_children.items()
+            if top_direct[top] == 0 and len(children) >= 2
+        }
+        for fid, p in self.paths.items():
+            parts = p.split("/")
+            if len(parts) == 1:
+                comp = "."
+            elif parts[0] in expand and len(parts) > 2:
+                comp = parts[0] + "/" + parts[1]
+            else:
+                comp = parts[0]
+            self.component_of[fid] = comp
+        self.component_files = Counter(self.component_of.values())
+
+        # Cross-component internal import ratio
+        self.cross_component_imports = 0
+        for e in self.internal_imports:
+            if self.component_of[e.importer_file_id] != self.component_of[e.imported_file_id]:
+                self.cross_component_imports += 1
+        self.cross_component_ratio = (
+            self.cross_component_imports / len(self.internal_imports)
+            if self.internal_imports else 0.0
+        )
+
+        # Entry points per component
+        self.entry_components = set()
+        for fid, p in self.paths.items():
+            stem = p.rsplit("/", 1)[-1].rsplit(".", 1)[0].lower()
+            if stem in ENTRY_POINT_STEMS:
+                self.entry_components.add(self.component_of[fid])
+
+        # Import DAG shape: longest chain and cyclic-edge ratio via Kahn
+        # peeling (deterministic; nodes stuck in cycles are excluded).
+        self.dag_depth, self.cycle_ratio = self._dag_shape()
+
+        # File depth distribution
+        self.shallow_ratio = (
+            sum(1 for p in self.paths.values() if p.count("/") <= 1) / self.n_files
+            if self.n_files else 0.0
+        )
+
+    def _dag_shape(self):
+        edges = {(e.importer_file_id, e.imported_file_id) for e in self.internal_imports}
+        if not edges:
+            return (1 if self.n_files else 0), 0.0
+        nodes = {n for edge in edges for n in edge}
+        out_deg = Counter(a for a, _ in edges)
+        preds = {}
+        for a, b in edges:
+            preds.setdefault(b, set()).add(a)
+
+        # Kahn peeling from sinks (files that import nothing internal)
+        depth = {}
+        ready = sorted(n for n in nodes if out_deg[n] == 0)
+        remaining_out = dict(out_deg)
+        order = []
+        while ready:
+            n = ready.pop(0)
+            order.append(n)
+            depth[n] = 1 + max(
+                (depth[m] for m in _succ(n, edges) if m in depth), default=0
+            )
+            new_ready = []
+            for p in sorted(preds.get(n, ())):
+                remaining_out[p] -= 1
+                if remaining_out[p] == 0:
+                    new_ready.append(p)
+            ready = sorted(set(ready) | set(new_ready))
+
+        cyclic_nodes = nodes - set(order)
+        cyclic_edges = sum(1 for a, b in edges if a in cyclic_nodes or b in cyclic_nodes)
+        max_depth = max(depth.values(), default=1)
+        return max_depth, cyclic_edges / len(edges)
+
+    def bands_present(self):
+        return [i for i, band in enumerate(LAYER_BANDS) if self.all_tokens & band]
+
+    def has(self, token_set):
+        return bool(self.all_tokens & token_set)
+
+    def matched(self, token_set):
+        return sorted(self.all_tokens & token_set)
+
+
+def _succ(node, edges):
+    return [b for a, b in edges if a == node]
+
+
+def _score(signals_list):
+    """signals_list: [(weight, fired, evidence_line)] -> (score, evidence)."""
+    total = sum(w for w, _, _ in signals_list)
+    if total == 0:
+        return 0.0, []
+    fired = sum(w for w, f, _ in signals_list if f)
+    evidence = [line for _, f, line in signals_list if f and line]
+    return fired / total, evidence
+
+
 class ArchitectureDetector:
     """Detects architectural style from call and import graphs."""
 
@@ -53,28 +256,78 @@ class ArchitectureDetector:
         files: list[File],
     ) -> ArchitectureDetectionResult:
         """Analyze graphs and return detected architectural style."""
+        if not files:
+            return ArchitectureDetectionResult(
+                style=ArchStyle.UNKNOWN,
+                confidence=0.0,
+                evidence=[
+                    "Detected style: unknown",
+                    "Confidence: 0.00",
+                    "No files to analyze.",
+                ],
+            )
+
+        sig = _Signals(call_graph, import_graph, symbols, files)
+
         scores = {}
+        evidence_by_style = {}
+        for style, scorer in (
+            (ArchStyle.LAYERED, self._score_layered),
+            (ArchStyle.HEXAGONAL, self._score_hexagonal),
+            (ArchStyle.MVC, self._score_mvc),
+            (ArchStyle.MICROSERVICES, self._score_microservices),
+            (ArchStyle.FLAT, self._score_flat),
+        ):
+            scores[style], evidence_by_style[style] = scorer(sig)
 
-        scores[ArchStyle.LAYERED] = self._score_layered(import_graph, files)
-        scores[ArchStyle.HEXAGONAL] = self._score_hexagonal(
-            call_graph, import_graph, files
+        # Deterministic winner: score desc, then tie-breaker order
+        winner = max(
+            scores,
+            key=lambda s: (scores[s], -self.TIE_BREAKER_ORDER.index(s)),
         )
-        scores[ArchStyle.MVC] = self._score_mvc(call_graph, import_graph, files)
-        scores[ArchStyle.MICROSERVICES] = self._score_microservices(
-            call_graph, symbols, files
-        )
-        scores[ArchStyle.FLAT] = self._score_flat(call_graph, import_graph, files)
+        winner_score = round(min(scores[winner], _MAX_CONFIDENCE), 4)
 
-        winner = max(scores, key=scores.get)
-        winner_score = scores[winner]
+        competing = ", ".join(
+            f"{s.value}={scores[s]:.2f}"
+            for s in sorted(scores, key=lambda s: (-scores[s], self.TIE_BREAKER_ORDER.index(s)))
+        )
+
+        if winner_score < _EVIDENCE_THRESHOLD:
+            # Never guess: insufficient evidence for any style.
+            return ArchitectureDetectionResult(
+                style=ArchStyle.UNKNOWN,
+                confidence=winner_score,
+                evidence=[
+                    "Detected style: unknown",
+                    f"Confidence: {winner_score:.2f}",
+                    f"No style reached the {_EVIDENCE_THRESHOLD:.2f} evidence "
+                    f"threshold; strongest candidate was {winner.value} "
+                    f"({winner_score:.2f}).",
+                    f"Competing scores: {competing}",
+                ],
+                alternative=winner,
+                alternative_confidence=winner_score,
+            )
 
         alternatives = [
-            s for s in scores if s != winner and scores[s] >= winner_score - 0.1
+            s for s in scores
+            if s != winner and scores[s] >= winner_score - 0.1
         ]
+        alternatives.sort(key=lambda s: (-scores[s], self.TIE_BREAKER_ORDER.index(s)))
         alternative = alternatives[0] if alternatives else None
-        alternative_score = scores[alternative] if alternative else None
+        alternative_score = round(scores[alternative], 4) if alternative else None
 
-        evidence = self._build_evidence(winner, winner_score, scores)
+        evidence = [
+            f"Detected style: {winner.value}",
+            f"Confidence: {winner_score:.2f}",
+        ]
+        evidence.extend(evidence_by_style[winner])
+        evidence.append(f"Competing scores: {competing}")
+        if alternative:
+            evidence.append(
+                f"Note: {alternative.value} also plausible "
+                f"(confidence: {alternative_score:.2f})"
+            )
 
         return ArchitectureDetectionResult(
             style=winner,
@@ -84,94 +337,145 @@ class ArchitectureDetector:
             alternative_confidence=alternative_score,
         )
 
-    def _score_layered(self, import_graph: list, files: list) -> float:
-        """Score layered architecture."""
-        if not import_graph:
-            return 0.0
+    # -- Style scorers ------------------------------------------------------
 
-        depth = len(set(e.importer_file_id for e in import_graph)) + 1
-        base = 0.6 if depth >= 3 else 0.3
+    def _score_layered(self, sig: _Signals):
+        bands = sig.bands_present()
+        band_names = ["presentation", "business", "data"]
+        matched = ", ".join(band_names[i] for i in bands)
 
-        has_cycles = any(
-            e.importer_file_id == e.imported_file_id for e in import_graph
+        # Directional flow among files whose top dirs fall in a band
+        band_of_file = {}
+        for fid, p in sig.paths.items():
+            segs = set(p.lower().split("/")[:-1])
+            for i, band in enumerate(LAYER_BANDS):
+                if segs & band:
+                    band_of_file[fid] = i
+                    break
+        banded_edges = [
+            (band_of_file[e.importer_file_id], band_of_file[e.imported_file_id])
+            for e in sig.internal_imports
+            if e.importer_file_id in band_of_file
+            and e.imported_file_id in band_of_file
+            and band_of_file[e.importer_file_id] != band_of_file[e.imported_file_id]
+        ]
+        flow_ok = sum(1 for a, b in banded_edges if a < b)
+        flow_ratio = flow_ok / len(banded_edges) if banded_edges else 0.0
+
+        return _score([
+            (0.35, len(bands) >= 2,
+             f"Layer vocabulary present in structure: {matched}"),
+            (0.15, len(bands) == 3,
+             "All three layer bands (presentation/business/data) present"),
+            (0.25, sig.dag_depth >= 3,
+             f"Import graph forms {sig.dag_depth}-level dependency chain"),
+            (0.15, sig.cycle_ratio < 0.1 and bool(sig.internal_imports),
+             f"Low import-cycle ratio ({sig.cycle_ratio:.1%})"),
+            (0.10, bool(banded_edges) and flow_ratio >= 0.7,
+             f"{flow_ratio:.0%} of cross-layer imports flow downward "
+             "(presentation → business → data)"),
+        ])
+
+    def _score_hexagonal(self, sig: _Signals):
+        ports = sig.has(HEX_PORT_TOKENS)
+        adapters = sig.has(HEX_ADAPTER_TOKENS)
+        core = sig.has(HEX_CORE_TOKENS)
+
+        # Dependency inversion: adapter files import core files, not vice versa
+        def _in(fid, tokens):
+            return bool(set(sig.paths[fid].lower().split("/")[:-1]) & tokens)
+
+        adapter_to_core = sum(
+            1 for e in sig.internal_imports
+            if _in(e.importer_file_id, HEX_ADAPTER_TOKENS)
+            and _in(e.imported_file_id, HEX_CORE_TOKENS)
+        )
+        core_to_adapter = sum(
+            1 for e in sig.internal_imports
+            if _in(e.importer_file_id, HEX_CORE_TOKENS)
+            and _in(e.imported_file_id, HEX_ADAPTER_TOKENS)
+        )
+        inversion = adapter_to_core > 0 and core_to_adapter == 0
+
+        return _score([
+            (0.40, ports and adapters,
+             "Both 'ports' and 'adapters' present in structure"),
+            (0.20, core and adapters,
+             f"Isolated core/domain alongside adapters: "
+             f"{', '.join(sig.matched(HEX_CORE_TOKENS | HEX_ADAPTER_TOKENS))}"),
+            (0.25, inversion,
+             f"Dependency inversion observed: {adapter_to_core} adapter→core "
+             "imports, 0 core→adapter imports"),
+            (0.15, sig.has(HEX_SUPPORT_TOKENS) and (ports or adapters),
+             "Supporting hexagonal vocabulary (infrastructure/application)"),
+        ])
+
+    def _score_mvc(self, sig: _Signals):
+        m = sig.has(MVC_MODEL_TOKENS)
+        v = sig.has(MVC_VIEW_TOKENS)
+        c = sig.has(MVC_CONTROLLER_TOKENS)
+        triad = m and v and c
+        frameworks = sorted(set(sig.external_modules) & MVC_FRAMEWORKS)
+
+        def _in(fid, tokens):
+            parts = sig.paths[fid].lower().split("/")
+            return bool((set(parts[:-1]) | {parts[-1].rsplit(".", 1)[0]}) & tokens)
+
+        cv_to_model = sum(
+            1 for e in sig.internal_imports
+            if _in(e.importer_file_id, MVC_VIEW_TOKENS | MVC_CONTROLLER_TOKENS)
+            and _in(e.imported_file_id, MVC_MODEL_TOKENS)
         )
 
-        if has_cycles:
-            return base - 0.25
-        if depth >= 3:
-            return min(base + 0.25, 0.95)
-        return base
+        return _score([
+            (0.35, triad, "Complete model/view/controller triad in structure"),
+            (0.15, sum([m, v, c]) >= 2 and not triad,
+             "Partial MVC vocabulary (2 of 3 roles present)"),
+            (0.20, bool(frameworks) and (m or v),
+             f"MVC-style framework in use: {', '.join(frameworks)}"),
+            (0.15, cv_to_model > 0,
+             f"{cv_to_model} view/controller → model import(s)"),
+            (0.15, triad and sig.cycle_ratio < 0.1,
+             "MVC roles are acyclically related"),
+        ])
 
-    def _score_hexagonal(
-        self, call_graph: list, import_graph: list, files: list
-    ) -> float:
-        """Score hexagonal architecture."""
-        if not files:
-            return 0.0
+    def _score_microservices(self, sig: _Signals):
+        # Components with meaningful size
+        sized = {c for c, n in sig.component_files.items() if n >= 3 and c != "."}
+        with_entry = sized & sig.entry_components
+        messaging = sorted(set(sig.external_modules) & MESSAGING_RPC_MODULES)
+        independent = sig.cross_component_ratio < 0.05 and len(sized) >= 3
 
-        isolation_count = sum(
-            1 for f in files if sum(1 for e in import_graph if e.importer_file_id == f.id) <= 2
-        )
-        isolation_ratio = isolation_count / len(files) if files else 0
+        return _score([
+            (0.20, len(sized) >= 3,
+             f"{len(sized)} sizeable independent components"),
+            (0.25, len(with_entry) >= 3,
+             f"{len(with_entry)} components have their own entry points "
+             f"({', '.join(sorted(with_entry)[:5])})"),
+            (0.25, independent,
+             f"Components are import-independent "
+             f"({sig.cross_component_ratio:.1%} cross-component imports)"),
+            (0.15, bool(messaging),
+             f"Inter-service communication dependencies: {', '.join(messaging)}"),
+            (0.15, len(sig.entry_components & sized) >= 3 and bool(messaging),
+             "Multiple entry points combined with messaging infrastructure"),
+        ])
 
-        return min(0.65 + isolation_ratio * 0.15, 0.9)
-
-    def _score_mvc(self, call_graph: list, import_graph: list, files: list) -> float:
-        """Score MVC architecture."""
-        if not files:
-            return 0.0
-
-        semantic_matches = sum(
-            1
-            for f in files
-            if any(
-                keyword in f.rel_path.lower()
-                for keyword in ["controller", "view", "model", "service"]
+    def _score_flat(self, sig: _Signals):
+        no_layer_vocab = not sig.bands_present()
+        score, evidence = _score([
+            (0.40, sig.shallow_ratio >= 0.7,
+             f"{sig.shallow_ratio:.0%} of files at directory depth ≤ 1"),
+            (0.20, no_layer_vocab, "No layering vocabulary in structure"),
+            (0.15, sig.n_files < 30, f"Small codebase ({sig.n_files} files)"),
+            (0.25, sig.dag_depth <= 2,
+             f"Shallow import chains (max depth {sig.dag_depth})"),
+        ])
+        # Architectural vocabulary is direct counter-evidence for "flat":
+        # a structured repo isn't flat however shallow its file tree is.
+        if not no_layer_vocab:
+            score *= 0.5
+            evidence.append(
+                "Penalty: layering vocabulary present (counter-evidence for flat)"
             )
-        )
-        semantic_ratio = semantic_matches / len(files) if files else 0
-
-        return min(0.7 + semantic_ratio * 0.15, 0.95)
-
-    def _score_microservices(
-        self, call_graph: list, symbols: list, files: list
-    ) -> float:
-        """Score microservices architecture."""
-        if not files:
-            return 0.0
-
-        components = min(len(set(e.caller_id for e in call_graph)) // 3, 5)
-        base = 0.6 if components >= 3 else 0.3
-
-        if components < 3:
-            return base - 0.2
-        return min(base + 0.1 * components, 0.9)
-
-    def _score_flat(self, call_graph: list, import_graph: list, files: list) -> float:
-        """Score flat architecture."""
-        if not import_graph or not files:
-            return 0.55
-
-        import_density = len(import_graph) / max(len(files) ** 2, 1)
-
-        if import_density > 0.3:
-            return min(0.55 + 0.2, 0.8)
-        return 0.3
-
-    def _build_evidence(
-        self, winner: ArchStyle, score: float, scores: dict
-    ) -> list[str]:
-        """Build evidence list justifying the detection."""
-        evidence = [f"Detected style: {winner.value}"]
-        evidence.append(f"Confidence: {score:.2f}")
-
-        sorted_scores = sorted(scores.items(), key=lambda x: -x[1])
-        if len(sorted_scores) > 1:
-            second = sorted_scores[1]
-            margin = score - second[1]
-            if margin < 0.1:
-                evidence.append(
-                    f"Note: {second[0].value} also plausible (confidence: {second[1]:.2f})"
-                )
-
-        return evidence
+        return score, evidence

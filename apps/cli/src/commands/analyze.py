@@ -85,7 +85,9 @@ class AnalyzeCommand:
         layers = layer_detector.extract_layers(import_graph, files)
 
         subsystem_detector = SubsystemDetector()
-        subsystems = subsystem_detector.detect_subsystems(call_graph, symbols, files)
+        subsystems = subsystem_detector.detect_subsystems(
+            call_graph, symbols, files, import_graph=import_graph
+        )
 
         # Build model
         model = ArchitectureModel(
@@ -153,6 +155,14 @@ class AnalyzeCommand:
             file_id = file_row["id"]
             repo_id = file_row["repo_id"]
 
+            # id → rel_path map so the report shows paths, not opaque hash IDs
+            path_by_id = {
+                row["id"]: row["rel_path"]
+                for row in conn.execute(
+                    "SELECT id, rel_path FROM files WHERE repo_id = ?", (repo_id,)
+                ).fetchall()
+            }
+
             symbol_rows = conn.execute(
                 "SELECT id, name, file_id, start_line, end_line FROM symbols WHERE repo_id = ?",
                 (repo_id,),
@@ -206,14 +216,27 @@ class AnalyzeCommand:
         analyzer = ImpactAnalyzer()
         report = analyzer.analyze(call_graph, import_graph, file_id, symbols=symbols, depth=depth)
 
+        def to_paths(ids):
+            return sorted(path_by_id.get(i, i) for i in ids)
+
+        # Evidence lines embed raw file IDs; substitute known IDs with paths.
+        evidence = []
+        for line in report.evidence:
+            for fid, rel in path_by_id.items():
+                if fid in line:
+                    line = line.replace(fid, rel)
+            evidence.append(line)
+
         return {
             "changed_file_id": file_path,
-            "direct_dependents": report.direct_dependents,
-            "transitive_dependents": report.transitive_dependents,
+            "direct_dependents": to_paths(report.direct_dependents),
+            "transitive_dependents": to_paths(report.transitive_dependents),
             "risk_score": report.risk_score,
             "analysis_confidence": report.analysis_confidence,
-            "blast_radius": report.blast_radius,
-            "evidence": report.evidence,
+            # blast_radius from the analyzer counts transitive dependents only;
+            # report total affected files (direct + transitive) for the CLI.
+            "blast_radius": len(set(report.direct_dependents) | set(report.transitive_dependents)),
+            "evidence": evidence,
         }
 
     def run_adr_check(self) -> dict:
