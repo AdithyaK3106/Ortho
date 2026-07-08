@@ -5,7 +5,7 @@
 **Methodology:** ASES v1.2 with FRD Part 17 optimizations (PLANNER+ARCHITECT fast path, compact templates, tiered verification)  
 **Stack:** Python (packages) + TypeScript (CLI)  
 **FRD:** `ortho-v3-frd.md` (sections 1â€“18, Part 17 optimizations active for Week 3â€“8)  
-**Last Updated:** 2026-06-30 by OPTIMIZATION-PASS
+**Last Updated:** 2026-07-08 by QUALITY-PASS
 
 ---
 
@@ -64,7 +64,23 @@ Building Ortho from scratch using ASES workflows (v1.2 optimized). Task-001 (Wee
 
 ## Active Tasks
 
-### task-013: Selector Engine + Execution (Week 17–18) — ✅ GATE 1 APPROVED
+### Quality Pass: Architecture & Intent Routing — ✅ COMPLETE
+
+**Completed:** 2026-07-08 (Commit c3e1fe7)
+**Scope:** Evidence-driven architecture detection, package-level subsystem clustering, semantic intent routing integration
+
+**Objectives Complete:**
+1. **Architecture Detection:** Replaced placeholder scorers with evidence-driven multi-signal approach (layer vocabulary, DAG depth, component structure, framework imports). Returns UNKNOWN when confidence < 0.45 instead of guessing. FastAPI: microservices 0.90 → **layered 0.75**. LangChain: microservices 0.90 → **layered 0.50** (microservices 0.45 competing). All five style scores always reported.
+2. **Subsystem Detection:** Changed from file-level Louvain on sparse call graph to package-level clustering on multi-signal graph (imports 1.0, calls 0.5, hierarchy 0.25). FastAPI: 978 → **21 subsystems** (avg 53.4 files, zero singletons). LangChain: 1733 → **38** (avg 66.6 files, cohesion 0.88). Deterministic across runs.
+3. **Intent Routing:** Integrated task-012 semantic IntentRouter into `ortho run`. Fixed three semantic-router 0.1.2 API mismatches, installed torch/transformers, fixed aggregation="mean" diluting scores by switching to "max". Utterance corpus added. 12 router tests (previously skipped) now execute and pass. Threshold 0.7 and LLM fallback unchanged.
+
+**Test Results:** 455 passing, 0 failing (repo-intelligence 142, context-hub 54, arch-intelligence 76, impact-analysis 42, orchestration 105, apps/cli 30+6 jest). Both FastAPI and LangChain complete full pipeline. Schema and APIs preserved (subsystem change additive).
+
+**Report:** `INTELLIGENCE-IMPROVEMENT-REPORT.md`
+
+---
+
+### task-013: Selector Engine + Execution (Week 17–18) — ✅ COMMITTED
 
 **State:** PLANNED → ARCH-REVIEW (GATE 1 approved 2026-07-07)  
 **Workflow:** `.ases/workflows/feature.md`  
@@ -120,6 +136,10 @@ Implements Selector Engine (Stage 4, FRD §11.4) + Workflow Executor (runtime):
 - ✅ GATE 6: REVIEWER (independent code review complete, 5 fixes applied, pilot+regression re-verified) — APPROVED
 
 **All 6 Gates Complete:** task-013 is COMMITTED (Commit 0eca791)
+
+**Next Steps:**
+1. **Token Optimizer (Phase 4, task-014)** — Trim prompt context for inference at scale. Token budgets per workflow stage, compression strategies, latency targets. Opens Phase 4 (Intent → Planning).
+2. **Public Repository Benchmarks** — Run quality-pass-improved Ortho on 50–100 Python repos. Compare before/after: architecture style accuracy, subsystem detection vs manual audit, coverage of workflow-triggering intents. Inform next phase iteration.
 
 **Parallel Execution (GATE 3 + GATE 4):**
 - BUILDER session: Implementing 5 atomic tasks (granular commits)
