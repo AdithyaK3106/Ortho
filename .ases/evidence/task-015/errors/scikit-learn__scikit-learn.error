@@ -1,0 +1,5 @@
+repo_url: https://github.com/scikit-learn/scikit-learn
+category: AI/ML
+failure_type: Unknown
+timestamp: 2026-07-08T16:35:18.080813
+error_message: [WinError 2] The system cannot find the file specified

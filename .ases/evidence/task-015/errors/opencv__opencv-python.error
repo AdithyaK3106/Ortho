@@ -1,0 +1,5 @@
+repo_url: https://github.com/opencv/opencv-python
+category: AI/ML
+failure_type: Unknown
+timestamp: 2026-07-08T16:35:19.614428
+error_message: [WinError 2] The system cannot find the file specified

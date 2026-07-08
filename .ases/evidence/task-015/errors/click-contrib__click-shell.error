@@ -1,0 +1,5 @@
+repo_url: https://github.com/click-contrib/click-shell
+category: CLI Tools
+failure_type: Unknown
+timestamp: 2026-07-08T16:35:26.749312
+error_message: [WinError 2] The system cannot find the file specified

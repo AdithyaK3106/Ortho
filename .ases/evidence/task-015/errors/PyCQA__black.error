@@ -1,0 +1,5 @@
+repo_url: https://github.com/PyCQA/black
+category: CLI Tools
+failure_type: Unknown
+timestamp: 2026-07-08T16:35:28.273416
+error_message: [WinError 2] The system cannot find the file specified

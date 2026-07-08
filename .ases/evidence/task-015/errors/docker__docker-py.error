@@ -1,0 +1,5 @@
+repo_url: https://github.com/docker/docker-py
+category: Infrastructure
+failure_type: Unknown
+timestamp: 2026-07-08T16:35:29.284056
+error_message: [WinError 2] The system cannot find the file specified
