@@ -50,11 +50,20 @@ def run_step(
     start_time = datetime.utcnow()
 
     try:
-        # Assemble system prompt: agent.md + skills
-        system_prompt = _assemble_system_prompt(agent, skills)
-
-        # Assemble user message from step context (stubbed; token optimizer does this)
-        user_message = _assemble_user_message(step, context_package)
+        # Assemble prompts (task-014: token optimizer)
+        if context_package:
+            # Use real assembler for proper context assembly
+            from packages.token_optimizer import assemble_prompt
+            system_prompt, user_message = assemble_prompt(
+                context_package=context_package,
+                step=step,
+                agent=agent,
+                skills=skills,
+            )
+        else:
+            # Fallback: assemble without context (for tests or when artifact_store unavailable)
+            system_prompt = _assemble_system_prompt(agent, skills)
+            user_message = _assemble_user_message(step, context_package)
 
         # Call LLM (with timeout)
         response = llm_client.complete(

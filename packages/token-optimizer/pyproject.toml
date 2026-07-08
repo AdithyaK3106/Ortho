@@ -3,9 +3,12 @@ name = "ortho-token-optimizer"
 version = "0.1.0"
 description = "Context ranking and token optimization"
 authors = ["urbra <urbrain369@gmail.com>"]
+packages = [{ include = "token_optimizer", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+ortho-orchestration = { path = "../orchestration" }
+ortho-context-hub = { path = "../context-hub" }
 
 [build-system]
 requires = ["poetry-core"]

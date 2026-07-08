@@ -61,6 +61,7 @@ class WorkflowExecutor:
         # Lazy imports to avoid circular dependencies
         from .evidence_collector import Evidence, EvidenceType
         from .step_runner import run_step
+        from packages.token_optimizer import assemble_context, TokenBudget
 
         # Create workflow run
         run_id = str(uuid.uuid4())
@@ -111,11 +112,23 @@ class WorkflowExecutor:
 
                 # Execute step
                 try:
+                    # Assemble context for step (task-014: token optimizer)
+                    budget = TokenBudget(total=8192, used=0, model="claude")
+                    context_package = assemble_context(
+                        query=step.step_id,  # Use step_id as search query
+                        repo_id=repo_id,
+                        artifact_store=self.state_store.artifact_store if hasattr(self.state_store, 'artifact_store') else None,
+                        budget=budget,
+                        step_id=step.step_id,
+                        workflow_run_id=run_id,
+                        model="claude",
+                    ) if hasattr(self.state_store, 'artifact_store') else None
+
                     step_result = run_step(
                         step=step,
                         agent=self.agent_registry.get_agent(step.agent_name),
                         skills=[self.skill_registry.get_skill(name) for name in step.skill_names],
-                        context_package=None,  # Stubbed; token optimizer (task-014) provides this
+                        context_package=context_package,
                         llm_client=self.llm_client,
                     )
 

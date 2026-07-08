@@ -74,7 +74,7 @@ async def run_workflow(request: RunRequest, background_tasks: BackgroundTasks):
 
         if request.dryRun:
             # Dry-run: just build plan, don't execute
-            from packages.shared.types import TokenBudget
+            from packages.token_optimizer.budget import TokenBudget
 
             budget = TokenBudget(
                 total=16000,
@@ -106,7 +106,7 @@ async def run_workflow(request: RunRequest, background_tasks: BackgroundTasks):
             }
 
         # Step 2: Build execution plan
-        from packages.shared.types import TokenBudget
+        from packages.token_optimizer.budget import TokenBudget
 
         budget = TokenBudget(
             total=16000,
