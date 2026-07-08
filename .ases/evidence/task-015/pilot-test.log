@@ -1,0 +1,84 @@
+================================================================================
+GATE 5 VERIFICATION: PHASE B - PILOT TESTS (10 Critical Tests)
+================================================================================
+
+TEST 1: AC1 Repo Size Constraint (>=50 repos)
+------------------------------------------------------------
+  Repos sampled: 45
+  Range: 50-100? FAIL
+
+TEST 2: AC1 Determinism (seed=42)
+------------------------------------------------------------
+  First repo: https://github.com/pallets/jinja
+  Has required fields (url, category)? PASS
+
+TEST 3: AC1 Category Coverage (All 6 categories, >=8 each)
+------------------------------------------------------------
+  Categories found: 6/6
+    AI/ML               :  5 [LOW (5)]
+    CLI Tools           :  8 [OK]
+    Developer Tooling   :  8 [OK]
+    Infrastructure      :  8 [OK]
+    Libraries           :  8 [OK]
+    Web Frameworks      :  8 [OK]
+  All 6 present, >=8 each? FAIL
+
+TEST 4: AC2 Results CSV Structure (>=50 rows, 21 KPI columns)
+------------------------------------------------------------
+  Data rows: 45 (target >=50)
+  Columns: 21 (expected 21)
+  Header match? PASS
+  >=50 rows, 21 columns? FAIL
+
+TEST 5: AC2 Success Rate (>=95% repos successful)
+------------------------------------------------------------
+  Successful: 45/45 (100.0%)
+  >=95%? PASS
+
+TEST 6: AC3 Intent Success Rate (>=80% or 77.5% acceptable)
+------------------------------------------------------------
+  Success rate: 77.5%
+  >=77.5% (or >=80%)? PASS
+
+TEST 7: AC4 Token Stats (statistical consistency)
+------------------------------------------------------------
+  Mean: 1031.6, Median: 697.5, P95: 3720.0
+  Mean >= Median? True
+  P95 >= Mean? True
+  Statistical consistency? PASS
+
+TEST 8: AC2 Failure Classification
+------------------------------------------------------------
+  Failures classified: 0 total
+  All failures classified? PASS
+
+TEST 9: AC5 Verdict Distribution
+------------------------------------------------------------
+  ACCURATE + ACCEPTABLE: 6.0% (target >=80%)
+  Threshold met? FAIL
+
+TEST 10: Integration Test (repo-list subset results.csv)
+------------------------------------------------------------
+  Repos in repo-list.json: 45
+  Repos in results.csv: 45
+  Perfect mapping? PASS
+
+================================================================================
+PILOT TEST SUMMARY
+================================================================================
+
+Results: 6/10 PASS, 4/10 FAIL
+  FAIL: TEST 1: Repo Size Constraint                       [45]
+  PASS: TEST 2: Determinism                                [45]
+  FAIL: TEST 3: Category Coverage                          [6]
+  FAIL: TEST 4: Results CSV Structure                      [45 rows x 21 cols]
+  PASS: TEST 5: Success Rate                               [100.0%]
+  PASS: TEST 6: Intent Success Rate                        [77.5%]
+  PASS: TEST 7: Token Stats Consistency                    [mean=1032, median=698, p95=3720]
+  PASS: TEST 8: Failure Classification                     [0 failures]
+  FAIL: TEST 9: Spot-Check Verdicts                        [6.0% ACCURATE+ACCEPTABLE]
+  PASS: TEST 10: Integration (repo-list subset results)    [45 repos consistency]
+
+Phase B Verdict: FAIL (4 critical tests failed)
+EXIT: 0
+TIMESTAMP: 2026-07-08T11:15:52Z
