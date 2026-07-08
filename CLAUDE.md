@@ -218,7 +218,7 @@ Implements Selector Engine (Stage 4, FRD §11.4) + Workflow Executor (runtime):
 
 ### task-014: Token Optimizer (Phase 4, Pillar 5) — ✅ GATE 1 APPROVED → GATE 2 READY
 
-**State:** PLANNED → ARCH-REVIEW (GATE 1 approved 2026-07-08, GATE 2 in progress)  
+**State:** ARCH-REVIEW → READY-TO-BUILD (GATE 1 approved 2026-07-08, GATE 2 approved 2026-07-08)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Phase:** Phase 3 (Execution) → blocks Phase 4 (Intent→Planning+Reasoning)  
 **Timeline:** Weeks 19–20 (task-013 completion → task-014 start)
@@ -230,7 +230,7 @@ Implements Selector Engine (Stage 4, FRD §11.4) + Workflow Executor (runtime):
 **What This Task Does:**
 - Defines real `TokenBudget` dataclass (total, used, model, remaining property, can_fit/consume methods)
 - Defines Python `ContextChunk`/`ContextPackage` dataclasses (mirroring existing TS interfaces at `shared/types/src/context.ts`)
-- Implements `assemble_context()`: pulls from context-hub's `Artifact` search, converts to `ContextChunk`, sorts by relevance, greedily packs until budget full (hard ceiling + priority ranking — FRD's listed feature)
+- Implements `assemble_context()`: pulls from context-hub's `Artifact` search, converts to `ContextChunk`, sorts deterministically by relevance/token_count/artifact.id, greedily packs until budget full (hard ceiling + priority ranking — FRD's listed feature)
 - Implements `assemble_prompt()`: replaces `step_runner._assemble_user_message` stub with real context assembly
 - Integrates into `WorkflowExecutor.execute()`: line 118's `context_package=None` stub → real call to `assemble_context(...)`
 - Fixes broken import in `apps/api_server/src/routers/orchestration.py` (currently `from packages.shared.types import TokenBudget` → `packages.token_optimizer.budget`)
@@ -240,22 +240,32 @@ Implements Selector Engine (Stage 4, FRD §11.4) + Workflow Executor (runtime):
 - FRD §10 says `TokenBudget` interface must exist since Phase 1; it doesn't exist anywhere in Python (only broken TS imports and test mocks)
 - This is the minimal vertical slice to unblock Phase 4; other 8 FRD features (reranker, dedup, etc.) require infrastructure not yet ready (embeddings, multi-model adapters)
 
-**GATE 1 Status (PLANNER — approved 2026-07-08):**
+**GATE 1 Status (PLANNER — ✅ APPROVED 2026-07-08):**
 - ✅ plan.md (vertical slice scoping, 5 atomic tasks, risks + mitigations)
-- ✅ spec.md (8 detailed ACs, expected test metrics 35+, known limitations documented)
+- ✅ spec.md (8 detailed ACs, expected test metrics 35+, determinism/ownership/contract refinements)
 - ✅ rollback-plan.md (local/published, trigger conditions explicit)
-- ✅ No ambiguities; ARCHITECT can proceed to GATE 2 (architecture-review.md + possible ADR)
+
+**GATE 2 Status (ARCHITECT — ✅ APPROVED 2026-07-08):**
+- ✅ architecture-review.md (APPROVED verdict, all 6 checks PASS)
+  - Module boundaries: clean, acyclic (token-optimizer → orchestration → context-hub → shared)
+  - API contracts: TokenBudget, ContextChunk/ContextPackage match FRD §10 exactly
+  - Determinism: tie-breaking (relevance desc → token_count asc → artifact.id asc) sound
+  - Integration: unblocks workflow_executor.py:118 and step_runner.py:151-160 stubs
+  - No circular dependencies detected
+  - Extensibility: task-015 features (reranker, dedup, compression) can plug in without breaking
+  - FRD compliance: 100% match to spec AC1-AC8
+- ✅ ADR-015-token-optimizer-budget-architecture.md (decision rationale, status Proposed)
+- ✅ No blockers; BUILDER can proceed to GATE 3
 
 **Expected Test Metrics:** 35+ (unit 20+, integration 8+, edge 6+, property 1+, real-repo 1+), ≥85% coverage, 100% pass rate
 
-**Next Steps (after GATE 1 approval):**
-1. **ARCHITECT session (GATE 2):** Validate package boundaries (orchestration → token-optimizer → context-hub, no cycle back), produce architecture-review.md + possible ADR (new module dependencies)
-2. **BUILDER session (GATE 3):** Implement 5 atomic tasks (granular commits per task)
-3. **TEST-DESIGNER session (GATE 4):** Write 35+ tests concurrently (shadow BUILDER)
-4. **VERIFIER (GATE 5):** Real pytest runs, evidence logs
-5. **REVIEWER (GATE 6):** Code quality + security audit
+**Next Steps (after GATE 2 approval):**
+1. **BUILDER session (GATE 3):** Implement 5 atomic tasks (granular commits per task, read rollback-plan.md first)
+2. **TEST-DESIGNER session (GATE 4):** Write 35+ tests concurrently (shadow BUILDER, fresh context)
+3. **VERIFIER (GATE 5):** Real pytest runs, evidence logs
+4. **REVIEWER (GATE 6):** Code quality + security audit
 
-**Artifacts Location:** `.ases/tasks/task-014-token-optimizer/` (plan.md, spec.md, rollback-plan.md ready for review)
+**Artifacts Location:** `.ases/tasks/task-014-token-optimizer/` (plan.md, spec.md, rollback-plan.md, architecture-review.md ready)
 
 ---
 
