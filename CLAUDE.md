@@ -216,9 +216,9 @@ Implements Selector Engine (Stage 4, FRD §11.4) + Workflow Executor (runtime):
 
 ---
 
-### task-014: Token Optimizer (Phase 4, Pillar 5) — ✅ GATE 1 APPROVED → GATE 2 READY
+### task-014: Token Optimizer (Phase 4, Pillar 5) — ✅ COMMITTED (All 6 Gates Approved)
 
-**State:** ARCH-REVIEW → READY-TO-BUILD (GATE 1 approved 2026-07-08, GATE 2 approved 2026-07-08)  
+**State:** COMMITTED (GATE 1-6 all approved 2026-07-08)  
 **Workflow:** `.ases/workflows/feature.md`  
 **Phase:** Phase 3 (Execution) → blocks Phase 4 (Intent→Planning+Reasoning)  
 **Timeline:** Weeks 19–20 (task-013 completion → task-014 start)

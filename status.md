@@ -1,12 +1,12 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 2.0 — Phase 3 Tasks 1–2 Complete  
+**Version:** 2.1 — Phase 3 Tasks 1–3 Complete  
 **Started:** 2026-06-30  
 **Current Phase:** Phase 3 — Execution (Weeks 15–22)  
 **Previous Phase:** Phase 2 — Reasoning (Weeks 9–14, COMPLETE)  
-**Goal:** Phase 3 Tasks 1–2 (Intent Routing, Selector Engine) COMPLETE. Phase 3 Task 3 (Token Optimizer, Weeks 19–20) queued for planning.
+**Goal:** Phase 3 Tasks 1–3 (Intent Routing, Selector Engine, Token Optimizer) ✅ COMPLETE. Phase 3 Task 4 (next: TBD, Weeks 21–22).
 
-**Status:** Phase 3 Weeks 15–18 (task-012 + task-013) COMPLETE ✅
+**Status:** Phase 3 Weeks 15–20 (task-012 + task-013 + task-014) ✅ COMPLETE
 - **task-012 (Intent Routing + Registries):** ✅ COMMITTED (all 6 ASES gates approved, Weeks 15–16)
   - AgentRegistry (8 core agents), SkillRegistry (10 core skills)
   - IntentRouter (semantic-router + HuggingFaceEncoder)
@@ -20,6 +20,14 @@
   - 5 code review fixes applied (auto-approval removed, Evidence deserialization, API responses)
 - Phase 2 exit criteria met (architectural style detection, `--impact` blast radius, circular dependency detection)
 - 2 real bugs found and fixed in task-010 via test execution (similarity symmetry, cluster ordering)
+- **task-014 (Token Optimizer):** ✅ COMMITTED (all 6 ASES gates approved, Weeks 19–20)
+  - TokenBudget + BudgetExceededError (FRD §10 mandate, never implemented in Python)
+  - ContextChunk + ContextPackage (mirror TS interfaces, deterministic)
+  - Context Assembler (greedy packing, deterministic tie-breaking: relevance desc → token_count asc → id asc)
+  - Prompt Assembler (chunk ordering by id, fixed format: `\n\n--- [{source_type}:{source_id}] ---\n{content}\n`)
+  - Integration: unblocks workflow_executor stubs, fixes broken API imports
+  - 77 tests PASS (99% coverage), all 7 code review checks pass, zero regressions
+  - Determinism verified via property-based tests, greedy algorithm correct, budget mutability tested
 
 ---
 
