@@ -1,0 +1,338 @@
+=== packages/repo-intelligence ===
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 202 items
+
+packages\repo-intelligence\tests\test_adapters.py ....x..                [  3%]
+packages\repo-intelligence\tests\test_basic_integration.py ............. [  9%]
+                                                                         [  9%]
+packages\repo-intelligence\tests\test_call_graph.py XXXXXXXXXXXXXXXXXX   [ 18%]
+packages\repo-intelligence\tests\test_file_discoverer_phase_b.py ....... [ 22%]
+......                                                                   [ 25%]
+packages\repo-intelligence\tests\test_file_watcher_phase_c.py s.......x. [ 30%]
+...                                                                      [ 31%]
+packages\repo-intelligence\tests\test_import_graph.py XXXXXXXxxXXXXXXXXX [ 40%]
+                                                                         [ 40%]
+packages\repo-intelligence\tests\test_incremental_indexer_phase_a.py ... [ 42%]
+...........                                                              [ 47%]
+packages\repo-intelligence\tests\test_index_store.py ................... [ 56%]
+..........................x............                                  [ 76%]
+packages\repo-intelligence\tests\test_indexer_phase_b.py ............... [ 83%]
+.                                                                        [ 84%]
+packages\repo-intelligence\tests\test_module_detector.py xXXXXxXXXXXxxXx [ 91%]
+XX                                                                       [ 92%]
+packages\repo-intelligence\tests\test_symbol_extractor.py ....x.x....... [ 99%]
+x                                                                        [100%]
+
+=========== 142 passed, 1 skipped, 13 xfailed, 46 xpassed in 15.02s ===========
+=== packages/context-hub ===
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 54 items
+
+packages\context-hub\tests\test_ingestion.py ..........                  [ 18%]
+packages\context-hub\tests\test_metadata.py .............                [ 42%]
+packages\context-hub\tests\test_search.py ..........                     [ 61%]
+packages\context-hub\tests\test_store_basic.py ........                  [ 75%]
+packages\context-hub\tests\test_versioning.py .............              [100%]
+
+============================= 54 passed in 1.49s ==============================
+=== packages/arch-intelligence ===
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 76 items
+
+packages\arch-intelligence\tests\test_adr_tracker.py ................... [ 25%]
+....                                                                     [ 30%]
+packages\arch-intelligence\tests\test_detectors.py ..............        [ 48%]
+packages\arch-intelligence\tests\test_integration.py .....               [ 55%]
+packages\arch-intelligence\tests\test_layer_detector.py ........         [ 65%]
+packages\arch-intelligence\tests\test_reuse_detector.py ................ [ 86%]
+..                                                                       [ 89%]
+packages\arch-intelligence\tests\test_subsystem_detector.py ........     [100%]
+
+============================= 76 passed in 2.85s ==============================
+=== packages/impact-analysis ===
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 42 items
+
+packages\impact-analysis\tests\test_debt_scorer.py ..............        [ 33%]
+packages\impact-analysis\tests\test_dependency_health.py ..............  [ 66%]
+packages\impact-analysis\tests\test_impact_analyzer.py ..............    [100%]
+
+============================= 42 passed in 1.53s ==============================
+=== packages/orchestration ===
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 105 items
+
+packages\orchestration\tests\test_agent_registry_sample.py ............  [ 11%]
+packages\orchestration\tests\test_evidence.py ............               [ 22%]
+packages\orchestration\tests\test_imports.py ........                    [ 30%]
+packages\orchestration\tests\test_integration_sample.py ....Windows fatal exception: access violation
+
+Current thread 0x00004958 (most recent call first):
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1289 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\pyarrow\__init__.py", line 71 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\compat\pyarrow.py", line 8 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\compat\__init__.py", line 27 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\__init__.py", line 39 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\utils\fixes.py", line 20 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\utils\_array_api.py", line 20 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\utils\validation.py", line 21 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\utils\_param_validation.py", line 17 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\utils\_chunking.py", line 11 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\utils\__init__.py", line 9 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\base.py", line 19 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\sklearn\__init__.py", line 73 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\generation\candidate_generator.py", line 31 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\generation\utils.py", line 53 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 995 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1387 in _gcd_import
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py", line 90 in import_module
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\utils\import_utils.py", line 2537 in _get_module
+  File "C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\utils\import_utils.py", line 2305 in __getattr__
+  ...
+......       [ 40%]
+packages\orchestration\tests\test_intent_router_sample.py ........       [ 47%]
+packages\orchestration\tests\test_selector_engine.py ................... [ 65%]
+.                                                                        [ 66%]
+packages\orchestration\tests\test_skill_registry_sample.py ............  [ 78%]
+packages\orchestration\tests\test_workflow_executor.py ................. [ 94%]
+......                                                                   [100%]
+
+============================== warnings summary ===============================
+packages/orchestration/tests/test_evidence.py::test_evidence_structure_all_fields
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\tests\test_evidence.py:32: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py::test_evidence_structure_all_fields
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\tests\test_evidence.py:33: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    completed_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py: 204 warnings
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\src\executor\evidence_collector.py:78: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py: 204 warnings
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\src\executor\evidence_collector.py:79: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    completed_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py::test_evidence_type_approval_gate_approved
+packages/orchestration/tests/test_evidence.py::test_evidence_type_approval_gate_rejected
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\src\executor\evidence_collector.py:98: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py::test_evidence_type_approval_gate_approved
+packages/orchestration/tests/test_evidence.py::test_evidence_type_approval_gate_rejected
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\src\executor\evidence_collector.py:99: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    completed_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py::test_evidence_type_error
+packages/orchestration/tests/test_evidence.py::test_evidence_determinism_error
+packages/orchestration/tests/test_evidence.py::test_evidence_determinism_error
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\src\executor\evidence_collector.py:115: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py::test_evidence_type_error
+packages/orchestration/tests/test_evidence.py::test_evidence_determinism_error
+packages/orchestration/tests/test_evidence.py::test_evidence_determinism_error
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\src\executor\evidence_collector.py:116: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    completed_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_evidence.py::test_evidence_timestamp_iso8601
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\orchestration\tests\test_evidence.py:213: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow().isoformat(),
+
+packages/orchestration/tests/test_integration_sample.py: 32 warnings
+packages/orchestration/tests/test_intent_router_sample.py: 19 warnings
+  C:\Users\urbra\AppData\Local\Programs\Python\Python312\Lib\site-packages\semantic_router\route.py:153: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    data = self.dict()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 105 passed, 472 warnings in 68.72s (0:01:08) =================
+=== packages/token-optimizer ===
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\urbra\OneDrive\Desktop\Projects\ortho
+configfile: pytest.ini
+plugins: anyio-4.6.0, hypothesis-6.155.7, cov-7.1.0
+collected 77 items
+
+packages\token-optimizer\tests\test_assembler.py ..........              [ 12%]
+packages\token-optimizer\tests\test_budget.py ..................         [ 36%]
+packages\token-optimizer\tests\test_edge_cases.py ...................    [ 61%]
+packages\token-optimizer\tests\test_integration.py ..........            [ 74%]
+packages\token-optimizer\tests\test_prompt.py ......                     [ 81%]
+packages\token-optimizer\tests\test_property.py ..............           [100%]
+
+============================== warnings summary ===============================
+packages/token-optimizer/tests/test_assembler.py: 13 warnings
+packages/token-optimizer/tests/test_edge_cases.py: 6 warnings
+packages/token-optimizer/tests/test_integration.py: 9 warnings
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\src\token_optimizer\assembler.py:83: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    assembled_at=datetime.utcnow().isoformat(),
+
+packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_single_chunk_exactly_fits
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestAssemblerEdgeCases::test_assemble_single_chunk_exceeds_budget
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:169: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_no_included_chunks
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:213: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_chunk_with_empty_content
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:236: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_chunk_with_newlines_in_content
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:258: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_very_large_content
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:279: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestPromptAssemblerEdgeCases::test_prompt_special_characters_preserved
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:302: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_chunk_relevance_score_extremes
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:328: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_package_iso_timestamp_format
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:350: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_edge_cases.py::TestTypeHandlingEdgeCases::test_context_chunk_all_source_types
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_edge_cases.py:368: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptDeterminism::test_assemble_prompt_determinism_identical_inputs
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:30: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptOrdering::test_assemble_prompt_chunk_ordering_by_id_ascending
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:61: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_format_fixed_delimiter
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:101: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_only_included_chunks
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:121: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptFormat::test_assemble_prompt_empty_included_set
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:150: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+packages/token-optimizer/tests/test_prompt.py::TestAssemblePromptDuplicateHandling::test_assemble_prompt_duplicate_source_ids_all_included
+  C:\Users\urbra\OneDrive\Desktop\Projects\ortho\packages\token-optimizer\tests\test_prompt.py:175: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 77 passed, 44 warnings in 1.60s =======================
+TIMESTAMP: 2026-07-09T10:38:41Z
