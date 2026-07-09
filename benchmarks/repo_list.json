@@ -1,0 +1,10 @@
+[
+  {"url": "https://github.com/pallets/flask", "name": "flask"},
+  {"url": "https://github.com/pallets/click", "name": "click"},
+  {"url": "https://github.com/psf/requests", "name": "requests"},
+  {"url": "https://github.com/tiangolo/fastapi", "name": "fastapi"},
+  {"url": "https://github.com/django/django", "name": "django"},
+  {"url": "https://github.com/langchain-ai/langchain", "name": "langchain"},
+  {"url": "https://github.com/open-telemetry/opentelemetry-demo", "name": "opentelemetry-demo"},
+  {"url": "https://github.com/supabase/supabase", "name": "supabase-master"}
+]
