@@ -5,7 +5,7 @@
 **Methodology:** ASES v1.2 with FRD Part 17 optimizations (PLANNER+ARCHITECT fast path, compact templates, tiered verification)  
 **Stack:** Python (packages) + TypeScript (CLI)  
 **FRD:** `ortho-v3-frd.md` (sections 1â€“18, Part 17 optimizations active for Week 3â€“8)  
-**Last Updated:** 2026-07-08 by QUALITY-PASS
+**Last Updated:** 2026-07-09 by REVIEWER (task-016 COMMITTED)
 
 ---
 
@@ -266,6 +266,89 @@ Implements Selector Engine (Stage 4, FRD §11.4) + Workflow Executor (runtime):
 4. **REVIEWER (GATE 6):** Code quality + security audit
 
 **Artifacts Location:** `.ases/tasks/task-014-token-optimizer/` (plan.md, spec.md, rollback-plan.md, architecture-review.md ready)
+
+---
+
+### task-016: Engineering Benchmark Suite (Modular Framework) — ✅ COMMITTED
+
+**State:** ✅ COMMITTED (All 6 gates APPROVED 2026-07-09)
+**Workflow:** `.ases/workflows/feature.md`
+**Phase:** Phase 2 Validation (tooling, parallel to Phase 3/4)
+**Timeline:** 2026-07-09 (single day, full 6-gate cycle with parallel BUILDER/TEST-DESIGNER)
+
+**Objective:** Restructure task-015's flat benchmark script into a modular,
+vendor-neutral Engineering Benchmark framework — ground-truth-based
+correctness metrics (precision/recall/F1, Recall@k/MRR/NDCG) instead of raw
+counts, architected so a second engineering-agent adapter (Claude Code,
+Cursor, etc.) could be added later without touching suite logic.
+
+**All 6 ASES Gates Complete:**
+
+✓ **GATE 1 (PLANNER)** — plan.md, spec.md, rollback-plan.md (7 atomic tasks, AC1–AC7)
+✓ **GATE 2 (ARCHITECT)** — architecture-review.md: adapter redesigned
+  capability-based (5 methods: `scan_repository`, `detect_architecture`,
+  `retrieve`, `analyze_impact`, `assemble_context` — not 7+ stage-shaped
+  passthroughs), canonical `SuiteResult` model + pure `core/reports.py`
+  renderers, dataset `manifest.json` (commit pin, schema_version, suites
+  list), central `BenchmarkConfig`, `validation/` layer added to Phase 1
+  scope, `RunMetadata` for reproducibility — all incorporated into spec.md
+✓ **GATE 3 (BUILDER)** — 8 atomic commits (AC1–AC7); wraps task-015's
+  existing `pipeline.py` stage bodies unchanged behind the new adapter;
+  old `pipeline.py`/`run_benchmark.py`/`report.py`/`test_pipeline.py`
+  removed in the same commit that replaced them
+✓ **GATE 4 (TEST-DESIGNER)** — independent fresh-context session (zero
+  BUILDER visibility, per feature.md), 135 tests (spec required 52+),
+  covering hard edge cases: empty-set precision/recall conventions,
+  cluster-match tie-breaking determinism, NDCG/MRR worked examples,
+  Spearman zero-variance, manifest suite-gating, adapter contract against
+  a hand-verified fixture repo, import-boundary enforcement
+✓ **GATE 5 (VERIFIER)** — Real pytest execution: `benchmarks/` 135/135
+  PASS; zero regressions across all 6 existing packages (496/496 combined,
+  repo-intelligence/context-hub/arch-intelligence/impact-analysis/
+  orchestration/token-optimizer all unchanged); golden-output regression
+  test confirms AC1's refactor is behavior-preserving vs task-015's
+  original pipeline
+✓ **GATE 6 (REVIEWER)** — Independent review, verified (not trusted)
+  against real evidence: import boundary honored (only
+  `adapters/ortho/adapter.py` touches `packages/*`), adapter genuinely
+  merges multiple detector calls into one `ArchResult` (not a relabeled
+  wrapper), `core/reports.py` has zero suite-specific branching, ground
+  truth cross-checked against live git history and real source (confirmed
+  non-circular — click's hand-authored "flat" architecture genuinely
+  disagrees with the tool's own "layered" call), golden regression test
+  confirmed genuinely wired. **Verdict: APPROVED**
+
+**Deliverables:**
+- `benchmarks/core/` — `config.py` (`BenchmarkConfig`), `result_model.py`
+  (`SuiteResult`, `RunMetadata`), `runner.py`, `ground_truth.py`,
+  `reports.py` (3 pure renderers), `metrics/{set_based,ranking,correlation}.py`
+- `benchmarks/adapters/interface.py` (`EngineeringSystemAdapter`, 5
+  capability methods) + `benchmarks/adapters/ortho/adapter.py`
+  (`OrthoAdapter` — the only file importing `packages/*`)
+- `benchmarks/suites/{repository,architecture,impact,efficiency,retrieval}/evaluate.py`
+- `benchmarks/datasets/{flask,click}/` — manifests + hand-authored ground
+  truth (symbols, imports, callgraph, architecture, impact, retrieval),
+  authored from real source/git history independently of the tool's own output
+- `benchmarks/validation/` — metrics/ground-truth/adapter-contract tests,
+  import-boundary enforcement, golden-output regression test + snapshot
+- `benchmarks/run_benchmark.py` — thin CLI
+
+**Real findings surfaced (genuine Ortho characteristics, not benchmark bugs,
+documented rather than silently worked around):**
+1. `ImportGraphBuilder` never resolves relative imports (`from .x import y`)
+   to internal files — only absolute imports resolve. Confirmed on flask:
+   0 of `src/flask/`'s own relative imports resolve internally.
+2. `OrthoAdapter.retrieve()` searches ContextHub's meta-analysis artifacts,
+   not raw source — source-location questions score ~0 recall on both
+   pilot repos.
+3. `ImpactReport.blast_radius` can diverge from actual dependent-file counts.
+
+**Evidence Location:**
+- `.ases/tasks/task-016-benchmark-framework/` — plan, spec, rollback-plan,
+  architecture-review, implementation-notes, test-plan, verification-report, review
+- `.ases/evidence/task-016/` — real pytest/import-check/regression logs
+
+**Commits:** `be6ab1f`..`a440d2d` (9 commits: AC1–AC7 + GATE 5 + GATE 6)
 
 ---
 
