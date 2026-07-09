@@ -37,21 +37,28 @@ def load_manifest(dataset_dir: Path) -> dict:
     return manifest
 
 
-def load_ground_truth(dataset_dir: Path, kind: str) -> dict | list:
+def load_ground_truth(dataset_dir: Path, kind: str, *, suite: str | None = None) -> dict | list:
     """Load `<dataset_dir>/ground_truth/<kind>.json`, gated by the manifest's `suites`.
 
+    `suite` defaults to `kind` -- the common case is one ground-truth file per
+    suite (e.g. `retrieval.json` gates on `"retrieval"`). Pass `suite`
+    explicitly when several files share one suite's gate (e.g. the repository
+    suite's `symbols.json`/`imports.json`/`callgraph.json` all gate on
+    `"repository"` being listed, not on a suite literally named "symbols").
+
     Raises GroundTruthError if:
-    - the manifest doesn't list `kind` in its `suites` array (fail loud, not
+    - the manifest doesn't list `suite` in its `suites` array (fail loud, not
       silent-empty -- a suite must be explicitly declared supported)
     - the ground-truth file doesn't exist
     - the ground-truth file isn't valid JSON
     """
     dataset_dir = Path(dataset_dir)
     manifest = load_manifest(dataset_dir)
+    gate = suite if suite is not None else kind
 
-    if kind not in manifest["suites"]:
+    if gate not in manifest["suites"]:
         raise GroundTruthError(
-            f"suite '{kind}' is not listed in {dataset_dir}/manifest.json's "
+            f"suite '{gate}' is not listed in {dataset_dir}/manifest.json's "
             f"'suites' ({manifest['suites']}) -- refusing to load ground truth "
             "for an ungated suite"
         )
@@ -59,7 +66,7 @@ def load_ground_truth(dataset_dir: Path, kind: str) -> dict | list:
     gt_path = dataset_dir / "ground_truth" / f"{kind}.json"
     if not gt_path.exists():
         raise GroundTruthError(
-            f"suite '{kind}' is listed in manifest.json but "
+            f"suite '{gate}' is listed in manifest.json but "
             f"{gt_path} does not exist"
         )
     try:
