@@ -1,0 +1,13 @@
+{
+  "repo": "flask",
+  "url": "https://github.com/pallets/flask",
+  "commit": "36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+  "language": "python",
+  "schema_version": 1,
+  "benchmark_version": "0.1.0",
+  "suites": ["repository", "architecture", "retrieval", "impact"],
+  "size_loc": 9502,
+  "ground_truth_authored_by": "human",
+  "ground_truth_date": "2026-07-09",
+  "ground_truth_notes": "symbols/imports/callgraph.json scoped to a curated subset of core src/flask/*.py files plus tests/conftest.py (not the whole repo) -- see suite evaluate.py docstrings. architecture.json hand-authored from reading source directly, independent of OrthoAdapter's own output. impact.json entries sampled from real git history commits (fbb6f0b, c2705ff, a29f88c) which predate this manifest's pinned commit; file contents may have drifted slightly since, but the co-change relationships are real and verified against `git show --stat`. retrieval.json questions ask where source-code symbols are defined, but OrthoAdapter.retrieve() currently searches only ContextHub's ingested meta-analysis artifacts (architecture/subsystem/debt notes), not raw source code -- so retrieval metrics on this dataset are expected to score near 0 today. This is an honest, real finding about current Ortho retrieval scope, not a broken suite; kept as-is rather than rewriting the questions to match the tool's current limitation."
+}

@@ -1,0 +1,38 @@
+{
+  "_authoring_note": "Hand-authored from reading src/flask/*.py directly (not copied from OrthoAdapter output, to avoid circularity). Scope: core library package only (src/flask/), not examples/ or tests/. style/subsystems reflect independent judgment: Flask is a small WSGI framework with a request/app-context core (ctx.py, globals.py, app.py) and supporting layers (config, helpers, templating, sessions, blueprints) built on top -- a real but shallow layering, matching the project's own description as 'a simple framework'.",
+  "style": "layered",
+  "layers": {
+    "src/flask/globals.py": 0,
+    "src/flask/signals.py": 0,
+    "src/flask/typing.py": 0,
+    "src/flask/ctx.py": 1,
+    "src/flask/config.py": 1,
+    "src/flask/sessions.py": 1,
+    "src/flask/wrappers.py": 1,
+    "src/flask/templating.py": 1,
+    "src/flask/logging.py": 1,
+    "src/flask/debughelpers.py": 1,
+    "src/flask/helpers.py": 2,
+    "src/flask/views.py": 2,
+    "src/flask/blueprints.py": 2,
+    "src/flask/testing.py": 2,
+    "src/flask/cli.py": 2,
+    "src/flask/app.py": 3,
+    "src/flask/__init__.py": 3
+  },
+  "subsystems": [
+    ["src/flask/ctx.py", "src/flask/globals.py", "src/flask/signals.py"],
+    ["src/flask/config.py", "src/flask/sessions.py", "src/flask/wrappers.py"],
+    ["src/flask/templating.py", "src/flask/logging.py", "src/flask/debughelpers.py"],
+    ["src/flask/helpers.py", "src/flask/views.py", "src/flask/blueprints.py", "src/flask/testing.py", "src/flask/cli.py"],
+    ["src/flask/app.py", "src/flask/__init__.py"]
+  ],
+  "layer_edges": [
+    ["src/flask/globals.py", "src/flask/ctx.py"],
+    ["src/flask/ctx.py", "src/flask/app.py"],
+    ["src/flask/config.py", "src/flask/app.py"],
+    ["src/flask/helpers.py", "src/flask/app.py"],
+    ["src/flask/blueprints.py", "src/flask/app.py"],
+    ["src/flask/globals.py", "src/flask/helpers.py"]
+  ]
+}

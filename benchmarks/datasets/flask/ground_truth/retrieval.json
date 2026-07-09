@@ -1,0 +1,32 @@
+[
+  {
+    "question": "how does flask store per-request configuration values",
+    "expected_files": ["src/flask/config.py"],
+    "expected_symbols": ["Config", "ConfigAttribute"]
+  },
+  {
+    "question": "how do I flash a message to the user",
+    "expected_files": ["src/flask/helpers.py"],
+    "expected_symbols": ["flash", "get_flashed_messages"]
+  },
+  {
+    "question": "how does flask register a blueprint",
+    "expected_files": ["src/flask/blueprints.py"],
+    "expected_symbols": ["Blueprint"]
+  },
+  {
+    "question": "how does flask generate a url for a view function",
+    "expected_files": ["src/flask/helpers.py"],
+    "expected_symbols": ["url_for"]
+  },
+  {
+    "question": "what is the current app context proxy",
+    "expected_files": ["src/flask/globals.py"],
+    "expected_symbols": ["current_app"]
+  },
+  {
+    "question": "how does flask push and pop the application context",
+    "expected_files": ["src/flask/ctx.py"],
+    "expected_symbols": []
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "_authoring_note": "Hand-authored from reading src/click/*.py directly (not copied from OrthoAdapter output). Scope: core library package only (src/click/), not examples/ or tests/. core.py is 3681 lines (30% of the whole package's LOC) and contains Command/Group/Context/Parameter/Option -- the entire object model in one file, with formatting/parser/types/decorators/shell_completion as thin supporting modules around it. This is genuinely closer to a flat/monolithic-core architecture than a layered one; Click's own docs describe it as 'a simple API without too much magic', consistent with a shallow structure.",
+  "style": "flat",
+  "layers": {
+    "src/click/globals.py": 0,
+    "src/click/_compat.py": 0,
+    "src/click/_utils.py": 0,
+    "src/click/exceptions.py": 1,
+    "src/click/parser.py": 1,
+    "src/click/formatting.py": 1,
+    "src/click/_textwrap.py": 1,
+    "src/click/types.py": 1,
+    "src/click/core.py": 2,
+    "src/click/decorators.py": 2,
+    "src/click/shell_completion.py": 2,
+    "src/click/termui.py": 2,
+    "src/click/utils.py": 2,
+    "src/click/testing.py": 3,
+    "src/click/__init__.py": 3
+  },
+  "subsystems": [
+    ["src/click/globals.py", "src/click/_compat.py", "src/click/_utils.py"],
+    ["src/click/exceptions.py", "src/click/parser.py", "src/click/formatting.py", "src/click/_textwrap.py"],
+    ["src/click/core.py", "src/click/types.py", "src/click/decorators.py"],
+    ["src/click/shell_completion.py", "src/click/termui.py", "src/click/utils.py"],
+    ["src/click/testing.py", "src/click/__init__.py"]
+  ],
+  "layer_edges": [
+    ["src/click/globals.py", "src/click/core.py"],
+    ["src/click/exceptions.py", "src/click/core.py"],
+    ["src/click/parser.py", "src/click/core.py"],
+    ["src/click/types.py", "src/click/core.py"],
+    ["src/click/core.py", "src/click/testing.py"],
+    ["src/click/core.py", "src/click/__init__.py"]
+  ]
+}

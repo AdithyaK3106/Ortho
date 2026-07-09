@@ -1,0 +1,24 @@
+[
+  {
+    "_source_commit": "fbb6f0bc4c60a0bada0e03c3480d0ccf30a3c1df",
+    "_source_commit_message": "all teardown callbacks are called despite errors",
+    "changed_file": "src/flask/ctx.py",
+    "actually_impacted": ["src/flask/app.py", "src/flask/helpers.py"]
+  },
+  {
+    "_source_commit": "c2705ff",
+    "_source_commit_message": "merge app and request context",
+    "changed_file": "src/flask/ctx.py",
+    "actually_impacted": [
+      "src/flask/app.py", "src/flask/cli.py", "src/flask/debughelpers.py",
+      "src/flask/globals.py", "src/flask/helpers.py", "src/flask/templating.py",
+      "src/flask/testing.py"
+    ]
+  },
+  {
+    "_source_commit": "a29f88ce6f2f9843bd6fcbbfce1390a2071965d6",
+    "_source_commit_message": "document that headers must be set before streaming",
+    "changed_file": "src/flask/helpers.py",
+    "actually_impacted": ["src/flask/ctx.py"]
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "question": "what class represents a click CLI command",
+    "expected_files": ["src/click/core.py"],
+    "expected_symbols": ["Command"]
+  },
+  {
+    "question": "what class represents a command-line option",
+    "expected_files": ["src/click/core.py"],
+    "expected_symbols": ["Option"]
+  },
+  {
+    "question": "how do I print output to the terminal in click",
+    "expected_files": ["src/click/utils.py"],
+    "expected_symbols": ["echo"]
+  },
+  {
+    "question": "how does click ask the user for confirmation",
+    "expected_files": ["src/click/termui.py"],
+    "expected_symbols": ["confirm"]
+  },
+  {
+    "question": "what holds the execution state for a running click command",
+    "expected_files": ["src/click/core.py"],
+    "expected_symbols": ["Context"]
+  },
+  {
+    "question": "how does click group multiple commands into a collection",
+    "expected_files": ["src/click/core.py"],
+    "expected_symbols": ["CommandCollection", "Group"]
+  }
+]

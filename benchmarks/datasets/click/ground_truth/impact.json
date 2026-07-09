@@ -1,0 +1,14 @@
+[
+  {
+    "_source_commit": "051bb0f",
+    "_source_commit_message": "Do not let the GC close a borrowed stdout",
+    "changed_file": "src/click/_termui_impl.py",
+    "actually_impacted": ["src/click/utils.py"]
+  },
+  {
+    "_source_commit": "9f9b149",
+    "_source_commit_message": "Add @custom_version_option, freeze @version_option",
+    "changed_file": "src/click/decorators.py",
+    "actually_impacted": ["src/click/__init__.py"]
+  }
+]
