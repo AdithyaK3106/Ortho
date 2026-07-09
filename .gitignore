@@ -5,10 +5,26 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 
-# Node build artifacts (ortho-cli source is tracked under node_modules/)
+# Virtual environments (P0-1)
+venv/
+.venv/
+env/
+
+# Node (P0-2)
+node_modules/
+
+# TypeScript build output
 dist/
 apps/cli/dist/
-node_modules/*/dist/
+
+# Logs (P0-3, P0-4)
+*.log
+
+# Screenshots / debugging dumps (D-7)
+screenshots/
+
+# ortho-demo is a separate repository
+ortho-demo/
 
 # Cloned/scratch repos used for real-repo scan tests and benchmarks
 repos/

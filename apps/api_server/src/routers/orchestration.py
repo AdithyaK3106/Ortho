@@ -15,6 +15,7 @@ from pathlib import Path
 class RunRequest(BaseModel):
     intent: str
     dryRun: bool = False
+    repo_id: str = "repo-default"  # Callers should pass the actual repo ID
 
 
 class ApproveRequest(BaseModel):
@@ -122,10 +123,7 @@ async def run_workflow(request: RunRequest, background_tasks: BackgroundTasks):
 
         # Step 3: Create workflow run in pending state
         # The workflow will pause at approval gates and must be resumed via /api/approve or /api/reject
-        global _current_workflow_run_id
-        repo_id = "repo-default"  # TODO: get from context
-
-        workflow_run = _state_store.create_run(repo_id, plan.intent_class, plan)
+        workflow_run = _state_store.create_run(request.repo_id, plan.intent_class, plan)
         _current_workflow_run_id = workflow_run.id  # Track for /approve, /reject, /status
 
         return {
@@ -236,7 +234,7 @@ async def reject_workflow(request: RejectRequest):
 
 
 @router.get("/history")
-async def get_history(id: Optional[str] = None, limit: int = 10):
+async def get_history(id: Optional[str] = None, repo_id: Optional[str] = None, limit: int = 10):
     """GET /api/history — List or show workflow runs."""
     if not _state_store:
         raise HTTPException(status_code=500, detail="Orchestration not initialized")
@@ -248,7 +246,7 @@ async def get_history(id: Optional[str] = None, limit: int = 10):
             return {"workflow_run": workflow_run}
         else:
             # List runs
-            runs = _state_store.list_runs("repo-default", limit=limit)
+            runs = _state_store.list_runs(repo_id or "repo-default", limit=limit)
             return {
                 "runs": [
                     {

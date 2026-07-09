@@ -20,7 +20,7 @@ def run_step(
     step: ExecutionStep,
     agent: any,  # AgentManifest
     skills: list = None,  # list[SkillManifest]
-    context_package: any = None,  # ContextPackage (stubbed; token optimizer task-014)
+    context_package: any = None,  # ContextPackage from token optimizer
     llm_client: any = None,  # LLM client
     timeout_seconds: int = 60,
 ) -> StepResult:
@@ -160,8 +160,10 @@ def _assemble_system_prompt(agent: any, skills: list) -> str:
 def _assemble_user_message(step: ExecutionStep, context_package: any = None) -> str:
     """Assemble user message from step context.
 
-    Stubbed: token optimizer (task-014) will provide full context_package.
-    For now, return placeholder.
+    When context_package is None (no artifact store available), returns a
+    minimal placeholder sufficient for tests or dry-run execution.
+    For real runs, context_package is provided by the token optimizer
+    (task-014).
     """
     if context_package:
         return f"Execute step: {step.step_id}\nContext available for {step.agent_name}"

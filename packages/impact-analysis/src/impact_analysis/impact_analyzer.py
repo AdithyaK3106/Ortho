@@ -68,11 +68,18 @@ class ImpactAnalyzer:
             depth=depth,
         )
 
-        # Compute risk score based on centrality
+        # Compute risk score based on centrality.
+        # Normalise by total graph size so a file needs many dependents
+        # (relative to the whole graph) to score near 1.0.
         fan_in = len(direct_dependents)
         fan_out_count = sum(1 for edge in import_graph if edge.importer_file_id == changed_file_id)
-        num_symbols = max(len(symbols_in_changed_file), 1)
-        risk_score = min(1.0, (fan_in + fan_out_count) / (2 * num_symbols))
+        all_file_ids: set[str] = set()
+        for edge in import_graph:
+            all_file_ids.add(edge.importer_file_id)
+            if edge.imported_file_id:
+                all_file_ids.add(edge.imported_file_id)
+        graph_size = max(len(all_file_ids), 1)
+        risk_score = min(1.0, (fan_in + fan_out_count) / (2 * graph_size))
 
         # Compute analysis confidence (based on unresolved symbols)
         unresolved = sum(1 for edge in call_graph if edge.confidence < 1.0)

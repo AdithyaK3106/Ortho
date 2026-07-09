@@ -19,7 +19,6 @@ class DependencyHealthAnalyzer:
     def analyze_module(
         self,
         file_id: str,
-        call_graph: list,
         import_graph: list[ImportEdge],
         architecture_model: Optional[dict] = None,
     ) -> DependencyHealthReport:
@@ -85,7 +84,6 @@ class DependencyHealthAnalyzer:
 
     def analyze_all_modules(
         self,
-        call_graph: list,
         import_graph: list[ImportEdge],
         architecture_model: Optional[dict] = None,
     ) -> list[DependencyHealthReport]:
@@ -93,7 +91,6 @@ class DependencyHealthAnalyzer:
         Full repository health report (stateless).
 
         Args:
-            call_graph: List of CallEdge objects
             import_graph: List of ImportEdge objects
             architecture_model: Optional architecture model for context
 
@@ -110,7 +107,7 @@ class DependencyHealthAnalyzer:
         # Analyze each module
         reports = []
         for file_id in file_ids:
-            report = self.analyze_module(file_id, call_graph, import_graph, architecture_model)
+            report = self.analyze_module(file_id, import_graph, architecture_model)
             reports.append(report)
 
         # Sort by is_hub, then high_fan_in, for better visibility
@@ -121,14 +118,12 @@ class DependencyHealthAnalyzer:
 
     def find_cycles(
         self,
-        call_graph: list,
         import_graph: list[ImportEdge],
     ) -> list[list[str]]:
         """
         Detect all circular dependency chains (stateless).
 
         Args:
-            call_graph: List of CallEdge objects
             import_graph: List of ImportEdge objects
 
         Returns:

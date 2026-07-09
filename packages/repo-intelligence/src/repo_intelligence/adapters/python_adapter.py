@@ -9,14 +9,19 @@ from typing import Any, List
 from dataclasses import dataclass
 
 try:
-    from tree_sitter import Language, Parser
+    from tree_sitter import Language, Parser as _TreeSitterParser
+    _TREE_SITTER_AVAILABLE = True
 except ImportError:
-    raise ImportError("tree-sitter package required. Install with: pip install tree-sitter")
+    _TREE_SITTER_AVAILABLE = False
+    Language = None  # type: ignore[assignment,misc]
+    _TreeSitterParser = None  # type: ignore[assignment,misc]
 
 try:
-    from tree_sitter_languages import get_language
+    from tree_sitter_languages import get_language as _get_language
+    _TS_LANGUAGES_AVAILABLE = True
 except ImportError:
-    raise ImportError("tree-sitter-languages package required. Install with: pip install tree-sitter-languages")
+    _TS_LANGUAGES_AVAILABLE = False
+    _get_language = None  # type: ignore[assignment]
 
 from ..symbol_extractor import SymbolExtractor, Symbol
 from ..import_graph import ImportGraphBuilder, ImportEdge
@@ -27,12 +32,22 @@ class PythonAdapter:
 
     def __init__(self) -> None:
         """Initialize Python adapter with tree-sitter grammar."""
+        if not _TREE_SITTER_AVAILABLE:
+            raise RuntimeError(
+                "tree-sitter is required for PythonAdapter. "
+                "Install with: pip install tree-sitter tree-sitter-languages"
+            )
+        if not _TS_LANGUAGES_AVAILABLE:
+            raise RuntimeError(
+                "tree-sitter-languages is required for PythonAdapter. "
+                "Install with: pip install tree-sitter-languages"
+            )
         try:
-            self.language: Language = get_language("python")
+            self.language: Language = _get_language("python")
         except Exception as e:
             raise RuntimeError(f"Failed to load Python grammar: {e}")
 
-        self.parser: Parser = Parser()
+        self.parser = _TreeSitterParser()
         self.parser.set_language(self.language)
 
     def parse(self, file_path: str) -> Any:

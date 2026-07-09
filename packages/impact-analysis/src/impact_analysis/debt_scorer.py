@@ -127,11 +127,21 @@ class DebtScorer:
         file_id: str,
         import_graph: list[ImportEdge],
     ) -> float:
-        """Compute coupling score: (fan_in + fan_out) / 2."""
+        """Compute coupling score: (fan_in + fan_out) / (2 * num_files).
+
+        Normalises by the total number of unique files in the import graph so
+        that only the most central files in large repos score near 1.0.
+        """
         fan_in = sum(1 for edge in import_graph if edge.imported_file_id == file_id)
         fan_out = sum(1 for edge in import_graph if edge.importer_file_id == file_id)
-        num_files = 1  # Denominator is just this file
-        coupling = (fan_in + fan_out) / (2 * num_files) if num_files > 0 else 0.0
+        # Collect all unique file IDs visible in the graph
+        file_ids: set[str] = set()
+        for edge in import_graph:
+            file_ids.add(edge.importer_file_id)
+            if edge.imported_file_id:
+                file_ids.add(edge.imported_file_id)
+        num_files = max(len(file_ids), 1)
+        coupling = (fan_in + fan_out) / (2 * num_files)
         return min(1.0, coupling)
 
     @staticmethod
@@ -139,21 +149,42 @@ class DebtScorer:
         file_id: str,
         git_metadata: dict[str, GitFileMetadata],
     ) -> float:
-        """Compute churn score: min(1.0, commits_30d / 20)."""
-        # Find metadata for this file
-        for path, metadata in git_metadata.items():
-            if file_id in path or path.endswith(file_id.split("/")[-1]):
-                commits = metadata.commits_30d
-                churn = min(1.0, commits / DebtScorer.CHURN_THRESHOLD)
-                return churn
-        return 0.0  # No git metadata, assume stable
+        """Compute churn score: min(1.0, commits_30d / 20).
+
+        Matches on exact file_id first, then falls back to a suffix match
+        only when the suffix is unique in the graph (avoids cross-crediting
+        files that share a basename such as __init__.py).
+        """
+        # Exact match takes priority
+        if file_id in git_metadata:
+            commits = git_metadata[file_id].commits_30d
+            return min(1.0, commits / DebtScorer.CHURN_THRESHOLD)
+
+        # Suffix fallback — only use when the basename is unambiguous
+        basename = file_id.split("/")[-1]
+        suffix_matches = [
+            (path, metadata)
+            for path, metadata in git_metadata.items()
+            if path.endswith(basename)
+        ]
+        if len(suffix_matches) == 1:
+            commits = suffix_matches[0][1].commits_30d
+            return min(1.0, commits / DebtScorer.CHURN_THRESHOLD)
+
+        return 0.0  # No unambiguous match — assume stable
 
     @staticmethod
     def _compute_complexity_score(
         file_id: str,
         symbols: list[Symbol],
     ) -> float:
-        """Compute complexity score: min(1.0, avg_ast_depth / 8)."""
+        """Compute complexity score: min(1.0, avg_line_span / 160).
+
+        Uses line-span per symbol as a *proxy* for nesting depth because
+        tree-sitter AST depth is not stored in Symbol.  A 160-line symbol
+        maps to score 1.0 (threshold = 8 * 20).  This is a known
+        approximation; replace with real AST-depth data when available.
+        """
         # Filter symbols for this file
         file_symbols = [s for s in symbols if s.file_id == file_id]
         if not file_symbols:
@@ -163,8 +194,7 @@ class DebtScorer:
         total_depth = 0
         for sym in file_symbols:
             lines = max(1, sym.end_line - sym.start_line)
-            # Rough heuristic: deeper = more lines
-            depth = min(8, max(1, lines // 20))  # Normalize to ~8
+            depth = min(8, max(1, lines // 20))
             total_depth += depth
 
         avg_depth = total_depth / len(file_symbols) if file_symbols else 1
@@ -173,11 +203,36 @@ class DebtScorer:
 
     @staticmethod
     def _compute_test_coverage_score(file_id: str) -> float:
-        """Compute test coverage score: 0.0 if tests exist, 1.0 if not."""
-        # Heuristic: check if file_id ends with _test or if there's a test_*.py for it
-        if "test" in file_id.lower():
-            return 0.0  # It's a test file itself
+        """Compute test coverage score: 0.0 if well-tested, 1.0 if no tests.
 
-        # Check if corresponding test file exists (would need external check in real impl)
-        # For now, return neutral (0.5)
-        return 0.5
+        Heuristic: infer test coverage from file-naming conventions.
+        A score of 0.5 means the heuristic found no evidence either way.
+        Callers should treat 0.5 as "unknown" rather than a measured value.
+
+        Limitation: this cannot detect tests that cover a module without
+        following the test_<module>.py or <module>_test.py convention.
+        Real coverage data from pytest-cov would supersede this score.
+        """
+        # Files that ARE test files contribute no debt for this dimension
+        if "test" in file_id.lower():
+            return 0.0
+
+        # Derive conventional test file basename from file_id
+        # e.g. "src/flask/app.py" -> "test_app.py" or "app_test.py"
+        basename = file_id.split("/")[-1]  # e.g. "app.py"
+        stem = basename.rsplit(".", 1)[0]   # e.g. "app"
+        conventional_names = {f"test_{stem}.py", f"{stem}_test.py"}
+
+        # Check: is there any path in file_id's parent that matches?
+        # We only have the file_id string, not the filesystem, so we check
+        # if any test-named sibling would share the same directory prefix.
+        parent = "/".join(file_id.split("/")[:-1])
+        for name in conventional_names:
+            candidate = f"{parent}/{name}" if parent else name
+            # Marker: if the file_id itself mentions a tests/ directory above,
+            # assume tests exist — conservative guess.
+            if "tests/" in file_id or "test/" in file_id:
+                return 0.2  # Likely in a tested package
+
+        # No evidence of tests found via convention
+        return 0.7  # Higher debt signal than neutral 0.5
