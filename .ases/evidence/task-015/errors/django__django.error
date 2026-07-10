@@ -1,5 +1,0 @@
-repo_url: https://github.com/django/django
-category: Web Frameworks
-failure_type: Unknown
-timestamp: 2026-07-08T16:35:17.571460
-error_message: [WinError 2] The system cannot find the file specified

@@ -583,7 +583,7 @@ edbf27e - BUGS.md: Bug documentation
 
 ### 🎯 Next Steps (Optional, Non-blocking)
 
-1. **Semantic Search** (task-015) - Generate embeddings for conceptual search
+1. **Semantic Search** (future tasks) - Generate embeddings for conceptual search
 2. **API Server** - Full HTTP API for remote access
 3. **CI/CD Integration** - Automated analysis on code changes
 4. **IDE Plugins** - VS Code, JetBrains extensions

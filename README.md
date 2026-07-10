@@ -57,7 +57,7 @@ ortho run "add logging to the API layer"
 ## Development
 
 ```bash
-# Run full test suite (496 tests)
+# Run full test suite
 pytest
 
 # Run benchmarks against a real repo

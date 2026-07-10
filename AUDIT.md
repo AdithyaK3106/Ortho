@@ -91,7 +91,7 @@ git rm --cached "C*pilot-test.log" ligence.log
 # 3. add README.md + LICENSE, decide ortho-demo/ placement
 
 # 4. sanity: full test suite + benchmarks still green
-pytest                      # 496 tests
+pytest                      # Run tests
 python benchmarks/run_benchmark.py --only flask
 
 # 5. push

@@ -15,7 +15,6 @@ class TestDependencyHealthBasic:
         analyzer = DependencyHealthAnalyzer()
         report = analyzer.analyze_module(
             file_id="isolated.py",
-            call_graph=[],
             import_graph=[],
         )
 
@@ -45,7 +44,6 @@ class TestDependencyHealthBasic:
         ]
         report = analyzer.analyze_module(
             file_id="core",
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -62,7 +60,6 @@ class TestDependencyHealthBasic:
 
         report = analyzer.analyze_module(
             file_id="client",
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -83,7 +80,6 @@ class TestDependencyHealthBasic:
 
         report = analyzer.analyze_module(
             file_id="hub",
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -101,7 +97,6 @@ class TestDependencyHealthBasic:
         ]
         report = analyzer.analyze_module(
             file_id="A",
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -116,7 +111,6 @@ class TestDependencyHealthBasic:
             ImportEdge(importer_file_id="A", imported_file_id="B"),  # Cycle: A ↔ B
         ]
         cycles = analyzer.find_cycles(
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -130,7 +124,6 @@ class TestDependencyHealthBasic:
             ImportEdge(importer_file_id="C", imported_file_id="B"),
         ]
         reports = analyzer.analyze_all_modules(
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -156,7 +149,6 @@ class TestDependencyHealthBasic:
         ]
         report = analyzer.analyze_module(
             file_id="core",
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -170,7 +162,7 @@ class TestDependencyHealthEdgeCases:
     def test_empty_graph(self):
         """Empty graph should produce no cycles."""
         analyzer = DependencyHealthAnalyzer()
-        cycles = analyzer.find_cycles(call_graph=[], import_graph=[])
+        cycles = analyzer.find_cycles(import_graph=[])
         assert len(cycles) == 0
 
     def test_external_imports_excluded(self):
@@ -186,7 +178,6 @@ class TestDependencyHealthEdgeCases:
         ]
         report = analyzer.analyze_module(
             file_id="numpy",
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -201,7 +192,6 @@ class TestDependencyHealthEdgeCases:
         ]
         report = analyzer.analyze_module(
             file_id="A",
-            call_graph=[],
             import_graph=import_graph,
         )
 
@@ -217,7 +207,7 @@ class TestDependencyHealthEdgeCases:
             ImportEdge(importer_file_id="C", imported_file_id="B"),
             ImportEdge(importer_file_id="A", imported_file_id="C"),
         ]
-        cycles = analyzer.find_cycles(call_graph=[], import_graph=import_graph)
+        cycles = analyzer.find_cycles(import_graph=import_graph)
 
         assert len(cycles) > 0
 
@@ -237,7 +227,7 @@ def test_threshold_consistency(fan_in, fan_out):
 
     report = analyzer.analyze_module(
         file_id="test",
-        call_graph=[],
+
         import_graph=import_graph,
     )
 
@@ -260,7 +250,7 @@ def test_hub_detection_property(fan_in, fan_out):
 
     report = analyzer.analyze_module(
         file_id="hub",
-        call_graph=[],
+
         import_graph=import_graph,
     )
 

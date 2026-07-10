@@ -309,6 +309,22 @@ class ArchitectureDetector:
                 alternative_confidence=winner_score,
             )
 
+        if winner_score <= 0.5:
+            # Multiple styles equally plausible — label as ambiguous
+            return ArchitectureDetectionResult(
+                style=ArchStyle.AMBIGUOUS,
+                confidence=winner_score,
+                evidence=[
+                    "Detected style: ambiguous",
+                    f"Confidence: {winner_score:.2f}",
+                    f"Multiple architectural patterns are equally plausible. "
+                    f"Strongest candidate: {winner.value} ({winner_score:.2f}).",
+                    f"Competing scores: {competing}",
+                ],
+                alternative=winner,
+                alternative_confidence=winner_score,
+            )
+
         alternatives = [
             s for s in scores
             if s != winner and scores[s] >= winner_score - 0.1

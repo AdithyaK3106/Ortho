@@ -1,4 +1,4 @@
-# Ortho Documentation Index
+﻿# Ortho Documentation Index
 
 **Status:** ✅ PRODUCTION READY  
 **Last Updated:** 2026-07-07  
@@ -199,7 +199,7 @@
 - Comprehensive documentation
 
 ### 🎯 Next Steps (Optional)
-- Generate embeddings for semantic search (task-015)
+- Generate embeddings for semantic search (future tasks)
 - Deploy API server for remote access
 - Integrate with CI/CD pipelines
 - Add IDE plugins

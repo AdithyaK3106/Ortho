@@ -15,6 +15,9 @@ class ArchStyle(str, Enum):
     # Returned when no style reaches the evidence threshold — the detector
     # never guesses (see arch_detector._EVIDENCE_THRESHOLD).
     UNKNOWN = "unknown"
+    # Returned when a style is detected but confidence is too low (≤0.5) —
+    # indicates multiple styles are equally plausible.
+    AMBIGUOUS = "ambiguous"
 
 
 @dataclass

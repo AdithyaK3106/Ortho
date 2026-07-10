@@ -2,7 +2,7 @@
 and the generic per-suite execution loop.
 
 `clone_repo`, `PipelineFailure`, and the `timed()` stage-timing pattern are moved
-unchanged from the pre-refactor `benchmarks/pipeline.py` (task-015). No suite
+unchanged from the pre-refactor `benchmarks/pipeline.py` (initial version). No suite
 logic lives here -- only orchestration plumbing shared by every suite.
 """
 

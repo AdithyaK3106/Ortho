@@ -1,5 +1,0 @@
-repo_url: https://github.com/pypa/setuptools
-category: Developer Tooling
-failure_type: Unknown
-timestamp: 2026-07-08T16:35:33.396424
-error_message: [WinError 2] The system cannot find the file specified

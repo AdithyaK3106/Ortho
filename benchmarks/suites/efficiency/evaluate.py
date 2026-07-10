@@ -1,5 +1,5 @@
 """Efficiency suite (Token + Performance): reuses existing timing/memory/context
-metrics from the task-015 pipeline, via adapter.assemble_context() and
+metrics from the initial pipeline, via adapter.assemble_context() and
 adapter.scan_repository()'s own timing. Measurement, not correctness -- no
 ground truth required (Context Recall/Precision is covered by the retrieval
 suite on the same corpus, not duplicated here).

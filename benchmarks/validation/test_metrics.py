@@ -254,7 +254,7 @@ class TestClusterMatch:
         assert result["matched"] + result["unmatched"] == len(expected)
 
     def test_singleton_clusters(self):
-        """Subsystems of size 1 are real (task-015 baseline had singletons pre-fix)."""
+        """Subsystems of size 1 are real (the baseline had singletons pre-fix)."""
         predicted = [{"a"}, {"b"}, {"c"}]
         expected = [{"a"}, {"b"}, {"c"}]
         result = cluster_match(predicted, expected)

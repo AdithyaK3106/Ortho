@@ -1,5 +1,0 @@
-repo_url: https://github.com/pallets/jinja
-category: Web Frameworks
-failure_type: Unknown
-timestamp: 2026-07-08T16:35:13.999548
-error_message: [WinError 2] The system cannot find the file specified

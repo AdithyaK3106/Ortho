@@ -49,8 +49,17 @@ class DebtScorer:
         # Complexity score: min(1.0, avg_ast_depth / 8)
         complexity_score = self._compute_complexity_score(file_id, symbols)
 
+        # Get all file IDs for test coverage checking
+        all_file_ids = set(git_metadata.keys())
+        for sym in symbols:
+            all_file_ids.add(sym.file_id)
+        for edge in import_graph:
+            all_file_ids.add(edge.importer_file_id)
+            if edge.imported_file_id:
+                all_file_ids.add(edge.imported_file_id)
+
         # Test coverage score: 0.0 if tests exist, 1.0 if not
-        test_coverage_score = self._compute_test_coverage_score(file_id)
+        test_coverage_score = self._compute_test_coverage_score(file_id, all_file_ids)
 
         # Total score: weighted average
         total_score = (
@@ -202,7 +211,7 @@ class DebtScorer:
         return complexity
 
     @staticmethod
-    def _compute_test_coverage_score(file_id: str) -> float:
+    def _compute_test_coverage_score(file_id: str, all_file_ids: set[str]) -> float:
         """Compute test coverage score: 0.0 if well-tested, 1.0 if no tests.
 
         Heuristic: infer test coverage from file-naming conventions.
@@ -223,16 +232,17 @@ class DebtScorer:
         stem = basename.rsplit(".", 1)[0]   # e.g. "app"
         conventional_names = {f"test_{stem}.py", f"{stem}_test.py"}
 
-        # Check: is there any path in file_id's parent that matches?
-        # We only have the file_id string, not the filesystem, so we check
-        # if any test-named sibling would share the same directory prefix.
-        parent = "/".join(file_id.split("/")[:-1])
-        for name in conventional_names:
-            candidate = f"{parent}/{name}" if parent else name
-            # Marker: if the file_id itself mentions a tests/ directory above,
-            # assume tests exist — conservative guess.
-            if "tests/" in file_id or "test/" in file_id:
-                return 0.2  # Likely in a tested package
+        # Check: is there any path in all_file_ids that matches?
+        for candidate in all_file_ids:
+            cand_basename = candidate.split("/")[-1]
+            if cand_basename in conventional_names:
+                return 0.0  # Found a test file!
+
+            if "tests/" in candidate or "test/" in candidate:
+                pass # Just iterating
+
+        if "tests/" in file_id or "test/" in file_id:
+            return 0.2  # Likely in a tested package
 
         # No evidence of tests found via convention
         return 0.7  # Higher debt signal than neutral 0.5

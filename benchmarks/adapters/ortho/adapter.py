@@ -1,5 +1,5 @@
 """OrthoAdapter: implements EngineeringSystemAdapter by wrapping the existing
-task-015 pipeline stage bodies unchanged. Multiple stages collapse into one
+initial pipeline stage bodies unchanged. Multiple stages collapse into one
 adapter method where natural (scan_repository folds scan+graphs;
 detect_architecture folds style+layers+subsystems).
 

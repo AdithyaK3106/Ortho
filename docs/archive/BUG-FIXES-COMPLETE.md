@@ -1,4 +1,4 @@
-# Bug Fixes Complete - Ortho Production Ready
+﻿# Bug Fixes Complete - Ortho Production Ready
 
 **Date:** 2026-07-07  
 **Status:** ✅ ALL 4 REMAINING BUGS FIXED  
@@ -281,7 +281,7 @@ $ ortho analyze
 
 ## Remaining Work (Non-blocking)
 
-### Future Enhancements (task-015+)
+### Future Enhancements (future tasks)
 1. **Semantic Search** - Requires embedding generation
 2. **API Server** - Full workflow execution via HTTP
 3. **Embeddings** - Vector generation for semantic search

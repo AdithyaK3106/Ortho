@@ -103,7 +103,7 @@ class ImpactAnalyzer:
             transitive_dependents=sorted(list(transitive_dependents)),
             risk_score=risk_score,
             analysis_confidence=analysis_confidence,
-            blast_radius=len(transitive_dependents),
+            blast_radius=len(direct_dependents) + len(transitive_dependents),
             evidence=evidence,
         )
 
@@ -173,7 +173,7 @@ class ImpactAnalyzer:
             transitive_dependents=sorted(list(transitive_dependents)),
             risk_score=risk_score,
             analysis_confidence=analysis_confidence,
-            blast_radius=len(transitive_dependents),
+            blast_radius=len(direct_callers) + len(transitive_dependents),
             evidence=evidence,
         )
 

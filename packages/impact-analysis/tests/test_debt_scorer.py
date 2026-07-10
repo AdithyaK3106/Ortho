@@ -78,8 +78,8 @@ class TestDebtScorerBasic:
             git_metadata={"B": GitFileMetadata(file_path="B", commits_30d=0)},
         )
 
-        # fan_in=4, fan_out=1 → (4+1)/2 = 2.5, clamped to 1.0
-        assert score.coupling_score > 0.5
+        # fan_in=4, fan_out=1, num_files=6 → (4+1)/(2*6) = 5/12 = 0.416
+        assert score.coupling_score > 0.4
 
     def test_score_all_modules_sorted(self):
         """score_all_modules should return sorted by total_score descending."""
@@ -113,7 +113,7 @@ class TestDebtScorerBasic:
             git_metadata={"core.py": GitFileMetadata(file_path="core.py", commits_30d=0)},
         )
 
-        assert score.test_coverage_score == 0.5  # Neutral, no test file detected
+        assert score.test_coverage_score == 0.7  # High debt signal, no test file detected
 
     def test_weights_sum_to_one(self):
         """DEFAULT_WEIGHTS should sum to 1.0 (or close)."""

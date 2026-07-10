@@ -1,4 +1,4 @@
-# Ortho End-to-End Testing Results
+﻿# Ortho End-to-End Testing Results
 
 **Date:** 2026-07-07  
 **Tester:** Claude Code  
@@ -196,7 +196,7 @@ Results:
   Relevance: 0.92, 0.88, 0.85, 0.82
 ```
 
-**Semantic Search (Requires Embeddings - Deferred to task-015):**
+**Semantic Search (Requires Embeddings - Deferred to a future task):**
 - Infrastructure in place (vectors.db created)
 - Embeddings not yet generated
 - Would search conceptually: "request handling", "dependency resolution", etc.
@@ -458,7 +458,7 @@ Results:
 **Semantic Search (Ready but needs vectors):**
 - Would find conceptually related code
 - Example: "How do I integrate external data?" → finds RAG patterns
-- Ready for task-015 when embeddings are generated
+- Ready for a future task when embeddings are generated
 
 **Status:** Full-text working, semantic pending
 
@@ -503,7 +503,7 @@ Same as FastAPI - commands implemented, requires API server for full execution.
 | **Architecture Detection** | ✅ Complete | FastAPI, LangChain | Accurate patterns |
 | **Impact Analysis** | ✅ Complete | FastAPI, LangChain | Detailed blast radius |
 | **Search (Full-Text)** | ✅ Complete | FastAPI | BM25 working |
-| **Search (Semantic)** | ⏳ Ready | — | Needs embeddings (task-015) |
+| **Search (Semantic)** | ⏳ Ready | — | Needs embeddings (future tasks) |
 | **ADR Awareness** | ✅ Complete | — | Not applicable to unmodified repos |
 | **Workflow Execution** | ✅ Complete | Partial | Commands implemented, API needed |
 
@@ -524,7 +524,7 @@ Same as FastAPI - commands implemented, requires API server for full execution.
 
 ### What's Ready But Needs Setup
 
-⏳ **Semantic Search** - Infrastructure ready, needs embeddings (task-015)  
+⏳ **Semantic Search** - Infrastructure ready, needs embeddings (future tasks)  
 ⏳ **Workflow Execution** - Commands built, needs API server running  
 ⏳ **ADR Tracking** - Feature complete, needs ADRs in repo  
 
@@ -537,7 +537,7 @@ Same as FastAPI - commands implemented, requires API server for full execution.
 ### Remaining Work
 
 📋 **4 Bugs** - Medium priority, non-blocking  
-📋 **Embeddings** - Need task-015 for semantic search  
+📋 **Embeddings** - Need a future task for semantic search  
 📋 **API Server** - Need running for full workflow testing  
 
 ---
@@ -574,7 +574,7 @@ Same as FastAPI - commands implemented, requires API server for full execution.
 
 ### Immediate Actions
 1. ✅ Fix remaining 4 medium-priority bugs (2 hours)
-2. ⏳ Generate embeddings for semantic search (task-015)
+2. ⏳ Generate embeddings for semantic search (future tasks)
 3. ⏳ Set up API server for workflow testing
 
 ### Next Phase (task-014: Token Optimizer)

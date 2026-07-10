@@ -1,5 +1,0 @@
-repo_url: https://github.com/cloud-custodian/cloud-custodian
-category: Infrastructure
-failure_type: Unknown
-timestamp: 2026-07-08T16:35:31.845612
-error_message: [WinError 2] The system cannot find the file specified
