@@ -10,6 +10,9 @@ from .graph_expander import expand_by_call_graph, CallGraphInterface
 from .compressor import compress_over_budget, CompressionError
 from .arch_retrieval import boost_by_architecture
 from .model_adapter import adapt_prompt_for_model
+from .quality_logger import ContextQualityLogger
+from .metrics import MetricsCollector
+from .weight_tuner import WeightTuner
 
 __all__ = [
     "TokenBudget",
@@ -28,4 +31,7 @@ __all__ = [
     "CompressionError",
     "boost_by_architecture",
     "adapt_prompt_for_model",
+    "ContextQualityLogger",
+    "MetricsCollector",
+    "WeightTuner",
 ]
