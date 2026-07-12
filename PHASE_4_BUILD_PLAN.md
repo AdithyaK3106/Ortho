@@ -318,7 +318,7 @@ def adapt_prompt_for_model(
 
 ---
 
-### 7. Context Quality Logger
+### 7. Context Quality Logger ✅ DONE
 
 **What it does:** Log every context assembly decision for offline analysis and tuning.
 
@@ -370,7 +370,7 @@ def log_context_quality(
 
 ---
 
-### 8. Metrics Collection + `ortho debug context` Command
+### 8. Metrics Collection + `ortho debug context` Command ✅ DONE
 
 **What it does:** Measure token reduction vs Phase 3 baseline; add CLI command for debugging.
 
@@ -431,7 +431,7 @@ def ortho_debug_context(
 
 ---
 
-### 9. Ranking Weight Tuning Framework
+### 9. Ranking Weight Tuning Framework ✅ DONE
 
 **What it does:** Auto-tune reranker weights from quality logs.
 
