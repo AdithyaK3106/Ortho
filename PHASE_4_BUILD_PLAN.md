@@ -166,7 +166,7 @@ def expand_by_call_graph(
 
 ---
 
-### 4. Context Compressor
+### 4. Context Compressor ✅ DONE
 
 **What it does:** When context exceeds token budget, summarize low-priority chunks instead of discarding them.
 
@@ -218,7 +218,7 @@ def compress_over_budget(
 
 ---
 
-### 5. Architecture-Aware Retrieval
+### 5. Architecture-Aware Retrieval ✅ DONE
 
 **What it does:** Weight architecturally central modules higher during context retrieval.
 
@@ -269,7 +269,7 @@ def boost_by_architecture(
 
 ---
 
-### 6. Model Context Adapter
+### 6. Model Context Adapter ✅ DONE
 
 **What it does:** Adjust prompt assembly per LLM model (Opus vs Haiku vs GPT differences).
 
