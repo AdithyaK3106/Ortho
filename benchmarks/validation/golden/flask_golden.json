@@ -52,7 +52,7 @@
     "dataset": "flask",
     "metrics": {
       "architecture_style_accuracy": 1.0,
-      "architecture_confidence": 0.55,
+      "architecture_confidence": 0.95,
       "layer_precision": 0.5294,
       "layer_recall": 0.5294,
       "layer_f1": 0.5294,
@@ -107,11 +107,12 @@
       },
       "evidence": [
         "Detected style: layered",
-        "Confidence: 0.55",
+        "Confidence: 0.95",
         "Import graph forms 4-level dependency chain",
         "Low import-cycle ratio (0.0%)",
         "Implicit layer structure detected (4 layers via dependency partition)",
-        "Competing scores: layered=0.55, microservices=0.35, mvc=0.20, flat=0.15, hexagonal=0.00"
+        "Framework detected: flask (confidence 0.95)",
+        "Competing scores: layered=0.97, microservices=0.31, mvc=0.20, flat=0.12, hexagonal=0.00"
       ]
     },
     "timings": {},
@@ -173,9 +174,9 @@
     "suite": "efficiency",
     "dataset": "flask",
     "metrics": {
-      "context_tokens_used": 648,
-      "context_budget_fill_pct": 8.1,
-      "context_compression_ratio": 0.5305,
+      "context_tokens_used": 668,
+      "context_budget_fill_pct": 8.35,
+      "context_compression_ratio": 0.5311,
       "context_chunks_total": 2,
       "context_chunks_included": 2,
       "peak_memory_mb": 0.3

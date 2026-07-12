@@ -88,6 +88,37 @@ ENTRY_POINT_STEMS = frozenset({
     "main", "__main__", "app", "application", "wsgi", "asgi", "manage",
     "server", "run", "cli",
 })
+
+# Framework fingerprints: decorators, imports, and file patterns that identify frameworks
+FRAMEWORK_FINGERPRINTS = {
+    'flask': {
+        'decorators': ['@app.route', '@app.before_request', '@app.after_request', '@bp.route'],
+        'imports': ['flask.Flask', 'flask.Blueprint'],
+        'files': ['app.py', 'wsgi.py'],
+        'style': ArchStyle.LAYERED,
+    },
+    'django': {
+        'files': ['manage.py', 'settings.py', 'urls.py', 'wsgi.py'],
+        'imports': ['django.db', 'django.views'],
+        'style': ArchStyle.LAYERED,
+    },
+    'fastapi': {
+        'decorators': ['@app.get', '@app.post', '@app.put', '@app.delete', '@app.dependency'],
+        'imports': ['fastapi', 'pydantic'],
+        'files': ['main.py', 'schemas.py'],
+        'style': ArchStyle.LAYERED,
+    },
+    'click': {
+        'decorators': ['@click.command', '@click.option', '@click.group', '@click.pass_context'],
+        'files': ['cli.py', 'commands.py'],
+        'style': ArchStyle.FLAT,
+    },
+    'celery': {
+        'imports': ['celery', 'celery.Task'],
+        'files': ['celery.py', 'tasks.py'],
+        'style': ArchStyle.MICROSERVICES,
+    },
+}
 # Top-level dirs that are containers for components in common monorepo
 # layouts (contain no code directly, only component subtrees).
 _EVIDENCE_THRESHOLD = 0.45
@@ -183,6 +214,9 @@ class _Signals:
         # Multi-evidence graph analysis: implicit layers, coupling metrics
         self.implicit_layers = self._detect_implicit_layers()
         self.coupling_metrics = self._measure_coupling()
+
+        # Framework fingerprinting
+        self.framework_signatures = self._detect_frameworks()
 
     def _dag_shape(self):
         edges = {(e.importer_file_id, e.imported_file_id) for e in self.internal_imports}
@@ -292,6 +326,49 @@ class _Signals:
             'avg_fan_out': avg_fan_out,
         }
 
+    def _detect_frameworks(self):
+        """Fingerprint frameworks via imports, decorators, and canonical files.
+
+        Returns list of (framework_name, confidence, style) tuples, sorted by confidence.
+        """
+        detected = []
+        for framework_name, sig_config in FRAMEWORK_FINGERPRINTS.items():
+            confidence = 0.0
+
+            # Check for canonical files (strong signal, 0.3 each)
+            canonical_files = sig_config.get('files', [])
+            for fname in canonical_files:
+                if any(fname in p.lower() for p in self.paths.values()):
+                    confidence += 0.3
+
+            # Check for imports (medium signal, 0.25 each)
+            import_patterns = sig_config.get('imports', [])
+            for pattern in import_patterns:
+                module_name = pattern.split('.')[0].lower()
+                if module_name in self.external_modules:
+                    confidence += 0.25
+
+            # Check for decorators (weak signal, 0.15 each, via stem token matching)
+            # Since we don't have full source code, we check for common decorator-related stems
+            decorator_patterns = sig_config.get('decorators', [])
+            if framework_name == 'flask' and ('route' in self.stem_tokens or 'blueprint' in self.stem_tokens):
+                confidence += 0.15
+            elif framework_name == 'django' and ('model' in self.stem_tokens or 'view' in self.stem_tokens):
+                confidence += 0.15
+            elif framework_name == 'fastapi' and ('schema' in self.stem_tokens or 'route' in self.stem_tokens):
+                confidence += 0.15
+            elif framework_name == 'click' and ('command' in self.stem_tokens or 'cli' in self.stem_tokens):
+                confidence += 0.15
+            elif framework_name == 'celery' and ('task' in self.stem_tokens or 'celery' in self.stem_tokens):
+                confidence += 0.15
+
+            if confidence > 0.0:
+                detected.append((framework_name, min(confidence, 0.95), sig_config['style']))
+
+        # Sort by confidence descending
+        detected.sort(key=lambda x: -x[1])
+        return detected
+
     def bands_present(self):
         # Directory names only: a file stem like core.py is not layer
         # structure — counting stems misclassified flat libraries as layered.
@@ -328,6 +405,22 @@ class ArchitectureDetector:
         ArchStyle.MICROSERVICES,
         ArchStyle.FLAT,
     ]
+
+    @staticmethod
+    def _framework_boost(sig: _Signals, target_style: ArchStyle) -> tuple[float, str]:
+        """Check if detected framework matches target style.
+
+        Returns (score_boost, evidence_line).
+        """
+        if not sig.framework_signatures:
+            return 0.0, ""
+
+        framework_name, fw_confidence, fw_style = sig.framework_signatures[0]
+        if fw_style == target_style:
+            score_boost = fw_confidence * 0.35  # Framework evidence gets 35% weight
+            evidence = f"Framework detected: {framework_name} (confidence {fw_confidence:.2f})"
+            return score_boost, evidence
+        return 0.0, ""
 
     def detect(
         self,
@@ -464,21 +557,27 @@ class ArchitectureDetector:
         has_implicit_structure = 2 <= implicit_layers <= 5
         coupling = sig.coupling_metrics
 
-        return _score([
-            (0.25, len(bands) >= 2,
+        # Framework detection
+        fw_boost, fw_evidence = self._framework_boost(sig, ArchStyle.LAYERED)
+
+        signals_list = [
+            (0.20, len(bands) >= 2,
              f"Layer vocabulary present in structure: {matched}"),
-            (0.10, len(bands) == 3,
+            (0.08, len(bands) == 3,
              "All three layer bands (presentation/business/data) present"),
-            (0.20, sig.dag_depth >= 3,
+            (0.18, sig.dag_depth >= 3,
              f"Import graph forms {sig.dag_depth}-level dependency chain"),
-            (0.15, sig.cycle_ratio < 0.1 and bool(sig.internal_imports),
+            (0.13, sig.cycle_ratio < 0.1 and bool(sig.internal_imports),
              f"Low import-cycle ratio ({sig.cycle_ratio:.1%})"),
-            (0.20, has_implicit_structure,
+            (0.18, has_implicit_structure,
              f"Implicit layer structure detected ({implicit_layers} layers via dependency partition)"),
-            (0.10, bool(banded_edges) and flow_ratio >= 0.7,
+            (0.08, bool(banded_edges) and flow_ratio >= 0.7,
              f"{flow_ratio:.0%} of cross-layer imports flow downward "
              "(presentation → business → data)"),
-        ])
+            (0.15, fw_boost > 0.0, fw_evidence),
+        ]
+        score, evidence = _score(signals_list)
+        return score + fw_boost, evidence
 
     def _score_hexagonal(self, sig: _Signals):
         ports = sig.has(HEX_PORT_TOKENS)
@@ -550,20 +649,25 @@ class ArchitectureDetector:
         messaging = sorted(set(sig.external_modules) & MESSAGING_RPC_MODULES)
         independent = sig.cross_component_ratio < 0.05 and len(sized) >= 3
 
-        return _score([
-            (0.20, len(sized) >= 3,
+        # Framework detection
+        fw_boost, fw_evidence = self._framework_boost(sig, ArchStyle.MICROSERVICES)
+
+        score, evidence = _score([
+            (0.18, len(sized) >= 3,
              f"{len(sized)} sizeable independent components"),
-            (0.25, len(with_entry) >= 3,
+            (0.22, len(with_entry) >= 3,
              f"{len(with_entry)} components have their own entry points "
              f"({', '.join(sorted(with_entry)[:5])})"),
-            (0.25, independent,
+            (0.22, independent,
              f"Components are import-independent "
              f"({sig.cross_component_ratio:.1%} cross-component imports)"),
-            (0.15, bool(messaging),
+            (0.13, bool(messaging),
              f"Inter-service communication dependencies: {', '.join(messaging)}"),
-            (0.15, len(sig.entry_components & sized) >= 3 and bool(messaging),
+            (0.12, len(sig.entry_components & sized) >= 3 and bool(messaging),
              "Multiple entry points combined with messaging infrastructure"),
+            (0.13, fw_boost > 0.0, fw_evidence),
         ])
+        return score + fw_boost, evidence
 
     def _score_flat(self, sig: _Signals):
         no_layer_vocab = not sig.bands_present()
@@ -572,16 +676,21 @@ class ArchitectureDetector:
         # (all modules interconnected, not layered or separated)
         high_coupling = coupling['density'] > 0.15 and coupling['avg_fan_in'] > 2.0
 
+        # Framework detection
+        fw_boost, fw_evidence = self._framework_boost(sig, ArchStyle.FLAT)
+
         score, evidence = _score([
-            (0.35, sig.shallow_ratio >= 0.7,
+            (0.30, sig.shallow_ratio >= 0.7,
              f"{sig.shallow_ratio:.0%} of files at directory depth ≤ 1"),
-            (0.15, no_layer_vocab, "No layering vocabulary in structure"),
-            (0.10, sig.n_files < 30, f"Small codebase ({sig.n_files} files)"),
-            (0.20, sig.dag_depth <= 2,
+            (0.12, no_layer_vocab, "No layering vocabulary in structure"),
+            (0.08, sig.n_files < 30, f"Small codebase ({sig.n_files} files)"),
+            (0.18, sig.dag_depth <= 2,
              f"Shallow import chains (max depth {sig.dag_depth})"),
-            (0.20, high_coupling,
+            (0.18, high_coupling,
              f"High coupling density ({coupling['density']:.2f}), avg fan-in {coupling['avg_fan_in']:.1f}"),
+            (0.14, fw_boost > 0.0, fw_evidence),
         ])
+        score += fw_boost
         # Architectural vocabulary is direct counter-evidence for "flat":
         # a structured repo isn't flat however shallow its file tree is.
         if not no_layer_vocab:
