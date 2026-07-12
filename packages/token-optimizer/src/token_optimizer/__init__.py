@@ -5,6 +5,7 @@ from .types import ContextChunk, ContextPackage
 from .assembler import assemble_context
 from .prompt import assemble_prompt
 from .deduplicator import detect_and_remove_duplicates, DeduplicationResult
+from .reranker import rerank_by_intent, RerankerConfig
 
 __all__ = [
     "TokenBudget",
@@ -15,4 +16,6 @@ __all__ = [
     "assemble_prompt",
     "detect_and_remove_duplicates",
     "DeduplicationResult",
+    "rerank_by_intent",
+    "RerankerConfig",
 ]
