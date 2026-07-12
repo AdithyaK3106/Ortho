@@ -13,7 +13,7 @@ Each component has: Description, Interface Contract, Tests, Effort estimate.
 
 ---
 
-### 1. Semantic Duplicate Detector
+### 1. Semantic Duplicate Detector ✅ DONE
 
 **What it does:** Detects semantically overlapping context chunks; removes redundancy before token budgeting.
 
