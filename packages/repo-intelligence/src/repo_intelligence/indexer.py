@@ -137,6 +137,8 @@ class Indexer:
         # Populate file objects for in-memory results
         if self.store is None:
             result.files = list(file_objects.values())
+            # Second pass: resolve internal imports against discovered files
+            self._resolve_imports_in_memory(result, self.repo_root)
 
         # Second pass: import + cross-file call resolution against the complete
         # index — order-independent (ADR-011)
@@ -256,6 +258,54 @@ class Indexer:
             result.persisted_imports += persisted.imports_written
             result.persisted_calls += persisted.calls_written
             result.persisted_calls_dropped += persisted.calls_dropped_unresolved
+
+    def _resolve_imports_in_memory(self, result: IndexResult, repo_root: Path) -> None:
+        """
+        Resolve internal imports by checking if target module is in repository.
+
+        Updates result.imports to mark internal vs external and map file IDs.
+
+        Args:
+            result: IndexResult with populated imports and files
+            repo_root: Repository root path
+        """
+        # Build set of internal package names from repository structure
+        internal_packages = set()
+        container_dirs = {'src', 'lib', 'source', 'packages', 'app'}
+
+        for file in result.files:
+            rel_path = file.rel_path.replace('\\', '/')
+            parts = rel_path.split('/')
+
+            # Case 1: src/flask/... or lib/mylib/... -> add flask, mylib
+            if len(parts) > 1 and parts[0] in container_dirs:
+                internal_packages.add(parts[1])
+
+            # Case 2: top-level package (flask/..., click/..., etc)
+            if len(parts) > 0 and parts[0] not in container_dirs and parts[0] not in {'tests', 'test', 'docs', 'examples'}:
+                internal_packages.add(parts[0])
+
+        # Resolve imports: check if target module belongs to internal package
+        resolved_imports = []
+        for imp in result.imports:
+            target_module = imp.imported_module
+            # Get top-level module name
+            top_module = target_module.split('.')[0] if target_module else ''
+
+            # Check if top-level module is an internal package
+            if top_module in internal_packages:
+                imp.is_external = False
+                # Try to find file match for graph edges
+                for file in result.files:
+                    if top_module in file.id.replace('\\', '/'):
+                        imp.imported_file_id = file.id
+                        break
+            else:
+                imp.is_external = True
+
+            resolved_imports.append(imp)
+
+        result.imports = resolved_imports
 
     def can_accept_error_rate(self, result: IndexResult) -> bool:
         """
