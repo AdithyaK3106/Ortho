@@ -30,6 +30,11 @@ class IndexResult:
     persisted_imports: int = 0
     persisted_calls: int = 0
     persisted_calls_dropped: int = 0
+    # Raw graph data (populated when no store provided)
+    files: list = field(default_factory=list)
+    symbols: list = field(default_factory=list)
+    imports: list = field(default_factory=list)
+    calls: list = field(default_factory=list)
 
     @property
     def success_rate(self) -> float:
@@ -102,12 +107,22 @@ class Indexer:
 
         logger.info(f"Discovered {result.total_files} Python files")
 
+        # Track file objects (for in-memory results when no store)
+        file_objects = {}
+
         # Index each file
         for idx, file_path in enumerate(python_files):
             if self.progress_callback:
                 self.progress_callback(idx, result.total_files)
 
             try:
+                # Track file
+                rel_path = str(file_path.relative_to(self.repo_root))
+                file_id = rel_path
+                if self.store is None:  # Only track when returning data in-memory
+                    from arch_intelligence.arch_detector import File
+                    file_objects[file_id] = File(id=file_id, rel_path=rel_path)
+
                 self._index_file(file_path, result)
                 result.files_scanned += 1
             except Exception as e:
@@ -118,6 +133,10 @@ class Indexer:
 
         if self.progress_callback:
             self.progress_callback(result.total_files, result.total_files)
+
+        # Populate file objects for in-memory results
+        if self.store is None:
+            result.files = list(file_objects.values())
 
         # Second pass: import + cross-file call resolution against the complete
         # index — order-independent (ADR-011)
@@ -144,16 +163,23 @@ class Indexer:
             file_paths: List of absolute paths to index
 
         Returns:
-            IndexResult with scan statistics
+            IndexResult with scan statistics and raw graph data (if no store)
         """
         result = IndexResult()
         result.total_files = len(file_paths)
+        file_objects = {}
 
         for idx, file_path in enumerate(file_paths):
             if self.progress_callback:
                 self.progress_callback(idx, result.total_files)
 
             try:
+                # Track file
+                if self.store is None:
+                    from arch_intelligence.arch_detector import File
+                    file_id = str(file_path.relative_to(self.repo_root)) if file_path.is_relative_to(self.repo_root) else str(file_path)
+                    file_objects[file_id] = File(id=file_id, rel_path=file_id)
+
                 self._index_file(file_path, result)
                 result.files_scanned += 1
             except Exception as e:
@@ -164,6 +190,10 @@ class Indexer:
 
         if self.progress_callback:
             self.progress_callback(result.total_files, result.total_files)
+
+        # Populate file objects for in-memory results
+        if self.store is None:
+            result.files = list(file_objects.values())
 
         return result
 
@@ -202,8 +232,24 @@ class Indexer:
         calls = self.call_builder.extract_calls(file_path, source, symbols)
         result.total_calls += len(calls)
 
-        # Persist (single writer: IndexStore, ADR-011)
-        if self.store is not None:
+        # Store in-memory data when no persistence store provided
+        if self.store is None:
+            result.symbols.extend(symbols)
+            # Convert ImportEdge format to detector format for in-memory use
+            from arch_intelligence.arch_detector import ImportEdge as DetectorImportEdge
+            rel_path = str(file_path.relative_to(self.repo_root)) if file_path.is_relative_to(self.repo_root) else str(file_path)
+            for imp in imports:
+                # Mark as external initially; detector will resolve if internal
+                detector_edge = DetectorImportEdge(
+                    importer_file_id=rel_path,
+                    imported_file_id=None,
+                    imported_module=imp.target_module,
+                    is_external=True
+                )
+                result.imports.append(detector_edge)
+            result.calls.extend(calls)
+        else:
+            # Persist (single writer: IndexStore, ADR-011)
             rel_path = str(file_path.relative_to(self.repo_root)) if file_path.is_absolute() else str(file_path)
             persisted = self.store.persist_file(rel_path, symbols, imports, calls)
             result.persisted_symbols += persisted.symbols_written
