@@ -42,9 +42,7 @@
       },
       "parse_errors": []
     },
-    "timings": {
-      "scan_repository": 0.968
-    },
+    "timings": {},
     "status": "SUCCESS",
     "error": null,
     "run_metadata": null
@@ -53,8 +51,8 @@
     "suite": "architecture",
     "dataset": "flask",
     "metrics": {
-      "architecture_style_accuracy": 0.0,
-      "architecture_confidence": 0.4,
+      "architecture_style_accuracy": 1.0,
+      "architecture_confidence": 0.55,
       "layer_precision": 0.5294,
       "layer_recall": 0.5294,
       "layer_f1": 0.5294,
@@ -65,8 +63,8 @@
     },
     "detail": {
       "ground_truth_style": "layered",
-      "predicted_style": "unknown",
-      "predicted_alternative": "layered",
+      "predicted_style": "layered",
+      "predicted_alternative": null,
       "layer_scores": {
         "precision": 0.5294,
         "recall": 0.5294,
@@ -108,15 +106,15 @@
         ]
       },
       "evidence": [
-        "Detected style: unknown",
-        "Confidence: 0.40",
-        "No style reached the 0.45 evidence threshold; strongest candidate was layered (0.40).",
-        "Competing scores: layered=0.40, microservices=0.35, mvc=0.20, flat=0.20, hexagonal=0.00"
+        "Detected style: layered",
+        "Confidence: 0.55",
+        "Import graph forms 4-level dependency chain",
+        "Low import-cycle ratio (0.0%)",
+        "Implicit layer structure detected (4 layers via dependency partition)",
+        "Competing scores: layered=0.55, microservices=0.35, mvc=0.20, flat=0.15, hexagonal=0.00"
       ]
     },
-    "timings": {
-      "detect_architecture": 0.774
-    },
+    "timings": {},
     "status": "SUCCESS",
     "error": null,
     "run_metadata": null
@@ -166,9 +164,7 @@
         }
       ]
     },
-    "timings": {
-      "analyze_impact_total": 0.006
-    },
+    "timings": {},
     "status": "SUCCESS",
     "error": null,
     "run_metadata": null
@@ -177,9 +173,9 @@
     "suite": "efficiency",
     "dataset": "flask",
     "metrics": {
-      "context_tokens_used": 620,
-      "context_budget_fill_pct": 7.75,
-      "context_compression_ratio": 0.531,
+      "context_tokens_used": 648,
+      "context_budget_fill_pct": 8.1,
+      "context_compression_ratio": 0.5305,
       "context_chunks_total": 2,
       "context_chunks_included": 2,
       "peak_memory_mb": 0.3
@@ -188,14 +184,7 @@
       "budget_total": 8000,
       "query": "architecture overview subsystems dependency health technical debt"
     },
-    "timings": {
-      "scan_repository": 0.007,
-      "detect_architecture": 0.032,
-      "ingest_analysis_artifacts": 0.083,
-      "assemble_context": 0.005,
-      "total": 0.127,
-      "context_latency_ms": 2.19
-    },
+    "timings": {},
     "status": "SUCCESS",
     "error": null,
     "run_metadata": null
@@ -270,9 +259,7 @@
         }
       ]
     },
-    "timings": {
-      "retrieve_total": 0.016
-    },
+    "timings": {},
     "status": "SUCCESS",
     "error": null,
     "run_metadata": null

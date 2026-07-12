@@ -180,6 +180,10 @@ class _Signals:
             if self.n_files else 0.0
         )
 
+        # Multi-evidence graph analysis: implicit layers, coupling metrics
+        self.implicit_layers = self._detect_implicit_layers()
+        self.coupling_metrics = self._measure_coupling()
+
     def _dag_shape(self):
         edges = {(e.importer_file_id, e.imported_file_id) for e in self.internal_imports}
         if not edges:
@@ -212,6 +216,81 @@ class _Signals:
         cyclic_edges = sum(1 for a, b in edges if a in cyclic_nodes or b in cyclic_nodes)
         max_depth = max(depth.values(), default=1)
         return max_depth, cyclic_edges / len(edges)
+
+    def _detect_implicit_layers(self):
+        """Partition files into layers by import dependencies.
+
+        Assigns layer numbers based on topological sort: files with high fan-in
+        (many dependents) are lower layers; files with high fan-out go upper.
+        Returns number of distinct layer bands.
+        """
+        edges = {(e.importer_file_id, e.imported_file_id) for e in self.internal_imports}
+        if not edges:
+            return 1  # No imports = single layer
+
+        nodes = {n for edge in edges for n in edge}
+        in_deg = Counter(b for _, b in edges)
+        out_deg = Counter(a for a, _ in edges)
+        succ_map = {}
+        for a, b in edges:
+            succ_map.setdefault(a, set()).add(b)
+
+        # Topological sort (Kahn): assign layer number
+        layer = {}
+        ready = sorted(n for n in nodes if in_deg[n] == 0)
+        remaining_in = dict(in_deg)
+
+        while ready:
+            n = ready.pop(0)
+            pred_layers = []
+            for p in nodes:
+                if n in succ_map.get(p, set()) and p in layer:
+                    pred_layers.append(layer[p])
+            layer[n] = max(pred_layers) + 1 if pred_layers else 0
+
+            for succ in succ_map.get(n, set()):
+                remaining_in[succ] -= 1
+                if remaining_in[succ] == 0:
+                    ready.append(succ)
+            ready.sort()
+
+        # Files in cycles get assigned to max layer + 1
+        for n in nodes:
+            if n not in layer:
+                layer[n] = max(layer.values()) + 1 if layer else 0
+
+        n_layers = len(set(layer.values())) if layer else 1
+        return n_layers
+
+    def _measure_coupling(self):
+        """Measure graph coupling metrics: cycles, density, fan-in/out."""
+        edges = {(e.importer_file_id, e.imported_file_id) for e in self.internal_imports}
+        if not edges:
+            return {
+                'cycle_ratio': 0.0,
+                'density': 0.0,
+                'avg_fan_in': 0.0,
+                'avg_fan_out': 0.0,
+            }
+
+        nodes = {n for edge in edges for n in edge}
+        in_deg = Counter(b for _, b in edges)
+        out_deg = Counter(a for a, _ in edges)
+
+        # Average fan-in and fan-out across all nodes
+        avg_fan_in = sum(in_deg.values()) / len(nodes) if nodes else 0.0
+        avg_fan_out = sum(out_deg.values()) / len(nodes) if nodes else 0.0
+
+        # Density: actual edges / possible edges
+        max_edges = len(nodes) * (len(nodes) - 1) if len(nodes) > 1 else 1
+        density = len(edges) / max_edges
+
+        return {
+            'cycle_ratio': self.cycle_ratio,  # Already computed
+            'density': density,
+            'avg_fan_in': avg_fan_in,
+            'avg_fan_out': avg_fan_out,
+        }
 
     def bands_present(self):
         # Directory names only: a file stem like core.py is not layer
@@ -380,15 +459,22 @@ class ArchitectureDetector:
         flow_ok = sum(1 for a, b in banded_edges if a < b)
         flow_ratio = flow_ok / len(banded_edges) if banded_edges else 0.0
 
+        # Implicit layer detection: partition by fan-in/fan-out
+        implicit_layers = sig.implicit_layers
+        has_implicit_structure = 2 <= implicit_layers <= 5
+        coupling = sig.coupling_metrics
+
         return _score([
-            (0.35, len(bands) >= 2,
+            (0.25, len(bands) >= 2,
              f"Layer vocabulary present in structure: {matched}"),
-            (0.15, len(bands) == 3,
+            (0.10, len(bands) == 3,
              "All three layer bands (presentation/business/data) present"),
-            (0.25, sig.dag_depth >= 3,
+            (0.20, sig.dag_depth >= 3,
              f"Import graph forms {sig.dag_depth}-level dependency chain"),
             (0.15, sig.cycle_ratio < 0.1 and bool(sig.internal_imports),
              f"Low import-cycle ratio ({sig.cycle_ratio:.1%})"),
+            (0.20, has_implicit_structure,
+             f"Implicit layer structure detected ({implicit_layers} layers via dependency partition)"),
             (0.10, bool(banded_edges) and flow_ratio >= 0.7,
              f"{flow_ratio:.0%} of cross-layer imports flow downward "
              "(presentation → business → data)"),
@@ -481,13 +567,20 @@ class ArchitectureDetector:
 
     def _score_flat(self, sig: _Signals):
         no_layer_vocab = not sig.bands_present()
+        coupling = sig.coupling_metrics
+        # High coupling (many mutual imports, dense graph) suggests flat structure
+        # (all modules interconnected, not layered or separated)
+        high_coupling = coupling['density'] > 0.15 and coupling['avg_fan_in'] > 2.0
+
         score, evidence = _score([
-            (0.40, sig.shallow_ratio >= 0.7,
+            (0.35, sig.shallow_ratio >= 0.7,
              f"{sig.shallow_ratio:.0%} of files at directory depth ≤ 1"),
-            (0.20, no_layer_vocab, "No layering vocabulary in structure"),
-            (0.15, sig.n_files < 30, f"Small codebase ({sig.n_files} files)"),
-            (0.25, sig.dag_depth <= 2,
+            (0.15, no_layer_vocab, "No layering vocabulary in structure"),
+            (0.10, sig.n_files < 30, f"Small codebase ({sig.n_files} files)"),
+            (0.20, sig.dag_depth <= 2,
              f"Shallow import chains (max depth {sig.dag_depth})"),
+            (0.20, high_coupling,
+             f"High coupling density ({coupling['density']:.2f}), avg fan-in {coupling['avg_fan_in']:.1f}"),
         ])
         # Architectural vocabulary is direct counter-evidence for "flat":
         # a structured repo isn't flat however shallow its file tree is.
