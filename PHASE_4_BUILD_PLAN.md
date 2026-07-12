@@ -112,7 +112,7 @@ def rerank_by_intent(
 
 ---
 
-### 3. Graph Expander
+### 3. Graph Expander ✅ DONE
 
 **What it does:** When assembling context for a task, pull related symbols via call graph.
 
