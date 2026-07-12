@@ -1,6 +1,7 @@
-﻿"""FastAPI server for Ortho context hub."""
+﻿"""FastAPI server for Ortho — unified API + orchestration."""
 
 from fastapi import FastAPI
+from routers.orchestration import router as orchestration_router
 
 app = FastAPI(title="Ortho API", version="0.1.0")
 
@@ -11,20 +12,8 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
-@app.get("/api/v1/search")
-async def search(q: str = "") -> dict:
-    """Search for artifacts."""
-    if not q:
-        return {"error": "query required"}
-    return {"query": q, "results": []}
-
-
-@app.post("/api/v1/artifacts")
-async def create_artifact(name: str = "", content: str = "") -> dict:
-    """Create a new artifact."""
-    if not name or not content:
-        return {"error": "name and content required"}
-    return {"id": "artifact-001", "name": name, "created": True}
+# Include orchestration endpoints (task-013: /run, /approve, /reject, /status, /history)
+app.include_router(orchestration_router)
 
 
 if __name__ == "__main__":
