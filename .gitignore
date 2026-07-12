@@ -2,7 +2,11 @@
 __pycache__/
 *.pyc
 .coverage
+.coverage.*
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
 *.egg-info/
 
 # Virtual environments (P0-1)
