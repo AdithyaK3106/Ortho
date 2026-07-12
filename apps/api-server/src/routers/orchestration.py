@@ -3,11 +3,27 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
-from packages.orchestration.src.orchestration.intent.router import IntentRouter
-from packages.orchestration.src.orchestration.selector.engine import SelectorEngine
-from packages.orchestration.src.executor.workflow_executor import WorkflowExecutor
-from packages.orchestration.src.executor.state_store import WorkflowStateStore
-from shared.storage.src.storage.database import OrthoDatabase
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from pydantic import BaseModel
+from typing import Optional
+
+# ponytail: conditional imports for optional orchestration features
+try:
+    from packages.orchestration.src.orchestration.intent.router import IntentRouter
+    from packages.orchestration.src.orchestration.selector.engine import SelectorEngine
+    from packages.orchestration.src.executor.workflow_executor import WorkflowExecutor
+    from packages.orchestration.src.executor.state_store import WorkflowStateStore
+except ImportError:
+    # If packages not available, define stub interfaces
+    IntentRouter = None
+    SelectorEngine = None
+    WorkflowExecutor = None
+    WorkflowStateStore = None
+
+try:
+    from shared.storage.src.storage.database import OrthoDatabase
+except ImportError:
+    OrthoDatabase = None
 from pathlib import Path
 
 

@@ -1,19 +1,28 @@
-﻿"""FastAPI server for Ortho — unified API + orchestration."""
+﻿"""FastAPI server for Ortho — unified health + orchestration API.
+
+Note: Orchestration endpoints live in routers/orchestration.py but are
+optional (only loaded if packages are available). Core health check always works.
+"""
 
 from fastapi import FastAPI
-from routers.orchestration import router as orchestration_router
 
 app = FastAPI(title="Ortho API", version="0.1.0")
 
 
 @app.get("/health")
 async def health() -> dict:
-    """Health check endpoint."""
+    """Health check endpoint (always available)."""
     return {"status": "ok"}
 
 
-# Include orchestration endpoints (task-013: /run, /approve, /reject, /status, /history)
-app.include_router(orchestration_router)
+# Orchestration router is optional
+try:
+    from routers.orchestration import router as orchestration_router
+    app.include_router(orchestration_router)
+except ImportError:
+    # If orchestration packages not available, skip router
+    # This allows API server to still run with just /health
+    pass
 
 
 if __name__ == "__main__":
