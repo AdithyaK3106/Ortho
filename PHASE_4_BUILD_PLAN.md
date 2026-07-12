@@ -59,7 +59,7 @@ def detect_and_remove_duplicates(
 
 ---
 
-### 2. Intent-Aware Reranker
+### 2. Intent-Aware Reranker ✅ DONE
 
 **What it does:** Rescore context chunks by relevance to the user's intent, not just raw BM25/embedding scores.
 
