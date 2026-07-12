@@ -1,0 +1,319 @@
+{
+  "click": {
+    "style": "flat",
+    "confidence": 0.85,
+    "rationale": "Single package, no layers. Files organized by CLI command responsibility, not architectural tier. No separation of presentation/business/data.",
+    "layers": [],
+    "subsystems": [
+      {
+        "name": "core",
+        "description": "Core CLI parsing and command execution",
+        "files": ["core.py", "decorators.py", "types.py", "parser.py"]
+      },
+      {
+        "name": "formatting",
+        "description": "Output formatting and utilities",
+        "files": ["utils.py", "formatting.py", "termui.py"]
+      },
+      {
+        "name": "testing",
+        "description": "Testing utilities",
+        "files": ["testing.py"]
+      }
+    ]
+  },
+  "flask": {
+    "style": "layered",
+    "confidence": 0.80,
+    "rationale": "MVC-influenced architecture with clear layer separation: infrastructure (app config) → domain (exceptions, core logic) → presentation (views, routes) → utilities (testing, helpers).",
+    "layers": [
+      {
+        "number": 0,
+        "name": "infrastructure",
+        "description": "App initialization, config, globals",
+        "files": ["globals.py", "config.py", "__init__.py"]
+      },
+      {
+        "number": 1,
+        "name": "domain",
+        "description": "Core logic, exceptions, domain models",
+        "files": ["exceptions.py", "core.py", "signals.py"]
+      },
+      {
+        "number": 2,
+        "name": "presentation",
+        "description": "Views, route handlers, request/response",
+        "files": ["views.py", "routes/", "helpers.py"]
+      },
+      {
+        "number": 3,
+        "name": "utilities",
+        "description": "Testing, debugging utilities",
+        "files": ["testing.py", "json/encoder.py"]
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "routing",
+        "description": "URL routing and view dispatch",
+        "files": ["routes/", "views.py"]
+      },
+      {
+        "name": "context",
+        "description": "Request context and globals",
+        "files": ["ctx.py", "globals.py"]
+      },
+      {
+        "name": "json_handling",
+        "description": "JSON encoding/decoding",
+        "files": ["json/"]
+      }
+    ]
+  },
+  "django": {
+    "style": "layered",
+    "confidence": 0.95,
+    "rationale": "Canonical MTV (Model-Template-View) architecture enforced by framework. Explicit directory structure: db/models → views → urls → middleware. Three-tier dependency flow.",
+    "layers": [
+      {
+        "number": 0,
+        "name": "data",
+        "description": "ORM models, migrations, database backends",
+        "files": ["db/models/", "db/migrations/", "db/backends/"]
+      },
+      {
+        "number": 1,
+        "name": "business",
+        "description": "Business logic, forms, views",
+        "files": ["views.py", "forms.py", "http/"]
+      },
+      {
+        "number": 2,
+        "name": "presentation",
+        "description": "URL routing, templates, admin",
+        "files": ["urls/", "template/", "contrib/admin/"]
+      },
+      {
+        "number": 3,
+        "name": "infrastructure",
+        "description": "Middleware, config, WSGI",
+        "files": ["middleware/", "core/", "conf/"]
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "orm",
+        "description": "Object-Relational Mapping core",
+        "files": ["db/models/", "db/fields/"]
+      },
+      {
+        "name": "http",
+        "description": "HTTP request/response handling",
+        "files": ["http/", "views.py"]
+      },
+      {
+        "name": "routing",
+        "description": "URL configuration and resolution",
+        "files": ["urls/"]
+      },
+      {
+        "name": "contrib",
+        "description": "Optional contrib packages (auth, admin, contenttypes)",
+        "files": ["contrib/"]
+      }
+    ]
+  },
+  "fastapi": {
+    "style": "layered",
+    "confidence": 0.90,
+    "rationale": "Schema/API/Database three-tier structure. Pydantic schemas validate input (layer 0), route handlers implement business logic (layer 1), SQLAlchemy ORM accesses data (layer 2).",
+    "layers": [
+      {
+        "number": 0,
+        "name": "schemas",
+        "description": "Pydantic data validation and serialization",
+        "files": ["schemas/"]
+      },
+      {
+        "number": 1,
+        "name": "routes",
+        "description": "API endpoint handlers and logic",
+        "files": ["api/", "routes/", "dependencies.py"]
+      },
+      {
+        "number": 2,
+        "name": "database",
+        "description": "SQLAlchemy ORM and database models",
+        "files": ["database/", "models.py"]
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "users",
+        "description": "User management endpoints",
+        "files": ["api/routes/users.py", "schemas/user.py", "models/user.py"]
+      },
+      {
+        "name": "items",
+        "description": "Item management endpoints",
+        "files": ["api/routes/items.py", "schemas/item.py", "models/item.py"]
+      },
+      {
+        "name": "auth",
+        "description": "Authentication and authorization",
+        "files": ["api/dependencies.py", "security.py"]
+      }
+    ]
+  },
+  "sqlalchemy": {
+    "style": "flat",
+    "confidence": 0.85,
+    "rationale": "High internal coupling with mutual imports across modules. Organization by feature/concern (orm, sql, engine, pool) not by tier. Single public API surface (sqlalchemy/__init__.py). Every module imports multiple others.",
+    "layers": [],
+    "subsystems": [
+      {
+        "name": "orm",
+        "description": "Object-Relational Mapping abstraction",
+        "files": ["orm/", "inspection.py"]
+      },
+      {
+        "name": "sql",
+        "description": "SQL compilation and AST construction",
+        "files": ["sql/"]
+      },
+      {
+        "name": "engine",
+        "description": "Database connection pooling and execution",
+        "files": ["engine/", "pool/"]
+      },
+      {
+        "name": "types",
+        "description": "Data types and type coercion",
+        "files": ["types/"]
+      },
+      {
+        "name": "ext",
+        "description": "Official extensions",
+        "files": ["ext/"]
+      }
+    ]
+  },
+  "requests": {
+    "style": "flat",
+    "confidence": 0.95,
+    "rationale": "Textbook flat library. Single package (requests/), unified HTTP client API. No layering: all modules imported directly from root __init__.py. No semantic separation of tiers.",
+    "layers": [],
+    "subsystems": [
+      {
+        "name": "http_interface",
+        "description": "Core HTTP request/response abstraction",
+        "files": ["models.py", "api.py"]
+      },
+      {
+        "name": "sessions",
+        "description": "Session management and persistence",
+        "files": ["sessions.py"]
+      },
+      {
+        "name": "auth",
+        "description": "Authentication strategies",
+        "files": ["auth.py"]
+      },
+      {
+        "name": "adapters",
+        "description": "HTTP adapter plugins",
+        "files": ["adapters.py"]
+      },
+      {
+        "name": "utilities",
+        "description": "Utility functions and helpers",
+        "files": ["utils.py", "structures.py", "hooks.py"]
+      }
+    ]
+  },
+  "celery": {
+    "style": "microservices",
+    "confidence": 0.88,
+    "rationale": "Service-oriented architecture with independent worker, broker, result backend, and scheduler services. Each service has entry point and messaging interface. Low cross-service coupling.",
+    "layers": [],
+    "subsystems": [
+      {
+        "name": "worker",
+        "description": "Task execution service",
+        "files": ["worker/", "app/base.py", "task/"]
+      },
+      {
+        "name": "broker",
+        "description": "Message broker abstraction (RabbitMQ, Redis, etc.)",
+        "files": ["broker/"]
+      },
+      {
+        "name": "result_backend",
+        "description": "Result storage service (database, cache, etc.)",
+        "files": ["result/"]
+      },
+      {
+        "name": "scheduler",
+        "description": "Task scheduling service (Beat)",
+        "files": ["beat/"]
+      },
+      {
+        "name": "orchestration",
+        "description": "Task coordination (chord, group, chain, pipeline)",
+        "files": ["canvas.py", "chord.py"]
+      }
+    ]
+  },
+  "langchain": {
+    "style": "layered",
+    "confidence": 0.75,
+    "rationale": "Implicit layering via abstraction hierarchy, not explicit naming. Base classes (Runnable, BaseLanguageModel) → implementations (LLMs, retrievers, embeddings) → orchestrators (agents, chains). Layering detected via dependency inversion, not directory structure.",
+    "layers": [
+      {
+        "number": 0,
+        "name": "abstractions",
+        "description": "Abstract base classes and protocols",
+        "files": ["schema/", "base_language_model.py", "runnable.py"]
+      },
+      {
+        "number": 1,
+        "name": "implementations",
+        "description": "Concrete implementations of abstractions",
+        "files": ["llms/", "retrievers/", "memory/", "embeddings/", "prompts/"]
+      },
+      {
+        "number": 2,
+        "name": "orchestration",
+        "description": "Higher-level task composition",
+        "files": ["agents/", "chains/"]
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "llms",
+        "description": "Language model providers (OpenAI, Anthropic, etc.)",
+        "files": ["llms/"]
+      },
+      {
+        "name": "retrievers",
+        "description": "Document retrieval strategies",
+        "files": ["retrievers/"]
+      },
+      {
+        "name": "embeddings",
+        "description": "Text embedding models",
+        "files": ["embeddings/"]
+      },
+      {
+        "name": "agents",
+        "description": "Agent orchestration (ReAct, etc.)",
+        "files": ["agents/"]
+      },
+      {
+        "name": "chains",
+        "description": "Chain orchestration (LLMChain, etc.)",
+        "files": ["chains/"]
+      }
+    ]
+  }
+}
