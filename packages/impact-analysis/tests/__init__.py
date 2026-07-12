@@ -1,1 +1,1 @@
-"""Tests for impact-analysis package."""
+# Namespace package for impact-analysis tests
