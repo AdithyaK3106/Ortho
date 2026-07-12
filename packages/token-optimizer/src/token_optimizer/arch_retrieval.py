@@ -29,6 +29,9 @@ def boost_by_architecture(
 
     Returns:
         Same chunks, relevance_score boosted, resorted
+
+    Raises:
+        ValueError: If centrality_weights contains negative values
     """
     # Early exit if no architecture model
     if architecture_model is None:
@@ -39,6 +42,14 @@ def boost_by_architecture(
 
     if centrality_weights is None:
         centrality_weights = _default_centrality_weights()
+    else:
+        # Validate weights (all must be positive)
+        for style_weights in centrality_weights.values():
+            for weight in style_weights.values():
+                if weight < 0.0:
+                    raise ValueError(
+                        f"All centrality weights must be non-negative, got {weight}"
+                    )
 
     # Get architecture style
     arch_style = getattr(architecture_model, "style", "unknown")

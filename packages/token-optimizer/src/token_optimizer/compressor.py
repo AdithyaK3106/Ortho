@@ -45,11 +45,12 @@ def compress_over_budget(
         New ContextPackage with compressed content
 
     Raises:
-        CompressionError: If compression_target invalid
+        CompressionError: If compression_target invalid or negative
+        ValueError: If inputs invalid
     """
-    # Validate inputs
-    if not (0.0 <= compression_target <= 1.0):
-        raise CompressionError(
+    # Validate compression_target strictly
+    if compression_target < 0.0 or compression_target > 1.0:
+        raise ValueError(
             f"compression_target must be in [0.0, 1.0], got {compression_target}"
         )
 
@@ -96,26 +97,33 @@ def _summarize_chunk(
 
     Args:
         chunk: ContextChunk to summarize
-        compression_target: Target compression ratio
+        compression_target: Target compression ratio (0.0–1.0)
         max_retries: Number of retry attempts
 
     Returns:
-        Summarized content
+        Summarized content (shorter or original if compression_target high)
     """
     # Compute target length
     original_length = len(chunk.content)
-    target_length = max(50, int(original_length * compression_target))
+    target_length = max(30, int(original_length * compression_target))
 
-    # Simple heuristic: truncate and add ellipsis
-    # In production: call LLM via Anthropic API
+    # If already short or target is high, return original
     if original_length <= target_length:
         return chunk.content
 
-    # Truncate to target, breaking at word boundary
-    truncated = chunk.content[:target_length].rsplit(" ", 1)[0]
-    if not truncated:
-        truncated = chunk.content[:target_length]
+    # Truncate to target, breaking at sentence boundary
+    text = chunk.content[:target_length]
 
-    # Add summary marker
-    summary = f"{truncated}... [summarized from {chunk.source_type}]"
+    # Try to break at period, comma, or newline (preserve structure)
+    last_period = text.rfind(".")
+    last_comma = text.rfind(",")
+    last_newline = text.rfind("\n")
+
+    break_pos = max(last_period, last_comma, last_newline)
+    if break_pos > target_length * 0.6:  # Must break after 60% of target
+        text = text[:break_pos + 1]
+
+    # Add summary marker indicating truncation
+    marker = f"... [truncated {100 - int(compression_target*100)}%]"
+    summary = text.rstrip() + marker
     return summary
