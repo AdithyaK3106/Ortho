@@ -6,9 +6,9 @@
       "symbols_precision": 0.0802,
       "symbols_recall": 1.0,
       "symbols_f1": 0.1485,
-      "imports_precision": 0.1268,
+      "imports_precision": 0.075,
       "imports_recall": 1.0,
-      "imports_f1": 0.225,
+      "imports_f1": 0.1395,
       "callgraph_precision": 0.1374,
       "callgraph_recall": 1.0,
       "callgraph_f1": 0.2417,
@@ -25,12 +25,12 @@
         "extra": 1147
       },
       "imports": {
-        "precision": 0.1268,
+        "precision": 0.075,
         "recall": 1.0,
-        "f1": 0.225,
+        "f1": 0.1395,
         "correct": 9,
         "missed": 0,
-        "extra": 62
+        "extra": 111
       },
       "callgraph": {
         "precision": 0.1374,
@@ -43,7 +43,7 @@
       "parse_errors": []
     },
     "timings": {
-      "scan_repository": 0.843
+      "scan_repository": 0.968
     },
     "status": "SUCCESS",
     "error": null,
@@ -53,70 +53,69 @@
     "suite": "architecture",
     "dataset": "flask",
     "metrics": {
-      "architecture_style_accuracy": 1.0,
-      "architecture_confidence": 0.5,
-      "layer_precision": 0.1765,
-      "layer_recall": 0.1765,
-      "layer_f1": 0.1765,
-      "subsystem_mean_jaccard": 0.041,
+      "architecture_style_accuracy": 0.0,
+      "architecture_confidence": 0.4,
+      "layer_precision": 0.5294,
+      "layer_recall": 0.5294,
+      "layer_f1": 0.5294,
+      "subsystem_mean_jaccard": 0.0525,
       "subsystem_matched": 5,
       "subsystem_unmatched": 0,
       "dependency_direction_accuracy": 1.0
     },
     "detail": {
       "ground_truth_style": "layered",
-      "predicted_style": "layered",
-      "predicted_alternative": null,
+      "predicted_style": "unknown",
+      "predicted_alternative": "layered",
       "layer_scores": {
-        "precision": 0.1765,
-        "recall": 0.1765,
-        "f1": 0.1765,
-        "correct": 3,
-        "missed": 14,
-        "extra": 14
+        "precision": 0.5294,
+        "recall": 0.5294,
+        "f1": 0.5294,
+        "correct": 9,
+        "missed": 8,
+        "extra": 8
       },
       "subsystem_scores": {
-        "mean_jaccard": 0.041,
+        "mean_jaccard": 0.0525,
         "matched": 5,
         "unmatched": 0,
         "pairs": [
           {
             "expected_size": 3,
-            "predicted_index": 1,
-            "jaccard": 0.0385
+            "predicted_index": 4,
+            "jaccard": 0.0492
           },
           {
             "expected_size": 3,
-            "predicted_index": 1,
-            "jaccard": 0.0385
+            "predicted_index": 4,
+            "jaccard": 0.0492
           },
           {
             "expected_size": 3,
-            "predicted_index": 1,
-            "jaccard": 0.0385
+            "predicted_index": 4,
+            "jaccard": 0.0492
           },
           {
             "expected_size": 5,
-            "predicted_index": 1,
-            "jaccard": 0.0641
+            "predicted_index": 4,
+            "jaccard": 0.082
           },
           {
             "expected_size": 2,
-            "predicted_index": 1,
-            "jaccard": 0.0256
+            "predicted_index": 4,
+            "jaccard": 0.0328
           }
         ]
       },
       "evidence": [
-        "Detected style: layered",
-        "Confidence: 0.50",
-        "Layer vocabulary present in structure: presentation, data",
-        "Low import-cycle ratio (0.0%)",
-        "Competing scores: layered=0.50, microservices=0.35, mvc=0.20, flat=0.12, hexagonal=0.00"
+        "Detected style: unknown",
+        "Confidence: 0.40",
+        "No style reached the 0.45 evidence threshold; strongest candidate was layered (0.40).",
+        "Competing scores: layered=0.40, microservices=0.35, mvc=0.20, flat=0.20, hexagonal=0.00"
       ]
     },
     "timings": {
-      "detect_architecture": 0.635
+      "detect_architecture": 0.774
     },
     "status": "SUCCESS",
     "error": null,
@@ -126,10 +125,10 @@
     "suite": "impact",
     "dataset": "flask",
     "metrics": {
-      "impact_precision": 0.6842,
+      "impact_precision": 0.3478,
       "impact_recall": 0.5476,
-      "impact_f1": 0.3389,
-      "blast_radius_mean_relative_error": 2.0,
+      "impact_f1": 0.2685,
+      "blast_radius_mean_relative_error": 7.5714,
       "risk_score_correlation": -0.866,
       "entries_evaluated": 3
     },
@@ -137,38 +136,38 @@
       "per_entry": [
         {
           "changed_file": "src/flask/ctx.py",
-          "precision": 1.0,
+          "precision": 0.5,
           "recall": 0.5,
-          "f1": 0.6667,
-          "predicted_blast_radius": 0,
+          "f1": 0.5,
+          "predicted_blast_radius": 2,
           "actual_blast_radius": 2,
-          "blast_radius_rel_error": 1.0,
-          "risk_score": 0.2833333333333333
+          "blast_radius_rel_error": 0.0,
+          "risk_score": 0.10625
         },
         {
           "changed_file": "src/flask/ctx.py",
-          "precision": 1.0,
+          "precision": 0.5,
           "recall": 0.1429,
-          "f1": 0.25,
-          "predicted_blast_radius": 0,
+          "f1": 0.2222,
+          "predicted_blast_radius": 2,
           "actual_blast_radius": 7,
-          "blast_radius_rel_error": 1.0,
-          "risk_score": 0.2833333333333333
+          "blast_radius_rel_error": 0.7143,
+          "risk_score": 0.10625
         },
         {
           "changed_file": "src/flask/helpers.py",
-          "precision": 0.0526,
+          "precision": 0.0435,
           "recall": 1.0,
-          "f1": 0.1,
-          "predicted_blast_radius": 5,
+          "f1": 0.0833,
+          "predicted_blast_radius": 23,
           "actual_blast_radius": 1,
-          "blast_radius_rel_error": 4.0,
-          "risk_score": 0.6875
+          "blast_radius_rel_error": 22.0,
+          "risk_score": 0.20625
         }
       ]
     },
     "timings": {
-      "analyze_impact_total": 0.004
+      "analyze_impact_total": 0.006
     },
     "status": "SUCCESS",
     "error": null,
@@ -178,9 +177,9 @@
     "suite": "efficiency",
     "dataset": "flask",
     "metrics": {
-      "context_tokens_used": 616,
-      "context_budget_fill_pct": 7.7,
-      "context_compression_ratio": 0.5357,
+      "context_tokens_used": 620,
+      "context_budget_fill_pct": 7.75,
+      "context_compression_ratio": 0.531,
       "context_chunks_total": 2,
       "context_chunks_included": 2,
       "peak_memory_mb": 0.3
@@ -190,12 +189,12 @@
       "query": "architecture overview subsystems dependency health technical debt"
     },
     "timings": {
-      "scan_repository": 0.006,
-      "detect_architecture": 0.027,
-      "ingest_analysis_artifacts": 0.042,
-      "assemble_context": 0.003,
-      "total": 0.078,
-      "context_latency_ms": 1.96
+      "scan_repository": 0.007,
+      "detect_architecture": 0.032,
+      "ingest_analysis_artifacts": 0.083,
+      "assemble_context": 0.005,
+      "total": 0.127,
+      "context_latency_ms": 2.19
     },
     "status": "SUCCESS",
     "error": null,
@@ -272,7 +271,7 @@
       ]
     },
     "timings": {
-      "retrieve_total": 0.013
+      "retrieve_total": 0.016
     },
     "status": "SUCCESS",
     "error": null,

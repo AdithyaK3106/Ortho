@@ -1,8 +1,48 @@
-# Test Execution Policy v1.0
+# Test Execution Policy v1.1
 
-**Effective:** Phase 2+ (task-006 onward)  
+**Effective:** Phase 2+ (task-006 onward); v1.1 additions effective 2026-07-12  
 **Status:** ACTIVE  
 **Created:** 2026-07-01  
+**Updated:** 2026-07-12 (v1.1 — Test Authenticity + Golden Re-baseline rules)
+
+---
+
+## v1.1 Addendum: Test Authenticity & Golden Re-baseline (2026-07-12)
+
+v1.0 solved "tests designed but never run." The Phase 4 audit found the next
+evasion: **tests that run but test nothing.** Four Component 6–9 test files
+imported zero product code (they tested mocks defined inside the test file),
+~55 tests had empty `pass` bodies, and several assertions were tautologies on
+hardcoded data. Meanwhile the golden regression gate sat red for 3 days after
+two intentional semantic changes, and "110+ tests, 100% pass" was declared
+with 18 tests failing.
+
+### New Rules (enforced by TEST-DESIGNER, VERIFIER, and REVIEWER roles)
+
+1. **Real imports:** Every test file MUST import the product module it tests.
+   Mocks may replace *dependencies*, never the unit under test.
+2. **No stubs:** `pass`-body tests are forbidden. Defer untestable behaviors
+   in test-plan.md instead — a stub inflates the count and verifies nothing.
+3. **No tautologies:** An assertion that can be evaluated without executing
+   product code is not a test.
+4. **`pytest.raises` must wrap product code**, not bare asserts or mock
+   constructors.
+5. **Golden re-baseline:** Any change to output *semantics* (metric
+   definitions, labels/enums, normalization, formats) must re-run
+   `pytest benchmarks/validation/` in the same task and regenerate the golden
+   snapshot with a documented reason if it fails intentionally.
+6. **Status claims must match executed evidence:** No document may state a
+   test count or pass rate that is not backed by a VERIFIER log from the
+   current code state.
+
+### Mechanical check (VERIFIER runs this)
+
+```bash
+# Any file listed = violation (does not import its product package)
+for f in packages/*/tests/test_*.py; do
+  grep -L "from $(basename $(dirname $(dirname $f)) | tr '-' '_')" "$f"
+done
+```
 
 ---
 

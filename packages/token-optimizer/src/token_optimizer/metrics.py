@@ -42,11 +42,12 @@ class MetricsCollector:
         sorted_base = sorted(baseline_tokens)
         sorted_curr = sorted(current_tokens)
 
-        p50_idx = len(sorted_base) // 2
         p95_idx = int(len(sorted_base) * 0.95)
 
-        p50_phase3 = sorted_base[p50_idx]
-        p50_phase4 = sorted_curr[min(p50_idx, len(sorted_curr) - 1)]
+        # statistics.median interpolates on even-length inputs; the previous
+        # sorted[n//2] indexing returned the upper-middle value, not the median.
+        p50_phase3 = statistics.median(sorted_base)
+        p50_phase4 = statistics.median(sorted_curr)
 
         p95_phase3 = sorted_base[min(p95_idx, len(sorted_base) - 1)]
         p95_phase4 = sorted_curr[min(p95_idx, len(sorted_curr) - 1)]

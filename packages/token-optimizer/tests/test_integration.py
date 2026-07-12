@@ -253,7 +253,7 @@ class TestErrorHandlingIntegration:
     @pytest.mark.skipif(TokenBudget is None, reason="TokenBudget not yet implemented")
     def test_empty_artifact_set_handles_gracefully(self):
         """Empty search results don't crash assembly."""
-        from conftest import MockArtifactStore
+        from tests.conftest import MockArtifactStore
 
         store = MockArtifactStore([])
         budget = TokenBudget(total=100, used=0, model="claude")

@@ -103,6 +103,18 @@ pytest --tb=short --cov=. 2>&1 | tee .ases/evidence/$TASK_ID/test-$(date +%s).lo
 echo "EXIT:$?" >> .ases/evidence/$TASK_ID/test-$(date +%s).log
 pytest 2>&1 | tee .ases/evidence/$TASK_ID/regression-$(date +%s).log
 echo "EXIT:$?" >> .ases/evidence/$TASK_ID/regression-$(date +%s).log
+
+# Golden regression gate (MANDATORY — v1.1, added 2026-07-12).
+# Phase 4 was declared complete while this gate was silently red for 3 days.
+pytest benchmarks/validation/ --tb=short 2>&1 | tee .ases/evidence/$TASK_ID/golden-$(date +%s).log
+echo "EXIT:$?" >> .ases/evidence/$TASK_ID/golden-$(date +%s).log
+
+# Test authenticity check (MANDATORY — v1.1): every test file must import
+# the product package it claims to test. grep -L lists files that do NOT
+# import it — any file listed is a violation; empty output passes.
+for f in packages/*/tests/test_*.py; do
+  grep -L "from $(basename $(dirname $(dirname $f)) | tr '-' '_')" "$f"
+done 2>&1 | tee .ases/evidence/$TASK_ID/test-authenticity-$(date +%s).log
 ```
 
 #### Kotlin/Java/Expense App

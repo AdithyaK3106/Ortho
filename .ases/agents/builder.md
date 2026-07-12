@@ -126,6 +126,17 @@ If the spec is unclear, ask for clarification — do not guess.
 7. Deviate from spec without explicit justification in implementation-notes.md
 8. Add "nice-to-have" features, configuration, or future-proofing
 9. Skip the implementation-notes.md — VERIFIER depends on it
+10. **Change output semantics without re-baselining goldens (v1.1 — added
+    2026-07-12).** If your change alters the *meaning* of any output a golden
+    snapshot or benchmark records (metric definitions like blast_radius,
+    classification labels like a new architecture style, score normalization,
+    log formats), you MUST in the same task: (a) re-run
+    `pytest benchmarks/validation/` — if the golden gate fails because of
+    your intentional change, regenerate the golden snapshot and state the
+    reason in implementation-notes.md; (b) never leave a known-red golden
+    gate for the next task to discover. Phase 4 shipped with the golden gate
+    silently red for 3 days because two intentional semantic changes
+    (blast_radius redefinition, AMBIGUOUS style) skipped this step.
 
 ---
 
@@ -142,6 +153,7 @@ Before submitting your implementation, run this checklist:
 | **No False Claims** | I did not claim to have tested this or that it works | You |
 | **Notes Complete** | implementation-notes.md is filled out (not placeholder text) | You |
 | **No Scope Creep** | No features beyond spec; no premature optimization | You |
+| **Goldens Current** | If output semantics changed, golden gate re-run and re-baselined with documented reason | You |
 
 ---
 

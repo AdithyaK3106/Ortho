@@ -82,7 +82,7 @@ class TestAssemblerEdgeCases:
     @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
     def test_assemble_empty_search_results(self):
         """Empty artifact list returns empty ContextPackage."""
-        from conftest import MockArtifactStore
+        from tests.conftest import MockArtifactStore
 
         store = MockArtifactStore([])
         budget = TokenBudget(total=100, used=0, model="claude")
@@ -101,7 +101,7 @@ class TestAssemblerEdgeCases:
     @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
     def test_assemble_zero_budget(self):
         """Zero budget → no chunks included."""
-        from conftest import MockArtifactStore, MockArtifact
+        from tests.conftest import MockArtifactStore, MockArtifact
 
         budget = TokenBudget(total=0, used=0, model="claude")
         pkg = assemble_context(
@@ -122,29 +122,12 @@ class TestAssemblerEdgeCases:
     @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
     def test_assemble_single_chunk_exactly_fits(self):
         """Single chunk with tokens == budget.total."""
-        from conftest import MockArtifactStore, MockArtifact
-        from datetime import datetime
+        from tests.conftest import MockArtifactStore, MockArtifact
 
-        now = datetime.utcnow().isoformat()
-        artifacts = [
-            MockArtifact(
-                id="fit_exactly",
-                repo_id="test-repo",
-                type="spec",
-                title="Exact",
-                content="content",
-                source="doc.md",
-                created_at=now,
-                last_modified=now,
-                relevance_scope="global",
-                tags=[],
-                related_symbols=[],
-                estimated_tokens=100,  # Exactly equals budget
-                content_hash="hash",
-                version=1,
-            )
-        ]
-        store = MockArtifactStore(artifacts)
+        store = MockArtifactStore([
+            MockArtifact(id="fit_exactly", content="content",
+                         estimated_tokens=100, relevance_score=0.9)
+        ])
         budget = TokenBudget(total=100, used=0, model="claude")
 
         pkg = assemble_context(
@@ -163,29 +146,12 @@ class TestAssemblerEdgeCases:
     @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
     def test_assemble_single_chunk_exceeds_budget(self):
         """Single chunk with tokens > budget.total → not included."""
-        from conftest import MockArtifactStore, MockArtifact
-        from datetime import datetime
+        from tests.conftest import MockArtifactStore, MockArtifact
 
-        now = datetime.utcnow().isoformat()
-        artifacts = [
-            MockArtifact(
-                id="oversized",
-                repo_id="test-repo",
-                type="spec",
-                title="Large",
-                content="x" * 10000,
-                source="doc.md",
-                created_at=now,
-                last_modified=now,
-                relevance_scope="global",
-                tags=[],
-                related_symbols=[],
-                estimated_tokens=5000,  # Way larger than budget
-                content_hash="hash",
-                version=1,
-            )
-        ]
-        store = MockArtifactStore(artifacts)
+        store = MockArtifactStore([
+            MockArtifact(id="oversized", content="x" * 10000,
+                         estimated_tokens=5000, relevance_score=0.9)
+        ])
         budget = TokenBudget(total=100, used=0, model="claude")
 
         pkg = assemble_context(
@@ -429,6 +395,6 @@ class TestConcurrencyHints:
 
 # Helper: Mock classes for edge case tests (replicate from conftest if needed)
 try:
-    from conftest import MockArtifact, MockArtifactStore
+    from tests.conftest import MockArtifact, MockArtifactStore
 except ImportError:
     pass

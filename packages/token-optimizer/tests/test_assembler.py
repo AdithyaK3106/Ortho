@@ -117,7 +117,7 @@ class TestAssembleContextGreedyPacking:
     @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
     def test_assemble_empty_artifact_set(self):
         """Empty search results produce ContextPackage with no chunks."""
-        from conftest import MockArtifactStore
+        from tests.conftest import MockArtifactStore
         store = MockArtifactStore([])
 
         budget = TokenBudget(total=100, used=0, model="claude")
@@ -140,7 +140,7 @@ class TestAssembleContextTieBreaking:
     @pytest.mark.skipif(assemble_context is None, reason="assembler not implemented")
     def test_assemble_tie_breaking_relevance_then_token_count(self, sample_artifacts_tie_breaking):
         """When relevance_score identical, sort by token_count ascending."""
-        from conftest import MockArtifactStore
+        from tests.conftest import MockArtifactStore
         store = MockArtifactStore(sample_artifacts_tie_breaking)
 
         budget = TokenBudget(total=1000, used=0, model="claude")

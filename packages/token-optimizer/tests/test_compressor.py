@@ -102,10 +102,14 @@ class TestCompressorBoundaryConditions:
         assert compression_target == 1.0
 
     def test_compression_target_invalid(self):
-        """Invalid compression targets rejected."""
-        with pytest.raises((ValueError, AssertionError)):
-            # Should reject out-of-range targets
-            assert -0.1 < 0 or 1.1 > 1
+        """Real compressor rejects out-of-range targets."""
+        from token_optimizer.compressor import compress_over_budget
+
+        pkg = make_package([make_chunk("c1", "content", 100)])
+        with pytest.raises(ValueError):
+            compress_over_budget(pkg, compression_target=-0.1)
+        with pytest.raises(ValueError):
+            compress_over_budget(pkg, compression_target=1.1)
 
 
 class TestCompressorStateTransitions:
@@ -228,16 +232,29 @@ class TestCompressorIntegration:
     """Integration scenarios from FRD."""
 
     def test_realistic_workflow_over_budget(self):
-        """FRD scenario: full workflow context exceeds budget."""
+        """FRD scenario: total workflow context exceeds budget; compression
+        shrinks the low-priority chunks while preserving included ones."""
+        from token_optimizer.compressor import compress_over_budget
+
         chunks = [
             make_chunk("c1", "import os\nimport sys", 50, 0.9, included=True),
             make_chunk("c2", "def authenticate():\n    pass", 100, 0.8, included=True),
-            make_chunk("c3", "# Documentation for auth", 200, 0.3, included=False),
-            make_chunk("c4", "# Legacy code notes", 150, 0.2, included=False),
+            make_chunk("c3", "# Documentation for auth " * 40, 200, 0.3, included=False),
+            make_chunk("c4", "# Legacy code notes " * 40, 150, 0.2, included=False),
         ]
         pkg = make_package(chunks, budget_total=300)
-        included_tokens = sum(c.token_count for c in pkg.chunks if c.included)
-        assert included_tokens > pkg.budget.total
+        total_tokens = sum(c.token_count for c in pkg.chunks)
+        assert total_tokens > pkg.budget.total  # 500 > 300: over budget overall
+
+        compressed = compress_over_budget(pkg, compression_target=0.5)
+        # Included chunks untouched
+        assert compressed.chunks[0].content == chunks[0].content
+        assert compressed.chunks[1].content == chunks[1].content
+        # Low-priority chunks shrank
+        low_priority_after = sum(
+            c.token_count for c in compressed.chunks if not c.included
+        )
+        assert low_priority_after < 350
 
     def test_compression_preserves_structure(self):
         """Compression should maintain chunk identity."""

@@ -244,18 +244,27 @@ class TestQualityLoggerSensitiveData:
         logged_field = "query_keywords"
         assert "content" not in logged_field.lower()
 
-    def test_api_keys_not_logged(self):
-        """No API keys in logs."""
-        sensitive = ["api_key", "token", "password"]
-        logged_fields = ["timestamp", "model", "tokens_used"]
-        assert not any(s in str(logged_fields) for s in sensitive)
+    def test_api_keys_not_logged(self, tmp_path):
+        """Real logger redacts credential-shaped values from the query field."""
+        from token_optimizer.quality_logger import ContextQualityLogger
+        from token_optimizer.types import ContextPackage
+        from token_optimizer.budget import TokenBudget
 
-    def test_user_input_sanitized(self):
-        """User input sanitized in logs."""
-        # Original query may have PII
-        query = "My name is John and password is secret"
-        # Logger should not log this verbatim
-        pass
+        logger = ContextQualityLogger(log_dir=tmp_path)
+        pkg = ContextPackage(
+            id="pkg1", workflow_run_id="wf1", step_id="s1", chunks=[],
+            budget=TokenBudget(total=1000, used=0, model="test"),
+            assembled_at="2026-01-01T00:00:00Z",
+        )
+        logger.log_assembly(
+            pkg,
+            query="fix auth api_key=sk-supersecret123 password: hunter2",
+            intent_class="bug_fix",
+        )
+        logged = "".join(p.read_text() for p in tmp_path.glob("*.csv"))
+        assert "sk-supersecret123" not in logged
+        assert "hunter2" not in logged
+        assert "[REDACTED]" in logged
 
     def test_repo_path_anonymized(self):
         """Repo paths anonymized in logs."""

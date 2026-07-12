@@ -1,0 +1,11 @@
+suite,dataset,status,error,architecture_confidence,architecture_style_accuracy,blast_radius_mean_relative_error,callgraph_f1,callgraph_precision,callgraph_recall,context_budget_fill_pct,context_chunks_included,context_chunks_total,context_compression_ratio,context_tokens_used,dependency_direction_accuracy,entries_evaluated,impact_f1,impact_precision,impact_recall,imports_f1,imports_precision,imports_recall,layer_f1,layer_precision,layer_recall,mrr,ndcg_at_10,parse_success_rate,peak_memory_mb,precision_at_10,precision_at_5,questions_evaluated,recall_at_10,recall_at_5,repository_coverage,risk_score_correlation,subsystem_matched,subsystem_mean_jaccard,subsystem_unmatched,symbols_f1,symbols_precision,symbols_recall
+repository,click,SUCCESS,,,,,0.3483,0.2109,1.0,,,,,,,,,,,0.2202,0.1237,1.0,,,,,,1.0,,,,,,,1.0,,,,,0.3805,0.235,1.0
+repository,flask,SUCCESS,,,,,0.2417,0.1374,1.0,,,,,,,,,,,0.1395,0.075,1.0,,,,,,1.0,,,,,,,1.0,,,,,0.1485,0.0802,1.0
+architecture,click,SUCCESS,,0.4,0.0,,,,,,,,,,0.8333,,,,,,,,0.2,0.2,0.2,,,,,,,,,,,,5,0.0429,0,,,
+architecture,flask,SUCCESS,,0.4,0.0,,,,,,,,,,1.0,,,,,,,,0.5294,0.5294,0.5294,,,,,,,,,,,,5,0.0525,0,,,
+impact,click,SUCCESS,,,,8.0,,,,,,,,,,2,0.0,0.0,0.0,,,,,,,,,,,,,,,,,0.0,,,,,,
+impact,flask,SUCCESS,,,,7.5714,,,,,,,,,,3,0.2685,0.3478,0.5476,,,,,,,,,,,,,,,,,-0.866,,,,,,
+efficiency,click,SUCCESS,,,,,,,,8.0,2,2,0.5352,640,,,,,,,,,,,,,,,0.4,,,,,,,,,,,,,
+efficiency,flask,SUCCESS,,,,,,,,7.75,2,2,0.531,620,,,,,,,,,,,,,,,0.2,,,,,,,,,,,,,
+retrieval,click,SUCCESS,,,,,,,,,,,,,,,,,,,,,,,,0.0,0.0,,,0.0,0.0,6,0.0,0.0,,,,,,,,
+retrieval,flask,SUCCESS,,,,,,,,,,,,,,,,,,,,,,,,0.0,0.0,,,0.0,0.0,6,0.0,0.0,,,,,,,,

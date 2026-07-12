@@ -25,17 +25,11 @@ class WeightTuner:
         if len(values_x) != len(values_y):
             return 0.0
 
-        mean_x = statistics.mean(values_x)
-        mean_y = statistics.mean(values_y)
-
-        numerator = sum((x - mean_x) * (y - mean_y) for x, y in zip(values_x, values_y))
-        denom_x = statistics.stdev(values_x) if len(values_x) > 1 else 1.0
-        denom_y = statistics.stdev(values_y) if len(values_y) > 1 else 1.0
-
-        if denom_x == 0 or denom_y == 0:
+        try:
+            return statistics.correlation(values_x, values_y)
+        except statistics.StatisticsError:
+            # Zero variance in either input
             return 0.0
-
-        return numerator / (denom_x * denom_y * len(values_x))
 
     @staticmethod
     def auto_tune(
@@ -63,6 +57,13 @@ class WeightTuner:
         Returns:
             Updated weights dict
         """
+        for cls_name, cls_weights in baseline_weights.items():
+            for keyword, weight in cls_weights.items():
+                if weight <= 0:
+                    raise ValueError(
+                        f"Weight must be > 0: {cls_name}:{keyword} = {weight}"
+                    )
+
         if not logs:
             return baseline_weights
 

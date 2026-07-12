@@ -217,9 +217,16 @@ class TestArchRetrievalConfiguration:
         assert missing_layer not in arch.layer_boosts
 
     def test_negative_weights_invalid(self):
-        """Negative weights should be rejected."""
-        with pytest.raises((ValueError, AssertionError)):
-            MockArchitectureModel(layer_boosts={"service": -1.0})
+        """Real boost_by_architecture rejects negative centrality weights."""
+        from token_optimizer.arch_retrieval import boost_by_architecture
+
+        chunks = [make_chunk("c1", "service_auth", 0.5)]
+        arch = MockArchitectureModel()
+        with pytest.raises(ValueError):
+            boost_by_architecture(
+                chunks, arch,
+                centrality_weights={"layered": {"service": -1.0}},
+            )
 
     def test_zero_weight_invalid(self):
         """Zero weight removes chunk effectively."""
@@ -281,10 +288,16 @@ class TestArchRetrievalErrorHandling:
         assert arch is None
 
     def test_invalid_symbol_id(self):
-        """Invalid symbol ID format."""
-        chunk = make_chunk("c1", None, 0.5)
-        # Should handle None gracefully
-        assert chunk.source_id == None
+        """Real boost_by_architecture handles a None source_id gracefully."""
+        from token_optimizer.arch_retrieval import boost_by_architecture
+
+        chunk = ContextChunk(
+            id="c1", source_type="symbol", source_id=None,
+            content="content", relevance_score=0.5,
+            token_count=100, included=True,
+        )
+        result = boost_by_architecture([chunk], MockArchitectureModel())
+        assert len(result) == 1  # no crash, chunk passes through
 
     def test_corrupted_architecture_model(self):
         """Architecture model with invalid data."""

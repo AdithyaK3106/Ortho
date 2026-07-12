@@ -109,11 +109,13 @@ class TestMetricsPercentiles:
     """Percentile calculations."""
 
     def test_p50_median(self):
-        """P50 percentile is median."""
-        logs = [{"tokens": x * 100} for x in range(1, 101)]  # 100-10000
-        metrics = MockMetricsLog(logs)
-        p50 = metrics.percentile(50)
-        assert 5000 < p50 < 5100
+        """P50 from the real MetricsCollector is the true median."""
+        from token_optimizer.metrics import MetricsCollector
+
+        tokens = [x * 100 for x in range(1, 101)]  # 100..10000, median 5050
+        result = MetricsCollector.compute_reduction(tokens, tokens)
+        assert result["p50_phase3"] == 5050
+        assert 5000 < result["p50_phase3"] < 5100
 
     def test_p95_high_tail(self):
         """P95 in high tail."""

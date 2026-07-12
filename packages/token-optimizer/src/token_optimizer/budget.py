@@ -19,6 +19,12 @@ class TokenBudget:
     used: int
     model: str
 
+    def __post_init__(self) -> None:
+        if self.total < 0:
+            raise ValueError(f"TokenBudget.total must be >= 0, got {self.total}")
+        if self.used < 0:
+            raise ValueError(f"TokenBudget.used must be >= 0, got {self.used}")
+
     @property
     def remaining(self) -> int:
         """Return remaining tokens in budget."""

@@ -1,0 +1,700 @@
+[
+  {
+    "suite": "repository",
+    "dataset": "click",
+    "metrics": {
+      "symbols_precision": 0.235,
+      "symbols_recall": 1.0,
+      "symbols_f1": 0.3805,
+      "imports_precision": 0.1429,
+      "imports_recall": 1.0,
+      "imports_f1": 0.25,
+      "callgraph_precision": 0.2109,
+      "callgraph_recall": 1.0,
+      "callgraph_f1": 0.3483,
+      "parse_success_rate": 1.0,
+      "repository_coverage": 1.0
+    },
+    "detail": {
+      "symbols": {
+        "precision": 0.235,
+        "recall": 1.0,
+        "f1": 0.3805,
+        "correct": 328,
+        "missed": 0,
+        "extra": 1068
+      },
+      "imports": {
+        "precision": 0.1429,
+        "recall": 1.0,
+        "f1": 0.25,
+        "correct": 12,
+        "missed": 0,
+        "extra": 72
+      },
+      "callgraph": {
+        "precision": 0.2109,
+        "recall": 1.0,
+        "f1": 0.3483,
+        "correct": 844,
+        "missed": 0,
+        "extra": 3158
+      },
+      "parse_errors": []
+    },
+    "timings": {
+      "scan_repository": 1.291
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@7925a3410d7098c28cfca3b2baa6c852666bbd14",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "repository",
+    "dataset": "flask",
+    "metrics": {
+      "symbols_precision": 0.0802,
+      "symbols_recall": 1.0,
+      "symbols_f1": 0.1485,
+      "imports_precision": 0.1268,
+      "imports_recall": 1.0,
+      "imports_f1": 0.225,
+      "callgraph_precision": 0.1374,
+      "callgraph_recall": 1.0,
+      "callgraph_f1": 0.2417,
+      "parse_success_rate": 1.0,
+      "repository_coverage": 1.0
+    },
+    "detail": {
+      "symbols": {
+        "precision": 0.0802,
+        "recall": 1.0,
+        "f1": 0.1485,
+        "correct": 100,
+        "missed": 0,
+        "extra": 1147
+      },
+      "imports": {
+        "precision": 0.1268,
+        "recall": 1.0,
+        "f1": 0.225,
+        "correct": 9,
+        "missed": 0,
+        "extra": 62
+      },
+      "callgraph": {
+        "precision": 0.1374,
+        "recall": 1.0,
+        "f1": 0.2417,
+        "correct": 399,
+        "missed": 0,
+        "extra": 2504
+      },
+      "parse_errors": []
+    },
+    "timings": {
+      "scan_repository": 0.789
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "architecture",
+    "dataset": "click",
+    "metrics": {
+      "architecture_style_accuracy": 0.0,
+      "architecture_confidence": 0.75,
+      "layer_precision": 0.2667,
+      "layer_recall": 0.2667,
+      "layer_f1": 0.2667,
+      "subsystem_mean_jaccard": 0.0429,
+      "subsystem_matched": 5,
+      "subsystem_unmatched": 0,
+      "dependency_direction_accuracy": 0.6667
+    },
+    "detail": {
+      "ground_truth_style": "flat",
+      "predicted_style": "layered",
+      "predicted_alternative": null,
+      "layer_scores": {
+        "precision": 0.2667,
+        "recall": 0.2667,
+        "f1": 0.2667,
+        "correct": 4,
+        "missed": 11,
+        "extra": 11
+      },
+      "subsystem_scores": {
+        "mean_jaccard": 0.0429,
+        "matched": 5,
+        "unmatched": 0,
+        "pairs": [
+          {
+            "expected_size": 3,
+            "predicted_index": 1,
+            "jaccard": 0.0429
+          },
+          {
+            "expected_size": 4,
+            "predicted_index": 1,
+            "jaccard": 0.0571
+          },
+          {
+            "expected_size": 3,
+            "predicted_index": 1,
+            "jaccard": 0.0429
+          },
+          {
+            "expected_size": 3,
+            "predicted_index": 1,
+            "jaccard": 0.0429
+          },
+          {
+            "expected_size": 2,
+            "predicted_index": 1,
+            "jaccard": 0.0286
+          }
+        ]
+      },
+      "evidence": [
+        "Detected style: layered",
+        "Confidence: 0.75",
+        "Layer vocabulary present in structure: presentation, business",
+        "Import graph forms 3-level dependency chain",
+        "Low import-cycle ratio (0.0%)",
+        "Competing scores: layered=0.75, microservices=0.20, mvc=0.00, hexagonal=0.00, flat=0.00"
+      ]
+    },
+    "timings": {
+      "detect_architecture": 0.835
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@7925a3410d7098c28cfca3b2baa6c852666bbd14",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "architecture",
+    "dataset": "flask",
+    "metrics": {
+      "architecture_style_accuracy": 0.0,
+      "architecture_confidence": 0.5,
+      "layer_precision": 0.1765,
+      "layer_recall": 0.1765,
+      "layer_f1": 0.1765,
+      "subsystem_mean_jaccard": 0.041,
+      "subsystem_matched": 5,
+      "subsystem_unmatched": 0,
+      "dependency_direction_accuracy": 1.0
+    },
+    "detail": {
+      "ground_truth_style": "layered",
+      "predicted_style": "ambiguous",
+      "predicted_alternative": "layered",
+      "layer_scores": {
+        "precision": 0.1765,
+        "recall": 0.1765,
+        "f1": 0.1765,
+        "correct": 3,
+        "missed": 14,
+        "extra": 14
+      },
+      "subsystem_scores": {
+        "mean_jaccard": 0.041,
+        "matched": 5,
+        "unmatched": 0,
+        "pairs": [
+          {
+            "expected_size": 3,
+            "predicted_index": 1,
+            "jaccard": 0.0385
+          },
+          {
+            "expected_size": 3,
+            "predicted_index": 1,
+            "jaccard": 0.0385
+          },
+          {
+            "expected_size": 3,
+            "predicted_index": 1,
+            "jaccard": 0.0385
+          },
+          {
+            "expected_size": 5,
+            "predicted_index": 1,
+            "jaccard": 0.0641
+          },
+          {
+            "expected_size": 2,
+            "predicted_index": 1,
+            "jaccard": 0.0256
+          }
+        ]
+      },
+      "evidence": [
+        "Detected style: ambiguous",
+        "Confidence: 0.50",
+        "Multiple architectural patterns are equally plausible. Strongest candidate: layered (0.50).",
+        "Competing scores: layered=0.50, microservices=0.35, mvc=0.20, flat=0.12, hexagonal=0.00"
+      ]
+    },
+    "timings": {
+      "detect_architecture": 0.023
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "impact",
+    "dataset": "click",
+    "metrics": {
+      "impact_precision": 0.0,
+      "impact_recall": 0.0,
+      "impact_f1": 0.0,
+      "blast_radius_mean_relative_error": 5.5,
+      "risk_score_correlation": 0.0,
+      "entries_evaluated": 2
+    },
+    "detail": {
+      "per_entry": [
+        {
+          "changed_file": "src/click/_termui_impl.py",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "predicted_blast_radius": 6,
+          "actual_blast_radius": 1,
+          "blast_radius_rel_error": 5.0,
+          "risk_score": 0.3150684931506849
+        },
+        {
+          "changed_file": "src/click/decorators.py",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "predicted_blast_radius": 7,
+          "actual_blast_radius": 1,
+          "blast_radius_rel_error": 6.0,
+          "risk_score": 0.13013698630136986
+        }
+      ]
+    },
+    "timings": {
+      "analyze_impact_total": 0.014
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@7925a3410d7098c28cfca3b2baa6c852666bbd14",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "impact",
+    "dataset": "flask",
+    "metrics": {
+      "impact_precision": 0.6842,
+      "impact_recall": 0.5476,
+      "impact_f1": 0.3389,
+      "blast_radius_mean_relative_error": 6.4524,
+      "risk_score_correlation": -0.866,
+      "entries_evaluated": 3
+    },
+    "detail": {
+      "per_entry": [
+        {
+          "changed_file": "src/flask/ctx.py",
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.6667,
+          "predicted_blast_radius": 1,
+          "actual_blast_radius": 2,
+          "blast_radius_rel_error": 0.5,
+          "risk_score": 0.10625
+        },
+        {
+          "changed_file": "src/flask/ctx.py",
+          "precision": 1.0,
+          "recall": 0.1429,
+          "f1": 0.25,
+          "predicted_blast_radius": 1,
+          "actual_blast_radius": 7,
+          "blast_radius_rel_error": 0.8571,
+          "risk_score": 0.10625
+        },
+        {
+          "changed_file": "src/flask/helpers.py",
+          "precision": 0.0526,
+          "recall": 1.0,
+          "f1": 0.1,
+          "predicted_blast_radius": 19,
+          "actual_blast_radius": 1,
+          "blast_radius_rel_error": 18.0,
+          "risk_score": 0.20625
+        }
+      ]
+    },
+    "timings": {
+      "analyze_impact_total": 0.02
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "efficiency",
+    "dataset": "click",
+    "metrics": {
+      "context_tokens_used": 640,
+      "context_budget_fill_pct": 8.0,
+      "context_compression_ratio": 0.5352,
+      "context_chunks_total": 2,
+      "context_chunks_included": 2,
+      "peak_memory_mb": 0.4
+    },
+    "detail": {
+      "budget_total": 8000,
+      "query": "architecture overview subsystems dependency health technical debt"
+    },
+    "timings": {
+      "scan_repository": 0.021,
+      "detect_architecture": 0.059,
+      "ingest_analysis_artifacts": 0.108,
+      "assemble_context": 0.009,
+      "total": 0.197,
+      "context_latency_ms": 4.9
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@7925a3410d7098c28cfca3b2baa6c852666bbd14",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "efficiency",
+    "dataset": "flask",
+    "metrics": {
+      "context_tokens_used": 616,
+      "context_budget_fill_pct": 7.7,
+      "context_compression_ratio": 0.5357,
+      "context_chunks_total": 2,
+      "context_chunks_included": 2,
+      "peak_memory_mb": 0.2
+    },
+    "detail": {
+      "budget_total": 8000,
+      "query": "architecture overview subsystems dependency health technical debt"
+    },
+    "timings": {
+      "scan_repository": 0.01,
+      "detect_architecture": 0.062,
+      "ingest_analysis_artifacts": 0.111,
+      "assemble_context": 0.01,
+      "total": 0.193,
+      "context_latency_ms": 5.61
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "retrieval",
+    "dataset": "click",
+    "metrics": {
+      "questions_evaluated": 6,
+      "mrr": 0.0,
+      "ndcg_at_10": 0.0,
+      "recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "recall_at_10": 0.0,
+      "precision_at_10": 0.0
+    },
+    "detail": {
+      "per_question": [
+        {
+          "question": "what class represents a click CLI command",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "what class represents a command-line option",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "how do I print output to the terminal in click",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "how does click ask the user for confirmation",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "what holds the execution state for a running click command",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "how does click group multiple commands into a collection",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        }
+      ]
+    },
+    "timings": {
+      "retrieve_total": 0.035
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@7925a3410d7098c28cfca3b2baa6c852666bbd14",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  },
+  {
+    "suite": "retrieval",
+    "dataset": "flask",
+    "metrics": {
+      "questions_evaluated": 6,
+      "mrr": 0.0,
+      "ndcg_at_10": 0.0,
+      "recall_at_5": 0.0,
+      "precision_at_5": 0.0,
+      "recall_at_10": 0.0,
+      "precision_at_10": 0.0
+    },
+    "detail": {
+      "per_question": [
+        {
+          "question": "how does flask store per-request configuration values",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "how do I flash a message to the user",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "how does flask register a blueprint",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "how does flask generate a url for a view function",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "what is the current app context proxy",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        },
+        {
+          "question": "how does flask push and pop the application context",
+          "recall_at_5": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_10": 0.0,
+          "precision_at_10": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0
+        }
+      ]
+    },
+    "timings": {
+      "retrieve_total": 0.033
+    },
+    "status": "SUCCESS",
+    "error": null,
+    "run_metadata": {
+      "benchmark_version": "0.1.0",
+      "dataset_version": "1@36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+      "adapter_version": "8b7545f",
+      "timestamp": "2026-07-12T11:31:04.324132+00:00",
+      "python_version": "3.12.3",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "config": {
+        "token_budget": 8000,
+        "retrieval_k": [
+          5,
+          10
+        ],
+        "only": null
+      }
+    }
+  }
+]

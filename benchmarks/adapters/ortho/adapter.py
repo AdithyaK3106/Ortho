@@ -72,7 +72,13 @@ class _SymbolRec:
 
 
 def _module_index(rel_paths):
-    """Map dotted module names to file ids ('a/b/c.py' -> 'a.b.c'). Moved from pipeline.py."""
+    """Map dotted module names to file ids ('a/b/c.py' -> 'a.b.c'). Moved from pipeline.py.
+
+    Registers every dotted suffix of the path (not just src/lib/source-stripped),
+    so monorepo layouts like langchain's 'libs/<pkg>/<pkg>/...' resolve their
+    internal imports. First registration wins (rel_paths is sorted), so
+    collisions across packages are deterministic.
+    """
     idx = {}
     for rel in rel_paths:
         parts = rel[:-3].split("/")
@@ -80,9 +86,8 @@ def _module_index(rel_paths):
             parts = parts[:-1]
         if not parts:
             continue
-        idx.setdefault(".".join(parts), rel)
-        if parts[0] in ("src", "lib", "source") and len(parts) > 1:
-            idx.setdefault(".".join(parts[1:]), rel)
+        for i in range(len(parts)):
+            idx.setdefault(".".join(parts[i:]), rel)
     return idx
 
 
@@ -169,6 +174,15 @@ def _build_graphs(scan: dict) -> dict:
                 importer_file_id=rel, imported_file_id=resolved,
                 imported_module=i.target_module, is_external=is_ext,
             ))
+
+    if internal == 0 and len(rel_paths) > 20:
+        print(
+            f"WARNING: 0 internal import edges resolved across {len(rel_paths)} "
+            f"files ({external} imports classified external). Module-to-file "
+            f"mapping likely failed for this repo layout; layer detection, "
+            f"impact analysis, and cycle detection will be empty.",
+            file=sys.stderr,
+        )
 
     return {
         "files": files, "symbols": symbols, "calls": calls, "imports": imports,

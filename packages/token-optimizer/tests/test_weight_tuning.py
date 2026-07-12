@@ -6,6 +6,8 @@ Tests for auto-tuning reranker weights from quality logs.
 import pytest
 from typing import Dict, List
 
+from token_optimizer.weight_tuner import WeightTuner
+
 
 class MockWeightTuner:
     """Mock weight tuner for testing."""
@@ -62,21 +64,22 @@ class TestWeightTuningBoundaryConditions:
         assert len(tuned) > 0
 
     def test_no_keywords_to_tune(self):
-        """No keywords defined for tuning."""
-        tuner = MockWeightTuner({})
-        logs = [{"quality": 0.9}]
-        tuned = tuner.tune(logs)
+        """No keywords defined for tuning (real WeightTuner)."""
+        logs = [{"intent_class": "bug_fix", "quality": 0.9}]
+        tuned = WeightTuner.auto_tune(logs, {})
         assert tuned == {}
 
     def test_zero_initial_weights_invalid(self):
-        """Zero weight invalid."""
+        """Zero weight invalid (real WeightTuner)."""
+        logs = [{"intent_class": "bug_fix"}]
         with pytest.raises((ValueError, AssertionError)):
-            MockWeightTuner({"api": 0.0})
+            WeightTuner.auto_tune(logs, {"bug_fix": {"api": 0.0}})
 
     def test_negative_weights_invalid(self):
-        """Negative weights invalid."""
+        """Negative weights invalid (real WeightTuner)."""
+        logs = [{"intent_class": "bug_fix"}]
         with pytest.raises((ValueError, AssertionError)):
-            MockWeightTuner({"api": -0.5})
+            WeightTuner.auto_tune(logs, {"bug_fix": {"api": -0.5}})
 
 
 class TestWeightTuningCorrelation:
@@ -159,11 +162,22 @@ class TestWeightTuningStability:
     """Stability of tuning (no wild swings)."""
 
     def test_bounded_weight_changes(self):
-        """Weight changes bounded (max 50% from baseline)."""
-        original = 1.5
-        max_change = 0.5
-        tuned = original * (1 + max_change)
-        assert tuned <= 2.0
+        """Real WeightTuner clamps tuned weights to [0.5, 2.0]."""
+        # Perfect positive correlation between rerank_factor and metric
+        # → auto_tune multiplies by 1.1; 1.95 * 1.1 = 2.145 must clamp to 2.0.
+        logs = [
+            {"intent_class": "bug_fix", "rerank_factor": 1.0, "llm_output_tokens": 100},
+            {"intent_class": "bug_fix", "rerank_factor": 2.0, "llm_output_tokens": 200},
+            {"intent_class": "bug_fix", "rerank_factor": 3.0, "llm_output_tokens": 300},
+        ]
+        tuned = WeightTuner.auto_tune(logs, {"bug_fix": {"api": 1.95}})
+        assert tuned["bug_fix"]["api"] == 2.0
+
+    def test_pearson_correlation_exact(self):
+        """Regression: correlation must be true Pearson, not shrunk by (n-1)/n."""
+        assert WeightTuner.compute_correlation([1, 2, 3], [1, 2, 3]) == pytest.approx(1.0)
+        assert WeightTuner.compute_correlation([1, 2, 3], [3, 2, 1]) == pytest.approx(-1.0)
+        assert WeightTuner.compute_correlation([1, 1, 1], [1, 2, 3]) == 0.0
 
     def test_repeated_tuning_convergence(self):
         """Repeated tuning converges."""

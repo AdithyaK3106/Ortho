@@ -2,11 +2,25 @@
 
 import csv
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 
 from .types import ContextPackage
+
+# Redact credential-shaped values before writing queries to disk:
+# "api_key=sk-abc123", "password: hunter2", "token=xyz", bare sk-/ghp- keys.
+_SECRET_PATTERN = re.compile(
+    r"(?:(api[_-]?key|token|password|secret|authorization)\s*[=:]\s*\S+)"
+    r"|(?:\b(sk|ghp|gho|pat)-[A-Za-z0-9_\-]{8,}\b)",
+    re.IGNORECASE,
+)
+
+
+def _redact(text: str) -> str:
+    """Replace credential-shaped substrings with [REDACTED]."""
+    return _SECRET_PATTERN.sub("[REDACTED]", text)
 
 
 class ContextQualityLogger:
@@ -63,7 +77,7 @@ class ContextQualityLogger:
             "timestamp": timestamp,
             "workflow_run_id": context_package.workflow_run_id,
             "step_id": context_package.step_id,
-            "query": query[:100],  # Truncate for CSV
+            "query": _redact(query)[:100],  # Redact secrets, truncate for CSV
             "intent_class": intent_class,
             "chunks_retrieved": chunks_retrieved,
             "chunks_included": chunks_included,

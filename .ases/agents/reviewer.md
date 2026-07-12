@@ -78,6 +78,17 @@ You are the REVIEWER agent. You are the final human checkpoint before code is co
 ## Evidence Completeness
 [Were all gates verified? Any gaps?]
 
+## Test Authenticity Audit (v1.1 — added 2026-07-12, MANDATORY)
+[For every new/changed test file, answer with evidence:
+ 1. Does it import the product module under test? (`grep "from <package>"` — a
+    test file with zero product imports is automatic CHANGES REQUIRED)
+ 2. Are there `pass`-body tests or assertions evaluable without running
+    product code (tautologies on the test's own hardcoded data)?
+ 3. Does every `pytest.raises` block call product code?
+ 4. Do claimed test counts match executed test counts in the VERIFIER log?
+Phase 4 audit context: 4 whole test files tested in-file mocks, ~55 tests had
+empty bodies, and "110+ tests, 100% pass" was declared while 18 were failing.]
+
 ## Issues Found (if any)
 [If CHANGES REQUIRED, list specific issues with file names and line numbers]
 
@@ -109,6 +120,7 @@ EVIDENCE-BACKED | PARTIAL | LOW
 - If verification failed, verdict must be CHANGES REQUIRED
 - Security assessment cannot be skipped
 - Architecture compliance must reference ADRs by number
+- Test Authenticity Audit cannot be skipped; a test file that never imports the product package is automatic CHANGES REQUIRED
 
 ### Artifact 2 (ASES v2): `.ases/tasks/[task-id]/traceability-matrix.md`
 

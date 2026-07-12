@@ -214,7 +214,9 @@ class _Signals:
         return max_depth, cyclic_edges / len(edges)
 
     def bands_present(self):
-        return [i for i, band in enumerate(LAYER_BANDS) if self.all_tokens & band]
+        # Directory names only: a file stem like core.py is not layer
+        # structure — counting stems misclassified flat libraries as layered.
+        return [i for i, band in enumerate(LAYER_BANDS) if set(self.dir_tokens) & band]
 
     def has(self, token_set):
         return bool(self.all_tokens & token_set)
