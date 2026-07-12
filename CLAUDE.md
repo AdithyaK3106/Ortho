@@ -40,7 +40,19 @@ Ortho is an AI engineering platform that scans a Python repository, builds intel
 All tests MUST be run and verified. Simulated logs are strictly prohibited.
 - **VERIFIER Mode A:** pytest MUST be executed. Example: `pytest packages/[pkg]/tests/ -v --tb=short`
 - **GATE 5 Enforcement:** A human must spot-check the actual test log file to confirm EXIT codes and output.
-- **Expected Results:** Test metrics and expectations must be documented in `spec.md` before implementation. 
+- **Expected Results:** Test metrics and expectations must be documented in `spec.md` before implementation.
+
+---
+
+## 3a. Known Limitations (Phase 3 → Phase 4 Transition)
+
+### Task-015 (Engineering Benchmark Suite) — 90% Complete
+- **Status:** COMMITTED with documented gap
+- **Coverage:** 45/50 repositories benchmarked (90% vs. 100% target)
+- **Root cause:** Time constraints during Phase 3 completion
+- **Impact:** Phase 4 token optimizer improvements validated against 45-repo baseline
+- **Mitigation:** Phase 5 includes completion of missing 5 repos
+- **Reference:** `TASK_015_ACCEPTANCE_GAP.md` 
 
 ---
 
