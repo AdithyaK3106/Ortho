@@ -6,6 +6,7 @@ from .assembler import assemble_context
 from .prompt import assemble_prompt
 from .deduplicator import detect_and_remove_duplicates, DeduplicationResult
 from .reranker import rerank_by_intent, RerankerConfig
+from .graph_expander import expand_by_call_graph, CallGraphInterface
 
 __all__ = [
     "TokenBudget",
@@ -18,4 +19,6 @@ __all__ = [
     "DeduplicationResult",
     "rerank_by_intent",
     "RerankerConfig",
+    "expand_by_call_graph",
+    "CallGraphInterface",
 ]
