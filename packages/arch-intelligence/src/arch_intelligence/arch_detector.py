@@ -598,7 +598,9 @@ class ArchitectureDetector:
              f"Import graph forms {sig.dag_depth}-level dependency chain"),
             (0.13, sig.cycle_ratio < 0.1 and bool(sig.internal_imports),
              f"Low import-cycle ratio ({sig.cycle_ratio:.1%})"),
-            (implicit_structure_weight, has_implicit_structure,
+            # Only fire implicit structure if 2+ vocabulary bands are present (true layering)
+            # Single band is just naming convention (e.g., only 'models/' dir), not true layering
+            (implicit_structure_weight, has_implicit_structure and len(bands) >= 2,
              f"Implicit layer structure detected ({implicit_layers} layers via dependency partition)"),
             (0.08, bool(banded_edges) and flow_ratio >= 0.7,
              f"{flow_ratio:.0%} of cross-layer imports flow downward "
@@ -709,15 +711,15 @@ class ArchitectureDetector:
         fw_boost, fw_evidence = self._framework_boost(sig, ArchStyle.FLAT)
 
         score, evidence = _score([
-            (0.30, sig.shallow_ratio >= 0.7,
+            (0.25, sig.shallow_ratio >= 0.7,
              f"{sig.shallow_ratio:.0%} of files at directory depth ≤ 1"),
-            (0.12, no_layer_vocab, "No layering vocabulary in structure"),
+            (0.18, no_layer_vocab, "No layering vocabulary in structure"),  # Increased: absence of structure is strong flat signal
             (0.08, sig.n_files < 30, f"Small codebase ({sig.n_files} files)"),
             (0.18, sig.dag_depth <= 2,
              f"Shallow import chains (max depth {sig.dag_depth})"),
             (0.18, high_coupling,
              f"High coupling density ({coupling['density']:.2f}), avg fan-in {coupling['avg_fan_in']:.1f}"),
-            (0.14, fw_boost > 0.0, fw_evidence),
+            (0.13, fw_boost > 0.0, fw_evidence),  # Reduced framework boost to compensate
         ])
         score += fw_boost
         # Architectural vocabulary is direct counter-evidence for "flat":
