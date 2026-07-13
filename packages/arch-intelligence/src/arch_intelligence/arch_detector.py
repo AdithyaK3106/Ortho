@@ -118,6 +118,24 @@ FRAMEWORK_FINGERPRINTS = {
         'files': ['celery.py', 'tasks.py'],
         'style': ArchStyle.MICROSERVICES,
     },
+    'starlette': {
+        'decorators': ['@app.route', '@app.get', '@app.post', '@app.middleware'],
+        'imports': ['starlette.applications', 'starlette.routing'],
+        'files': ['app.py', 'main.py'],
+        'style': ArchStyle.LAYERED,
+    },
+    'pyramid': {
+        'decorators': ['@view_config', '@route_config'],
+        'imports': ['pyramid.config', 'pyramid.view'],
+        'files': ['__init__.py', 'routes.py', 'views.py'],
+        'style': ArchStyle.LAYERED,
+    },
+    'faststream': {
+        'decorators': ['@app.message', '@app.subscribe', '@app.event'],
+        'imports': ['faststream', 'faststream.kafka'],
+        'files': ['main.py', 'handlers.py'],
+        'style': ArchStyle.MICROSERVICES,
+    },
 }
 # Top-level dirs that are containers for components in common monorepo
 # layouts (contain no code directly, only component subtrees).
@@ -360,6 +378,12 @@ class _Signals:
             elif framework_name == 'click' and ('command' in self.stem_tokens or 'cli' in self.stem_tokens):
                 confidence += 0.15
             elif framework_name == 'celery' and ('task' in self.stem_tokens or 'celery' in self.stem_tokens):
+                confidence += 0.15
+            elif framework_name == 'starlette' and ('route' in self.stem_tokens or 'middleware' in self.stem_tokens):
+                confidence += 0.15
+            elif framework_name == 'pyramid' and ('view' in self.stem_tokens or 'route' in self.stem_tokens):
+                confidence += 0.15
+            elif framework_name == 'faststream' and ('handler' in self.stem_tokens or 'event' in self.stem_tokens):
                 confidence += 0.15
 
             if confidence > 0.0:
