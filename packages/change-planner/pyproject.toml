@@ -1,0 +1,35 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "change-planner"
+version = "0.1.0"
+description = "Change impact prediction engine for Ortho"
+authors = [{name = "Ortho Team", email = "urbrain369@gmail.com"}]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4"
+pytest-cov = "^4.1"
+mypy = "^1.5"
+ruff = "^0.0.292"
+black = "^23.9"
+
+[tool.mypy]
+strict = true
+disallow_any_unimported = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "W", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src/change_planner --cov-report=term-missing -v"
