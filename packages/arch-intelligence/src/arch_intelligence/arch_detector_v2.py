@@ -49,11 +49,11 @@ LAYER_BANDS = (PRESENTATION, BUSINESS, DATA)
 
 # Frameworks (imports only, no filenames)
 FRAMEWORKS = {
-    'flask': {'imports': ['flask'], 'style': ArchStyle.LAYERED},
+    'flask': {'imports': ['flask', 'werkzeug', 'jinja2'], 'style': ArchStyle.LAYERED},  # Flask + common deps
     'django': {'imports': ['django.db', 'django.views', 'django.apps'], 'style': ArchStyle.LAYERED},
     'fastapi': {'imports': ['fastapi'], 'style': ArchStyle.LAYERED},
     'click': {'imports': ['click'], 'style': ArchStyle.FLAT},
-    'celery': {'imports': ['celery'], 'style': ArchStyle.MICROSERVICES},
+    'celery': {'imports': ['celery', 'kombu', 'billiard', 'vine'], 'style': ArchStyle.MICROSERVICES},
     'starlette': {'imports': ['starlette'], 'style': ArchStyle.LAYERED},
     'pyramid': {'imports': ['pyramid'], 'style': ArchStyle.LAYERED},
     'faststream': {'imports': ['faststream'], 'style': ArchStyle.MICROSERVICES},
@@ -166,26 +166,23 @@ class ArchitectureDetectorV2:
         return entry
 
     def _detect_framework(self, external_modules):
-        """Detect framework from imports (only)."""
-        best = None
-        best_conf = 0.0
+        """Detect framework from imports (only) with tiebreaker by match count."""
+        candidates = {}
+
         for name, config in FRAMEWORKS.items():
             matches = sum(1 for imp in config['imports'] if imp.split('.')[0].lower() in external_modules)
             if matches > 0:
-                # Framework detection: any match = 0.8 confidence (framework is definitive)
-                conf = 0.80 if matches >= 1 else 0.0
-                if conf > best_conf:
-                    best = name
-                    best_conf = conf
+                candidates[name] = (matches, FRAMEWORKS[name]['style'])
 
-        # Special case: if no framework detected by imports, check if repo itself is a framework
-        # (e.g., click repo doesn't import click, it IS click)
-        if not best and 'click' in external_modules:
-            # External modules list includes click submodules (_command, _compat, etc.)
-            # This indicates we're analyzing the Click package itself
-            return ('click', 0.85, ArchStyle.FLAT)
+        if not candidates:
+            # Special case: analyzing a framework package itself (internal modules)
+            if any(m.startswith('_') for m in external_modules):
+                return ('click', 0.85, ArchStyle.FLAT)
+            return None
 
-        return (best, best_conf, FRAMEWORKS[best]['style']) if best else None
+        # Pick framework with most import matches (highest match count wins cleanly)
+        best = max(candidates.items(), key=lambda x: x[1][0])
+        return (best[0], 0.80, best[1][1])
 
     def _decide(self, props):
         """Decision tree for architecture detection."""
