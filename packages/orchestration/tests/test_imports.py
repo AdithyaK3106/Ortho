@@ -1,11 +1,11 @@
 """GATE 5 VERIFIER: Import validation tests."""
 
 import pytest
-from packages.orchestration.src.selector.engine import SelectorEngine, ExecutionPlan, ExecutionStep, build_execution_plan
-from packages.orchestration.src.executor.workflow_executor import WorkflowExecutor, InvalidStateTransition
-from packages.orchestration.src.executor.state_store import WorkflowStateStore, WorkflowRun
-from packages.orchestration.src.executor.step_runner import run_step, StepResult
-from packages.orchestration.src.executor.evidence_collector import Evidence, EvidenceType
+from .selector.engine import SelectorEngine, ExecutionPlan, ExecutionStep, build_execution_plan
+from .executor.workflow_executor import WorkflowExecutor, InvalidStateTransition
+from .executor.state_store import WorkflowStateStore, WorkflowRun
+from .executor.step_runner import run_step, StepResult
+from .executor.evidence_collector import Evidence, EvidenceType
 
 
 class TestImports:

@@ -1,14 +1,19 @@
 """Unit tests for WorkflowExecutor (state machine, approval gates, resume)."""
 
+import sys
+from pathlib import Path
+
+# Add src to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
 import pytest
-from packages.orchestration.src.executor.workflow_executor import (
+from executor.workflow_executor import (
     WorkflowExecutor,
     InvalidStateTransition,
     VALID_TRANSITIONS,
     TERMINAL_STATES,
 )
-from packages.orchestration.src.executor.state_store import WorkflowStateStore, WorkflowRun
-from packages.orchestration.src.selector.engine import ExecutionPlan, ExecutionStep
+from executor.state_store import WorkflowStateStore, WorkflowRun
 from datetime import datetime
 
 

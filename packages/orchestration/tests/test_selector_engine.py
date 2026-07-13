@@ -4,7 +4,7 @@ import pytest
 from dataclasses import dataclass, field
 from typing import Optional
 
-from packages.orchestration.src.selector.engine import SelectorEngine, ExecutionPlan, ExecutionStep
+from .selector.engine import SelectorEngine, ExecutionPlan, ExecutionStep
 
 
 # Local test doubles. The original imports pointed at modules that never existed

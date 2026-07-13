@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional
 from datetime import datetime
-from packages.orchestration.src.selector.engine import ExecutionStep
+from .selector.engine import ExecutionStep
 from .evidence_collector import Evidence, create_agent_execution_evidence, create_error_evidence
 
 
@@ -53,7 +53,7 @@ def run_step(
         # Assemble prompts (task-014: token optimizer)
         if context_package:
             # Use real assembler for proper context assembly
-            from packages.token_optimizer import assemble_prompt
+            from token_optimizer import assemble_prompt
             system_prompt, user_message = assemble_prompt(
                 context_package=context_package,
                 step=step,

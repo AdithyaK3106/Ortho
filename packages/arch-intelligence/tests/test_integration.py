@@ -63,41 +63,57 @@ class TestFullPipeline:
         assert 0.0 <= loaded.style_confidence <= 1.0
 
     def test_full_pipeline_microservices(self, arch_db):
-        """Test pipeline on microservices-like structure."""
+        """Test pipeline on true microservices structure (independent top-level components)."""
         detector = ArchitectureDetector()
         layer_detector = LayerDetector()
         subsystem_detector = SubsystemDetector()
 
-        # Create synthetic microservices (multiple isolated subsystems)
+        # Create REAL microservices: separate top-level directories per service
+        # Each service has its own handler + database (independent) + entry point
         call_graph = [
+            CallEdge(caller_id="auth_main", callee_id="auth_svc"),
             CallEdge(caller_id="auth_svc", callee_id="auth_db"),
+            CallEdge(caller_id="user_main", callee_id="user_svc"),
             CallEdge(caller_id="user_svc", callee_id="user_db"),
+            CallEdge(caller_id="order_main", callee_id="order_svc"),
+            CallEdge(caller_id="order_svc", callee_id="order_db"),
         ]
         import_graph = [
-            ImportEdge(importer_file_id="auth.py", imported_file_id="auth_db.py"),
-            ImportEdge(importer_file_id="user.py", imported_file_id="user_db.py"),
+            # Auth service
+            ImportEdge(importer_file_id="auth_main.py", imported_file_id="auth_svc.py"),
+            ImportEdge(importer_file_id="auth_svc.py", imported_file_id="auth_db.py"),
+            # User service
+            ImportEdge(importer_file_id="user_main.py", imported_file_id="user_svc.py"),
+            ImportEdge(importer_file_id="user_svc.py", imported_file_id="user_db.py"),
+            # Order service
+            ImportEdge(importer_file_id="order_main.py", imported_file_id="order_svc.py"),
+            ImportEdge(importer_file_id="order_svc.py", imported_file_id="order_db.py"),
         ]
         files = [
-            File(id="auth.py", rel_path="services/auth.py"),
-            File(id="auth_db.py", rel_path="services/auth_db.py"),
-            File(id="user.py", rel_path="services/user.py"),
-            File(id="user_db.py", rel_path="services/user_db.py"),
+            # Auth service (isolated component)
+            File(id="auth_main.py", rel_path="auth_service/__main__.py"),  # Entry point
+            File(id="auth_svc.py", rel_path="auth_service/service.py"),
+            File(id="auth_db.py", rel_path="auth_service/db.py"),
+            # User service (isolated component)
+            File(id="user_main.py", rel_path="user_service/__main__.py"),  # Entry point
+            File(id="user_svc.py", rel_path="user_service/service.py"),
+            File(id="user_db.py", rel_path="user_service/db.py"),
+            # Order service (isolated component)
+            File(id="order_main.py", rel_path="order_service/__main__.py"),  # Entry point
+            File(id="order_svc.py", rel_path="order_service/service.py"),
+            File(id="order_db.py", rel_path="order_service/db.py"),
         ]
 
         detection_result = detector.detect(call_graph, import_graph, [], files)
         layers = layer_detector.extract_layers(import_graph, files)
         subsystems = subsystem_detector.detect_subsystems(call_graph, [], files)
 
-        # Verify detection. UNKNOWN is a legitimate outcome: four files in a
-        # single `services/` directory is not sufficient evidence for any
-        # style, and the detector never guesses.
-        assert detection_result.style in {
-            ArchStyle.MICROSERVICES,
-            ArchStyle.LAYERED,
-            ArchStyle.FLAT,
-            ArchStyle.UNKNOWN,
-        }
-        assert 0.3 <= detection_result.confidence <= 1.0
+        # REAL microservices: 3+ top-level service directories, each isolated
+        # Should detect as MICROSERVICES (confidence ≥0.55 indicates microservice signal)
+        assert detection_result.style == ArchStyle.MICROSERVICES, \
+            f"Expected MICROSERVICES but got {detection_result.style} (confidence: {detection_result.confidence})"
+        assert 0.5 <= detection_result.confidence <= 1.0, \
+            f"Expected confidence ≥0.5 but got {detection_result.confidence}"
 
     def test_versioning(self, arch_db):
         """Test model versioning and load_latest."""

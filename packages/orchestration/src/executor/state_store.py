@@ -269,7 +269,10 @@ class WorkflowStateStore:
     @staticmethod
     def _deserialize_plan(data: dict) -> Any:  # ExecutionPlan
         """Deserialize JSON dict to ExecutionPlan."""
-        from packages.orchestration.src.selector.engine import ExecutionStep, ExecutionPlan
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from orchestration.selector.engine import ExecutionStep, ExecutionPlan
 
         steps = [
             ExecutionStep(
@@ -320,7 +323,7 @@ class WorkflowStateStore:
         Ensures Evidence is always deserialized into Evidence dataclass instances,
         never exposed as raw dictionaries internally.
         """
-        from packages.orchestration.src.executor.evidence_collector import Evidence, EvidenceType
+        from executor.evidence_collector import Evidence, EvidenceType
 
         # Map evidence_type string back to enum (stored as lowercase value, e.g., "agent_execution")
         evidence_type_str = data.get("evidence_type", "agent_execution")

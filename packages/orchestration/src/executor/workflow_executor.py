@@ -61,7 +61,7 @@ class WorkflowExecutor:
         # Lazy imports to avoid circular dependencies
         from .evidence_collector import Evidence, EvidenceType
         from .step_runner import run_step
-        from packages.token_optimizer import assemble_context, TokenBudget
+        from token_optimizer import assemble_context, TokenBudget
 
         # Create workflow run
         run_id = str(uuid.uuid4())
