@@ -127,7 +127,7 @@ FRAMEWORK_FINGERPRINTS = {
     'pyramid': {
         'decorators': ['@view_config', '@route_config'],
         'imports': ['pyramid.config', 'pyramid.view'],
-        'files': ['__init__.py', 'routes.py', 'views.py'],
+        'files': ['routes.py', 'views.py'],  # Removed __init__.py (too generic)
         'style': ArchStyle.LAYERED,
     },
     'faststream': {
@@ -151,13 +151,16 @@ class _Signals:
         self.n_files = len(files)
         self.paths = {f.id: f.rel_path.replace("\\", "/") for f in files}
 
-        # Structure tokens: every directory segment and file stem, lowercased.
+        # Structure tokens: directory segments (NOT file stems), lowercased.
+        # File stems are tracked separately and not used for layer detection.
         self.dir_tokens = Counter()
         self.stem_tokens = Counter()
         for p in self.paths.values():
             parts = p.lower().split("/")
+            # Only directory parts (exclude file name)
             for seg in parts[:-1]:
                 self.dir_tokens[seg] += 1
+            # Track file stem separately (not used in bands_present)
             stem = parts[-1].rsplit(".", 1)[0]
             self.stem_tokens[stem] += 1
         self.all_tokens = set(self.dir_tokens) | set(self.stem_tokens)
@@ -354,9 +357,10 @@ class _Signals:
             confidence = 0.0
 
             # Check for canonical files (strong signal, 0.3 each)
+            # Only match exact basename, not substring (e.g., "views.py" should match only "views.py", not "my_views.py" or "models/views.py")
             canonical_files = sig_config.get('files', [])
             for fname in canonical_files:
-                if any(fname in p.lower() for p in self.paths.values()):
+                if any(p.lower().split('/')[-1] == fname.lower() for p in self.paths.values()):
                     confidence += 0.3
 
             # Check for imports (medium signal, 0.25 each)
@@ -369,22 +373,10 @@ class _Signals:
             # Check for decorators (weak signal, 0.15 each, via stem token matching)
             # Since we don't have full source code, we check for common decorator-related stems
             decorator_patterns = sig_config.get('decorators', [])
-            if framework_name == 'flask' and ('route' in self.stem_tokens or 'blueprint' in self.stem_tokens):
-                confidence += 0.15
-            elif framework_name == 'django' and ('model' in self.stem_tokens or 'view' in self.stem_tokens):
-                confidence += 0.15
-            elif framework_name == 'fastapi' and ('schema' in self.stem_tokens or 'route' in self.stem_tokens):
-                confidence += 0.15
-            elif framework_name == 'click' and ('command' in self.stem_tokens or 'cli' in self.stem_tokens):
-                confidence += 0.15
-            elif framework_name == 'celery' and ('task' in self.stem_tokens or 'celery' in self.stem_tokens):
-                confidence += 0.15
-            elif framework_name == 'starlette' and ('route' in self.stem_tokens or 'middleware' in self.stem_tokens):
-                confidence += 0.15
-            elif framework_name == 'pyramid' and ('view' in self.stem_tokens or 'route' in self.stem_tokens):
-                confidence += 0.15
-            elif framework_name == 'faststream' and ('handler' in self.stem_tokens or 'event' in self.stem_tokens):
-                confidence += 0.15
+            # Note: Decorator tokens would require source-level parsing of decorators (@app.route, @view, etc.)
+            # Without that, file stems like 'views.py' create false positives (e.g., Requests has views.py but no Pyramid).
+            # Removed stem-based decorator matching to avoid false framework detection.
+            # Frameworks are detected by: canonical files + imports alone.
 
             if confidence > 0.0:
                 detected.append((framework_name, min(confidence, 0.95), sig_config['style']))
@@ -584,6 +576,19 @@ class ArchitectureDetector:
         # Framework detection
         fw_boost, fw_evidence = self._framework_boost(sig, ArchStyle.LAYERED)
 
+        # Dampen implicit structure signal when there's no vocabulary evidence
+        # but high coupling (suggests flat, not layered despite import topology)
+        has_vocabulary = len(bands) >= 2
+        has_high_coupling = coupling['density'] > 0.15 and coupling['avg_fan_in'] > 2.0
+        # Full weight (0.18) if vocabulary present; dampened (0.05) if no vocab AND high coupling;
+        # low weight (0.05) if no vocab AND no high coupling (truly flat structure)
+        if has_vocabulary:
+            implicit_structure_weight = 0.18
+        elif has_high_coupling:
+            implicit_structure_weight = 0.05  # Dampen due to high coupling
+        else:
+            implicit_structure_weight = 0.05  # Low weight for flat structures
+
         signals_list = [
             (0.20, len(bands) >= 2,
              f"Layer vocabulary present in structure: {matched}"),
@@ -593,7 +598,7 @@ class ArchitectureDetector:
              f"Import graph forms {sig.dag_depth}-level dependency chain"),
             (0.13, sig.cycle_ratio < 0.1 and bool(sig.internal_imports),
              f"Low import-cycle ratio ({sig.cycle_ratio:.1%})"),
-            (0.18, has_implicit_structure,
+            (implicit_structure_weight, has_implicit_structure,
              f"Implicit layer structure detected ({implicit_layers} layers via dependency partition)"),
             (0.08, bool(banded_edges) and flow_ratio >= 0.7,
              f"{flow_ratio:.0%} of cross-layer imports flow downward "
