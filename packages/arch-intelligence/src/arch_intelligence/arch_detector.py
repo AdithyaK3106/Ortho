@@ -417,7 +417,7 @@ class ArchitectureDetector:
 
         framework_name, fw_confidence, fw_style = sig.framework_signatures[0]
         if fw_style == target_style:
-            score_boost = fw_confidence * 0.35  # Framework evidence gets 35% weight
+            score_boost = fw_confidence * 0.50  # Framework evidence gets 50% weight (Phase 5.2 tuning)
             evidence = f"Framework detected: {framework_name} (confidence {fw_confidence:.2f})"
             return score_boost, evidence
         return 0.0, ""
