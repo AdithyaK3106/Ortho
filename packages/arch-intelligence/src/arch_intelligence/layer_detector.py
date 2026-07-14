@@ -3,6 +3,20 @@
 from typing import Optional
 from .types import Layer
 
+# Path segments (exact match, case-insensitive) identifying non-production
+# code. Files under any of these directories are excluded from layer
+# assignment entirely — they are not part of the architecture being
+# evaluated, and including them causes test/example files that import
+# production code to be misclassified as architectural layer violations.
+_EXCLUDED_SEGMENTS = frozenset({
+    "tests", "test", "examples", "example", "__tests__", "vendor", "node_modules",
+})
+
+
+def _is_excluded(rel_path: str) -> bool:
+    segments = rel_path.replace("\\", "/").split("/")
+    return any(segment.lower() in _EXCLUDED_SEGMENTS for segment in segments)
+
 
 class LayerDetector:
     """Extracts architectural layers from import graph."""
@@ -17,12 +31,17 @@ class LayerDetector:
         """
         Extract layers from import DAG via topological sort.
         Layer 0 = data (no outgoing), Layer 1 = business, Layer 2 = presentation.
+
+        Files under test/example/vendor directories (see _EXCLUDED_SEGMENTS)
+        are excluded entirely — they are not production architecture.
         """
+        files = [f for f in files if not _is_excluded(f.rel_path)]
+
         if not files:
             return []
 
         file_map = {f.id: f for f in files}
-        
+
         # Build adjacency (internal imports only)
         file_ids = {f.id for f in files}
         imports: dict = {fid: set() for fid in file_ids}
