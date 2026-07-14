@@ -1,13 +1,44 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 3.0 — Phase 4 COMPLETE ✅  
+**Version:** 3.0 — Phase 7.1 COMPLETE ✅  
 **Started:** 2026-06-30  
-**Current Status:** Production Ready  
-**Last Updated:** 2026-07-12  
+**Current Status:** Production Ready — Review wedge (`ortho guardrails`/`ortho decide`) now runs real analysis, not stubs  
+**Last Updated:** 2026-07-14  
 
 ---
 
-## 1. Current Status: PHASE 4 COMPLETE ✅
+## 0. Phase 7.1: Repo Graph Query Layer + Real CLI Wiring ✅ COMPLETE (2026-07-14)
+
+**task-017-repo-graph-queries** — closed the gap between "current Ortho" and
+something a pilot user could actually run. `packages/cli-commands`'s
+`guardrails()`/`decide()` were 100% hardcoded stub strings; the query methods
+`change-planner`/`arch-guardrails` needed didn't exist anywhere. Built:
+
+- `RepoGraphQueries`, `SymbolIndex`, `CodeMetricsAdapter` (packages/repo-intelligence) — real BFS call-graph traversal, import resolution, line/function counting
+- `ArchModelAdapter` (packages/arch-intelligence) — real layer/module lookups over `ArchitectureModel`
+- `DependencyGraphAdapter` (packages/cli-commands) — real internal dependency graph + cycle detection (three-color DFS)
+- `ortho guardrails`/`ortho decide` now call real `ArchitectureEnforcer`/`ChangePredictor`/`DecisionEngine` against real scanned repos
+
+**New architecture layer:** ADR-016 (Engineering Copilot layer) — classifies
+`change-planner`, `feature-planner`, `refactoring-advisor`, `arch-guardrails`,
+`decision-engine` between Apps and Intelligence, extending ADR-015.
+
+**Verified:** 68 new/updated tests (34+10+14 new + updates), all 6 touched
+packages regression-clean (176/105/54/37/42/28 passing), mypy --strict clean,
+real-repo scans against `repos/click`/`repos/flask`/`repos/requests`. Full
+ASES workflow (PLANNER → ARCHITECT → BUILDER + shadow-parallel blind
+TEST-DESIGNER → API Contract Gate → VERIFIER → REVIEWER) with one
+CHANGES-REQUIRED cycle (over-broad exception handling in `repo_scanner.py`,
+fixed and re-verified). See `.ases/tasks/task-017-repo-graph-queries/`.
+
+**Real bug found and fixed during this task:** `decide('')`/no-path defaults
+silently scanned unbounded cwd (this monorepo's `repos/` has 7,882 vendored
+files across 5 cloned frameworks) — fixed with explicit empty-intent
+rejection and a `scan_path` kwarg.
+
+---
+
+## 1. Prior Status: PHASE 4 COMPLETE ✅ (historical, superseded by Phase 5/6 — see CLAUDE.md)
 
 **All 9 Phase 4 components implemented and tested:**
 

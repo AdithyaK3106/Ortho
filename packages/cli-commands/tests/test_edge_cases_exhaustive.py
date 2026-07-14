@@ -1,8 +1,14 @@
 """Exhaustive edge case tests for cli-commands"""
+from pathlib import Path
 from unittest.mock import Mock
 import pytest
 
 from cli_commands.commands import CliCommands
+
+# guardrails()/decide() now run a real filesystem scan. Bare "." from this
+# repo's cwd would walk repos/ (7800+ vendored files across 8 cloned
+# frameworks) — bound these tests to a small real fixture instead.
+_SMALL_FIXTURE = str(Path(__file__).resolve().parents[3] / "repos" / "requests")
 
 
 @pytest.fixture
@@ -85,18 +91,19 @@ class TestBoundaryConditions:
         assert result is not None
 
     def test_guardrails_check(self, commands: CliCommands) -> None:
-        """Guardrails check"""
-        result = commands.guardrails()
+        """Guardrails check against a real bounded fixture repo"""
+        result = commands.guardrails(_SMALL_FIXTURE)
         assert result is not None
 
     def test_guardrails_with_path(self, commands: CliCommands) -> None:
-        """Guardrails check with path"""
+        """Guardrails check with a nonexistent path fails cleanly"""
         result = commands.guardrails("src/")
         assert result is not None
+        assert result.success is False
 
     def test_decide_with_valid_intent(self, commands: CliCommands) -> None:
-        """Valid decide call"""
-        result = commands.decide("add feature")
+        """Valid decide call, bounded to a real fixture repo"""
+        result = commands.decide("add feature", scan_path=_SMALL_FIXTURE)
         assert result is not None
 
     def test_output_format_valid(self, commands: CliCommands) -> None:
