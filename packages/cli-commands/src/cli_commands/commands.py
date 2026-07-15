@@ -14,6 +14,7 @@ from cli_commands.feature_plan_adapter import FeaturePlannerArchModelAdapter
 from cli_commands.refactor_adapter import CodeRepositoryAdapter
 from cli_commands.repo_scanner import ScanResult, scan_repository
 from cli_commands.types import CliReport
+from cli_commands.workflow_capture import capture_workflow_run
 
 
 class _CallGraphView:
@@ -55,6 +56,11 @@ class CliCommands:
     def plan(self, intent: str, **kwargs: Any) -> CliReport:
         """ortho plan <intent>"""
         if not intent or not isinstance(intent, str):
+            # No real scan target exists for this call (it never got far
+            # enough to resolve one) -- capturing against "." would write
+            # into whatever directory the caller's process happens to be
+            # running from (e.g. this repo's own .ortho/ during a test
+            # run), not a meaningful scoped memory. Skip capture here.
             return CliReport(
                 title="Feature Plan: (empty)",
                 content="Cannot plan for an empty or non-string intent.",
@@ -65,9 +71,13 @@ class CliCommands:
         try:
             scan = scan_repository(scan_target)
         except FileNotFoundError as e:
-            return CliReport(title=f"Feature Plan: {intent}", content=str(e), success=False)
+            report = CliReport(title=f"Feature Plan: {intent}", content=str(e), success=False)
+            capture_workflow_run(scan_target, "plan", intent, report)
+            return report
         except Exception as e:
-            return CliReport(title=f"Feature Plan: {intent}", content=f"Scan failed: {e}", success=False)
+            report = CliReport(title=f"Feature Plan: {intent}", content=f"Scan failed: {e}", success=False)
+            capture_workflow_run(scan_target, "plan", intent, report)
+            return report
 
         adapter = FeaturePlannerArchModelAdapter(scan.arch_model)
         plan = FeaturePlanner(adapter).plan_feature(intent)
@@ -80,11 +90,13 @@ class CliCommands:
             )
         content = "\n".join(lines)
 
-        return CliReport(
+        report = CliReport(
             title=f"Feature Plan: {intent}",
             content=content,
             success=True,
         )
+        capture_workflow_run(scan_target, "plan", intent, report)
+        return report
 
     def refactor(self, path: str | None = None, **kwargs: Any) -> CliReport:
         """ortho refactor [path]"""
@@ -92,9 +104,13 @@ class CliCommands:
         try:
             scan = scan_repository(target)
         except FileNotFoundError as e:
-            return CliReport(title=f"Refactoring: {path or 'All'}", content=str(e), success=False)
+            report = CliReport(title=f"Refactoring: {path or 'All'}", content=str(e), success=False)
+            capture_workflow_run(target, "refactor", path or "All", report)
+            return report
         except Exception as e:
-            return CliReport(title=f"Refactoring: {path or 'All'}", content=f"Scan failed: {e}", success=False)
+            report = CliReport(title=f"Refactoring: {path or 'All'}", content=f"Scan failed: {e}", success=False)
+            capture_workflow_run(target, "refactor", path or "All", report)
+            return report
 
         repo = CodeRepositoryAdapter(scan)
         issues = RefactoringAdvisor(repo).find_issues()
@@ -109,11 +125,13 @@ class CliCommands:
             ]
             content = "\n".join(lines)
 
-        return CliReport(
+        report = CliReport(
             title=f"Refactoring: {path or 'All'}",
             content=content,
             success=True,
         )
+        capture_workflow_run(target, "refactor", path or "All", report)
+        return report
 
     def guardrails(self, path: str | None = None, **kwargs: Any) -> CliReport:
         """ortho guardrails check [path]"""
@@ -121,17 +139,21 @@ class CliCommands:
         try:
             scan = scan_repository(target)
         except FileNotFoundError as e:
-            return CliReport(
+            report = CliReport(
                 title=f"Architecture Check: {target}",
                 content=str(e),
                 success=False,
             )
+            capture_workflow_run(target, "guardrails", target, report)
+            return report
         except Exception as e:
-            return CliReport(
+            report = CliReport(
                 title=f"Architecture Check: {target}",
                 content=f"Scan failed: {e}",
                 success=False,
             )
+            capture_workflow_run(target, "guardrails", target, report)
+            return report
 
         arch_model_adapter = ArchModelAdapter(scan.arch_model, scan.file_to_module)
         dep_graph = DependencyGraphAdapter(scan.import_edges_by_file, scan.file_to_module)
@@ -151,15 +173,20 @@ class CliCommands:
             ]
             content = "\n".join(lines)
 
-        return CliReport(
+        report = CliReport(
             title=f"Architecture Check: {target}",
             content=content,
             success=True,
         )
+        capture_workflow_run(target, "guardrails", target, report)
+        return report
 
     def decide(self, intent: str, **kwargs: Any) -> CliReport:
         """ortho decide <intent>"""
         if not intent:
+            # See plan()'s identical early-return comment: no real scan
+            # target exists yet, so skip capture rather than writing into
+            # whatever directory the caller's cwd happens to be.
             return CliReport(
                 title="Decision: (empty)",
                 content="Cannot decide on an empty intent.",
@@ -173,9 +200,13 @@ class CliCommands:
         try:
             scan = scan_repository(scan_target)
         except FileNotFoundError as e:
-            return CliReport(title=f"Decision: {intent}", content=str(e), success=False)
+            report = CliReport(title=f"Decision: {intent}", content=str(e), success=False)
+            capture_workflow_run(scan_target, "decide", intent, report)
+            return report
         except Exception as e:
-            return CliReport(title=f"Decision: {intent}", content=f"Scan failed: {e}", success=False)
+            report = CliReport(title=f"Decision: {intent}", content=f"Scan failed: {e}", success=False)
+            capture_workflow_run(scan_target, "decide", intent, report)
+            return report
 
         arch_model_adapter = ArchModelAdapter(scan.arch_model, scan.file_to_module)
         dep_graph = DependencyGraphAdapter(scan.import_edges_by_file, scan.file_to_module)
@@ -211,8 +242,10 @@ class CliCommands:
         if alt_titles:
             content += f"\nAlternatives: {', '.join(alt_titles)}"
 
-        return CliReport(
+        report = CliReport(
             title=f"Decision: {intent}",
             content=content,
             success=True,
         )
+        capture_workflow_run(scan_target, "decide", intent, report)
+        return report
