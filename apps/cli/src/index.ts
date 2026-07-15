@@ -12,6 +12,12 @@ import { approveCommand } from "./commands/approve";
 import { rejectCommand } from "./commands/reject";
 import { historyCommand } from "./commands/history";
 import { contextCommand } from "./commands/context";
+import {
+  guardrailsCommand,
+  decideCommand,
+  planCommand,
+  refactorCommand,
+} from "./commands/copilot";
 
 program.name("ortho").description("AI Engineering Platform CLI").version("0.1.0");
 
@@ -52,5 +58,11 @@ program.addCommand(approveCommand);
 program.addCommand(rejectCommand);
 program.addCommand(historyCommand);
 program.addCommand(contextCommand);
+
+// task-021: engineering copilot commands (real CliCommands engines)
+program.addCommand(guardrailsCommand);
+program.addCommand(decideCommand);
+program.addCommand(planCommand);
+program.addCommand(refactorCommand);
 
 program.parse(process.argv);
