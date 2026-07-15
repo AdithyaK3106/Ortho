@@ -368,9 +368,8 @@ ortho guardrails
 
 ### Documentation
 
-- **Phase 5 Summary:** `PHASE-5-FINAL-ACCEPTANCE.md`
-- **Phase 5.2 Summary:** `PHASE-5-2-FINAL-SUMMARY.md`
-- **Deployment Details:** `DEPLOYMENT-SUMMARY.md`
+- **Current Status:** `status.md`
+- **Historical Phase Reports:** `docs/archive/` (Phase 5/5.2/6 completion summaries, deployment details)
 - **Project Status:** `.ases/tasks/ortho-phase5-arch-intelligence/` and `.ases/tasks/ortho-phase5-2-calibration/`
 - **Functional Requirements:** `ortho-v3-frd.md`
 

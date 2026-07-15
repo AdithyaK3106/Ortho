@@ -145,7 +145,7 @@ rejection and a `scan_path` kwarg.
 - ✅ **Component 8:** Metrics Collection (3 tests)
 - ✅ **Component 9:** Ranking Weight Tuning (4 tests)
 
-**Test Results (verified 2026-07-12, post-audit):** 883 tests passed, 0 failed (796 package tests + 87 benchmark-validation tests incl. golden gate). An audit on 2026-07-12 found the previous "110+ tests, 100% pass" claim false (18 failures, 4 mock-only test files); all were fixed same day — see `TEST_VERIFICATION_REPORT.md`.  
+**Test Results (verified 2026-07-12, post-audit):** 883 tests passed, 0 failed (796 package tests + 87 benchmark-validation tests incl. golden gate). An audit on 2026-07-12 found the previous "110+ tests, 100% pass" claim false (18 failures, 4 mock-only test files); all were fixed same day — see `docs/archive/TEST_VERIFICATION_REPORT.md`.  
 **ASES Workflow:** All 5 gates passed  
 **Code Quality:** Full type safety, deterministic, ponytail principles  
 
@@ -389,5 +389,5 @@ rejection and a `scan_path` kwarg.
 
 - **Features:** See `FEATURES.md` for complete feature list
 - **FRD:** See `ortho-v3-frd.md` for functional requirements
-- **Build Plan:** See `PHASE_4_BUILD_PLAN.md` for component details
+- **Build Plan:** See `docs/archive/PHASE_4_BUILD_PLAN.md` for component details
 - **Architecture:** See `docs/architecture/` for technical docs

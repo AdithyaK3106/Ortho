@@ -52,7 +52,7 @@ All tests MUST be run and verified. Simulated logs are strictly prohibited.
 - **Root cause:** Time constraints during Phase 3 completion
 - **Impact:** Phase 4 token optimizer improvements validated against 45-repo baseline
 - **Mitigation:** Phase 5 includes completion of missing 5 repos
-- **Reference:** `TASK_015_ACCEPTANCE_GAP.md` 
+- **Reference:** `docs/archive/TASK_015_ACCEPTANCE_GAP.md` 
 
 ---
 
@@ -70,7 +70,7 @@ All tests MUST be run and verified. Simulated logs are strictly prohibited.
 - [ ] Phase 4: Reorganize into `core/`, `intelligence/`, `storage/` top-level directories (non-breaking, optional)
 - [ ] Phase 5: Consolidate test fixtures into `benchmarks/fixtures/` (low priority)
 
-**See:** `CLEANUP_PLAN.md`, `docs/architecture/adr-015-layer-boundaries.md`
+**See:** `docs/archive/CLEANUP_PLAN.md`, `docs/architecture/adr-015-layer-boundaries.md`
 
 ---
 

@@ -63,7 +63,7 @@ strict = true
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["packages", "shared"]
+testpaths = ["packages", "shared", "apps"]
 python_files = "test_*.py"
 addopts = "-v --tb=short"
 
