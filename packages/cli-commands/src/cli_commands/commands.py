@@ -136,6 +136,10 @@ class CliCommands:
     def guardrails(self, path: str | None = None, **kwargs: Any) -> CliReport:
         """ortho guardrails check [path]"""
         target = path or "."
+        severity_filter = kwargs.get("severity_filter")
+        if severity_filter is not None and severity_filter not in ("error", "warning"):
+            raise ValueError(f"severity_filter must be 'error' or 'warning', got '{severity_filter}'")
+
         try:
             scan = scan_repository(target)
         except FileNotFoundError as e:
@@ -164,20 +168,31 @@ class CliCommands:
         enforcer = ArchitectureEnforcer(arch_model_adapter, dep_graph, metrics)
         violations = enforcer.check_violations()
 
-        if not violations:
+        # Filter violations if severity_filter is provided
+        filtered_violations = violations
+        filter_count = 0
+        if severity_filter is not None:
+            filtered_violations = [v for v in violations if v.severity == severity_filter]
+            filter_count = len(violations) - len(filtered_violations)
+
+        if not filtered_violations:
             content = f"Scanned {len(scan.file_to_module)} file(s). No violations found."
         else:
             lines = [
                 f"[{v.severity}] {v.rule_id} at {v.location}: {v.message} -> {v.suggested_fix}"
-                for v in violations
+                for v in filtered_violations
             ]
             content = "\n".join(lines)
+            if filter_count > 0:
+                content += f"\n\n(Scanned {len(scan.file_to_module)} file(s). {len(filtered_violations)} violation(s) found ({filter_count} filtered by severity).)"
+            else:
+                content = f"Scanned {len(scan.file_to_module)} file(s). {len(filtered_violations)} violation(s) found.\n\n" + content
 
         report = CliReport(
             title=f"Architecture Check: {target}",
             content=content,
             success=True,
-            violations=violations,
+            violations=filtered_violations,
         )
         capture_workflow_run(target, "guardrails", target, report)
         return report
@@ -193,6 +208,15 @@ class CliCommands:
                 content="Cannot decide on an empty intent.",
                 success=False,
             )
+
+        confidence_threshold = kwargs.get("confidence_threshold")
+        if confidence_threshold is not None:
+            try:
+                threshold = float(confidence_threshold)
+                if not (0.0 <= threshold <= 1.0):
+                    raise ValueError(f"confidence_threshold must be 0.0–1.0, got {threshold}")
+            except (TypeError, ValueError) as e:
+                raise ValueError(f"confidence_threshold must be a float 0.0–1.0: {e}")
 
         candidate_path = Path(intent)
         is_file_intent = candidate_path.is_file()
@@ -238,16 +262,31 @@ class CliCommands:
             },
         )
 
-        alt_titles = [opt.title for opt in decision.options if opt is not decision.recommended_option]
-        content = f"Decision for: {intent}\n\nRecommended: {decision.recommended_option.title}\n{decision.reasoning}"
+        # Filter recommendations if confidence_threshold is provided
+        filtered_options = decision.options
+        filter_count = 0
+        if confidence_threshold is not None:
+            threshold = float(confidence_threshold)
+            filtered_options = [r for r in decision.options if r.confidence >= threshold]
+            filter_count = len(decision.options) - len(filtered_options)
+            # If all filtered out, fall back to highest-confidence option
+            if not filtered_options:
+                filtered_options = [max(decision.options, key=lambda r: r.confidence)]
+
+        recommended = filtered_options[0] if filtered_options else decision.recommended_option
+        alt_titles = [opt.title for opt in filtered_options if opt is not recommended]
+
+        content = f"Decision for: {intent}\n\nRecommended: {recommended.title}\n{decision.reasoning}"
         if alt_titles:
             content += f"\nAlternatives: {', '.join(alt_titles)}"
+        if filter_count > 0:
+            content += f"\n\n({filter_count} recommendation(s) filtered by confidence threshold.)"
 
         report = CliReport(
             title=f"Decision: {intent}",
             content=content,
             success=True,
-            recommendations=decision.options,
+            recommendations=filtered_options,
         )
         capture_workflow_run(scan_target, "decide", intent, report)
         return report

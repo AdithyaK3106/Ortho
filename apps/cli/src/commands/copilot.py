@@ -39,10 +39,12 @@ def _main() -> None:
 
     guardrails_parser = subparsers.add_parser("guardrails", help="Architecture violation check")
     guardrails_parser.add_argument("--path", required=True, help="Directory to scan")
+    guardrails_parser.add_argument("--severity", choices=["error", "warning"], help="Filter violations by severity")
 
     decide_parser = subparsers.add_parser("decide", help="Decision support")
     decide_parser.add_argument("intent", help="Free-text intent or a file path")
     decide_parser.add_argument("--scan-path", required=True, help="Directory to scan")
+    decide_parser.add_argument("--confidence", help="Minimum confidence threshold (0.0-1.0)")
 
     plan_parser = subparsers.add_parser("plan", help="Feature implementation paths")
     plan_parser.add_argument("intent", help="Free-text feature intent")
@@ -57,9 +59,21 @@ def _main() -> None:
 
     commands = CliCommands()
     if args.action == "guardrails":
-        report = commands.guardrails(args.path)
+        kwargs = {}
+        if hasattr(args, "severity") and args.severity:
+            kwargs["severity_filter"] = args.severity
+        report = commands.guardrails(args.path, **kwargs)
     elif args.action == "decide":
-        report = commands.decide(args.intent, scan_path=args.scan_path)
+        kwargs = {"scan_path": args.scan_path}
+        if hasattr(args, "confidence") and args.confidence:
+            try:
+                conf = float(args.confidence)
+            except ValueError:
+                parser.error(f"--confidence must be a float, got '{args.confidence}'")
+            if not (0.0 <= conf <= 1.0):
+                parser.error(f"--confidence must be 0.0–1.0, got {conf}")
+            kwargs["confidence_threshold"] = conf
+        report = commands.decide(args.intent, **kwargs)
     elif args.action == "plan":
         report = commands.plan(args.intent, scan_path=args.scan_path)
     else:
