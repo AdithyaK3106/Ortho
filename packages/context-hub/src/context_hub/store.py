@@ -12,6 +12,8 @@ from storage import OrthoDatabase
 from .embedding import EmbeddingProvider, NullEmbedding
 from .ingestion import ArtifactIngestionRequest, ValidationResult, validate_ingestion
 from .versioning import make_artifact_id, make_content_hash, check_content_changed, get_next_version
+from .search.bm25 import BM25Search
+from .search.result import SearchResult
 
 
 logger = logging.getLogger(__name__)
@@ -181,6 +183,17 @@ class ArtifactStore:
             "DELETE FROM artifacts WHERE id = ?", (artifact_id,)
         )
         self._conn.commit()
+
+    def search(
+        self,
+        query: str,
+        artifact_type: Optional[str] = None,
+        limit: int = 50,
+    ) -> list[SearchResult]:
+        """Search artifacts by keyword using BM25 ranking."""
+        searcher = BM25Search(self._conn)
+        type_filter = [artifact_type] if artifact_type else None
+        return searcher.search(query, limit=limit, type_filter=type_filter)
 
     @staticmethod
     def _row_to_artifact(row) -> Optional[Artifact]:

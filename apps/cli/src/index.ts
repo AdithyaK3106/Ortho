@@ -17,6 +17,7 @@ import {
   decideCommand,
   planCommand,
   refactorCommand,
+  memoryCommand,
 } from "./commands/copilot";
 
 program.name("ortho").description("AI Engineering Platform CLI").version("0.1.0");
@@ -64,5 +65,8 @@ program.addCommand(guardrailsCommand);
 program.addCommand(decideCommand);
 program.addCommand(planCommand);
 program.addCommand(refactorCommand);
+
+// task-024: memory search (query workflow_run artifacts)
+program.addCommand(memoryCommand);
 
 program.parse(process.argv);

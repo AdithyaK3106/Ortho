@@ -211,12 +211,10 @@ class CliCommands:
 
         confidence_threshold = kwargs.get("confidence_threshold")
         if confidence_threshold is not None:
-            try:
-                threshold = float(confidence_threshold)
-                if not (0.0 <= threshold <= 1.0):
-                    raise ValueError(f"confidence_threshold must be 0.0–1.0, got {threshold}")
-            except (TypeError, ValueError) as e:
-                raise ValueError(f"confidence_threshold must be a float 0.0–1.0: {e}")
+            if not isinstance(confidence_threshold, float):
+                raise ValueError(f"confidence_threshold must be a float, got {type(confidence_threshold).__name__}")
+            if not (0.0 <= confidence_threshold <= 1.0):
+                raise ValueError(f"confidence_threshold must be 0.0–1.0, got {confidence_threshold}")
 
         candidate_path = Path(intent)
         is_file_intent = candidate_path.is_file()
@@ -266,8 +264,7 @@ class CliCommands:
         filtered_options = decision.options
         filter_count = 0
         if confidence_threshold is not None:
-            threshold = float(confidence_threshold)
-            filtered_options = [r for r in decision.options if r.confidence >= threshold]
+            filtered_options = [r for r in decision.options if r.confidence >= confidence_threshold]
             filter_count = len(decision.options) - len(filtered_options)
             # If all filtered out, fall back to highest-confidence option
             if not filtered_options:
@@ -290,3 +287,87 @@ class CliCommands:
         )
         capture_workflow_run(scan_target, "decide", intent, report)
         return report
+
+    def search_memory(self, repo_path: str, query: str) -> CliReport:
+        """Search workflow_run artifacts in the repo's ContextHub memory."""
+        repo_path_obj = Path(repo_path).resolve()
+
+        # Reject empty queries
+        if not query or not query.strip():
+            return CliReport(
+                title=f"Memory Search: {repo_path}",
+                content="No artifacts found for empty query.",
+                success=True,
+            )
+
+        # Check if repo exists
+        if not repo_path_obj.is_dir():
+            return CliReport(
+                title=f"Memory Search: {repo_path}",
+                content=f"Repo path does not exist: {repo_path}",
+                success=False,
+            )
+
+        try:
+            from storage import OrthoDatabase
+            from context_hub.store import ArtifactStore
+            from repo_intelligence.index_store import mint_repo_id
+
+            db = OrthoDatabase(repo_path_obj)
+            # Don't migrate — just read what exists
+            if not db.db_path.exists():
+                return CliReport(
+                    title=f"Memory Search: {repo_path}",
+                    content="No memory artifacts in this repo yet.",
+                    success=True,
+                )
+
+            store = ArtifactStore(db, repo_id=mint_repo_id(repo_path_obj))
+            results = store.search(query, artifact_type="workflow_run", limit=50)
+
+            if not results:
+                return CliReport(
+                    title=f"Memory Search: {repo_path}",
+                    content=f"No artifacts found matching '{query}'.",
+                    success=True,
+                )
+
+            # Count by command from titles
+            commands_found: dict[str, int] = {}
+            for artifact in results:
+                # Title format: "command: argument" from task-020
+                title_parts = artifact.title.split(": ", 1)
+                if title_parts:
+                    cmd = title_parts[0].lower()
+                    commands_found[cmd] = commands_found.get(cmd, 0) + 1
+
+            # Build human-readable output
+            lines = [f"Found {len(results)} workflow_run artifact(s) matching '{query}':"]
+            lines.append("")
+
+            for artifact in results:
+                title_parts = artifact.title.split(": ", 1)
+                cmd = title_parts[0] if title_parts else "unknown"
+                arg = title_parts[1] if len(title_parts) > 1 else ""
+                success_status = "✓" if "success=True" in artifact.content else "✗"
+                lines.append(f"  {success_status} {cmd}: {arg[:60]}")
+
+            lines.append("")
+            breakdown = ", ".join(f"{count} {cmd} run(s)" for cmd, count in sorted(commands_found.items()))
+            lines.append(f"Breakdown: {breakdown}")
+
+            content = "\n".join(lines)
+
+            return CliReport(
+                title=f"Memory Search: {repo_path}",
+                content=content,
+                success=True,
+                search_results=results,  # Structured results
+            )
+
+        except Exception as e:
+            return CliReport(
+                title=f"Memory Search: {repo_path}",
+                content=f"Search failed: {e}",
+                success=False,
+            )

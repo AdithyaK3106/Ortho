@@ -84,3 +84,13 @@ export const refactorCommand = new Command()
   .action(async (path?: string) => {
     await runCopilot(["refactor", "--path", path ?? process.cwd()]);
   });
+
+export const memoryCommand = new Command()
+  .command("memory <query>")
+  .description("Search workflow_run artifacts in ContextHub (learned from past guardrails/decide/plan/refactor runs)")
+  .option("--repo-path <dir>", "Repository path (default: current directory)")
+  .action(async (query: string, options?: { repoPath?: string }) => {
+    requireIntent(query, "memory");
+    const args = ["search", query, "--repo-path", options?.repoPath || process.cwd()];
+    await runPython("apps/cli/src/commands/memory_search.py", args);
+  });

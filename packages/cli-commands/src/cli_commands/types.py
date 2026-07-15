@@ -10,3 +10,4 @@ class CliReport:
     success: bool = True
     violations: Optional[Any] = None  # list[GuardrailViolation] | None
     recommendations: Optional[Any] = None  # list[Recommendation] | None
+    search_results: Optional[Any] = None  # list[WorkflowRunResult] | None
