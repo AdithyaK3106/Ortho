@@ -6,8 +6,12 @@ from arch_intelligence.model_adapter import ArchModelAdapter
 from change_planner.predictor import ChangePredictor
 from change_planner.types import ImpactPrediction
 from decision_engine.engine import DecisionEngine
+from feature_planner.planner import FeaturePlanner
+from refactoring_advisor.advisor import RefactoringAdvisor
 
 from cli_commands.dependency_graph_adapter import DependencyGraphAdapter
+from cli_commands.feature_plan_adapter import FeaturePlannerArchModelAdapter
+from cli_commands.refactor_adapter import CodeRepositoryAdapter
 from cli_commands.repo_scanner import ScanResult, scan_repository
 from cli_commands.types import CliReport
 
@@ -50,17 +54,64 @@ class _SymbolRegistryView:
 class CliCommands:
     def plan(self, intent: str, **kwargs: Any) -> CliReport:
         """ortho plan <intent>"""
+        if not intent or not isinstance(intent, str):
+            return CliReport(
+                title="Feature Plan: (empty)",
+                content="Cannot plan for an empty or non-string intent.",
+                success=False,
+            )
+
+        scan_target = str(kwargs.get("scan_path", "."))
+        try:
+            scan = scan_repository(scan_target)
+        except FileNotFoundError as e:
+            return CliReport(title=f"Feature Plan: {intent}", content=str(e), success=False)
+        except Exception as e:
+            return CliReport(title=f"Feature Plan: {intent}", content=f"Scan failed: {e}", success=False)
+
+        adapter = FeaturePlannerArchModelAdapter(scan.arch_model)
+        plan = FeaturePlanner(adapter).plan_feature(intent)
+
+        lines = [f"Feature type: {plan.feature_type}", ""]
+        for path in plan.paths:
+            lines.append(
+                f"- {path.name} (effort={path.effort}, risk={path.risk}): "
+                f"{path.description} -> {path.rationale}"
+            )
+        content = "\n".join(lines)
+
         return CliReport(
             title=f"Feature Plan: {intent}",
-            content=f"Planning feature: {intent}\n\nPath 1: Simple approach\nPath 2: Robust approach\nPath 3: Optimized approach",
+            content=content,
             success=True,
         )
 
-    def refactor(self, path: str = None, **kwargs: Any) -> CliReport:
+    def refactor(self, path: str | None = None, **kwargs: Any) -> CliReport:
         """ortho refactor [path]"""
+        target = path or "."
+        try:
+            scan = scan_repository(target)
+        except FileNotFoundError as e:
+            return CliReport(title=f"Refactoring: {path or 'All'}", content=str(e), success=False)
+        except Exception as e:
+            return CliReport(title=f"Refactoring: {path or 'All'}", content=f"Scan failed: {e}", success=False)
+
+        repo = CodeRepositoryAdapter(scan)
+        issues = RefactoringAdvisor(repo).find_issues()
+
+        if not issues:
+            content = "No refactoring issues found."
+        else:
+            lines = [
+                f"[{i.severity}] {i.issue_type} at {i.location}: {i.recommendation} "
+                f"(effort={i.estimated_effort}, confidence={i.confidence:.2f})"
+                for i in issues
+            ]
+            content = "\n".join(lines)
+
         return CliReport(
             title=f"Refactoring: {path or 'All'}",
-            content=f"Refactoring recommendations for {path or 'entire codebase'}:\n\n[HIGH] Issue 1\n[MEDIUM] Issue 2",
+            content=content,
             success=True,
         )
 

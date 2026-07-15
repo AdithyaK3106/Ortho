@@ -19,15 +19,15 @@ class TestCommands:
     """Test CLI command execution"""
 
     def test_plan_command(self, commands: CliCommands) -> None:
-        """ortho plan <intent>"""
-        result = commands.plan("add user search endpoint")
+        """ortho plan <intent> runs real feature planning against a bounded fixture"""
+        result = commands.plan("add user search endpoint", scan_path=_FIXTURE_REPO)
         assert isinstance(result, CliReport)
         assert result.success
         assert "Feature Plan" in result.title
 
     def test_refactor_command(self, commands: CliCommands) -> None:
-        """ortho refactor [path]"""
-        result = commands.refactor("src/service.py")
+        """ortho refactor [path] runs a real scan against a real repo"""
+        result = commands.refactor(_FIXTURE_REPO)
         assert isinstance(result, CliReport)
         assert result.success
         assert "Refactoring" in result.title
@@ -69,9 +69,9 @@ class TestCommands:
 
     def test_report_has_content(self, commands: CliCommands) -> None:
         """Reports have content"""
-        result = commands.plan("test")
+        result = commands.plan("test", scan_path=_FIXTURE_REPO)
         assert result.content != ""
-        assert "Path" in result.content
+        assert "effort=" in result.content
 
     def test_guardrails_skips_file_with_syntax_error_without_crashing(self, tmp_path: Path) -> None:
         """A file with a real Python syntax error must be skipped (with a
@@ -87,12 +87,15 @@ class TestCommands:
         assert result.success
 
     def test_no_stub_literals_remain(self) -> None:
-        """guardrails/decide must not contain the old unconditional-fake stub strings.
-        (refactor()/plan() stubs are explicitly out of scope for this task and
-        legitimately still contain their own placeholder text.)"""
+        """None of the four commands may contain the old unconditional-fake
+        stub strings; all four must call their real backing engine."""
         source = Path(__file__).resolve().parents[1] / "src" / "cli_commands" / "commands.py"
         text = source.read_text(encoding="utf-8")
         assert "No violations found!" not in text  # old guardrails() stub (exact string, with "!")
         assert "Recommended: Option A" not in text  # old decide() stub
+        assert "Path 1: Simple approach" not in text  # old plan() stub
+        assert "[HIGH] Issue 1" not in text  # old refactor() stub
         assert "check_violations" in text  # guardrails() must call the real enforcer
         assert "DecisionEngine" in text  # decide() must call the real engine
+        assert "FeaturePlanner" in text  # plan() must call the real planner
+        assert "RefactoringAdvisor" in text  # refactor() must call the real advisor
