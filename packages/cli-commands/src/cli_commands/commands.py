@@ -14,7 +14,7 @@ from cli_commands.feature_plan_adapter import FeaturePlannerArchModelAdapter
 from cli_commands.refactor_adapter import CodeRepositoryAdapter
 from cli_commands.repo_scanner import ScanResult, scan_repository
 from cli_commands.types import CliReport
-from cli_commands.workflow_capture import capture_workflow_run
+from cli_commands.workflow_capture import capture_workflow_run, cite_prior_findings
 
 
 class _CallGraphView:
@@ -188,6 +188,15 @@ class CliCommands:
             else:
                 content = f"Scanned {len(scan.file_to_module)} file(s). {len(filtered_violations)} violation(s) found.\n\n" + content
 
+            # Memory citations: has any of these findings shown up in a prior
+            # run of this repo? Queries prior workflow_run artifacts BEFORE
+            # this run's own capture_workflow_run() call below, so a finding
+            # never cites itself.
+            queries = list(dict.fromkeys(f"{v.rule_id} {v.location}" for v in filtered_violations))
+            citations = cite_prior_findings(target, queries)
+            if citations:
+                content += "\n\n" + "\n".join(citations)
+
         report = CliReport(
             title=f"Architecture Check: {target}",
             content=content,
@@ -278,6 +287,15 @@ class CliCommands:
             content += f"\nAlternatives: {', '.join(alt_titles)}"
         if filter_count > 0:
             content += f"\n\n({filter_count} recommendation(s) filtered by confidence threshold.)"
+
+        # Memory citations: same violations feed decide() as guardrails(), so
+        # reuse them as citation queries -- has this repo's decision-relevant
+        # evidence come up before? Queried before this run's own
+        # capture_workflow_run() call below, so a finding never cites itself.
+        queries = list(dict.fromkeys(f"{v.rule_id} {v.location}" for v in violations))
+        citations = cite_prior_findings(scan_target, queries)
+        if citations:
+            content += "\n\n" + "\n".join(citations)
 
         report = CliReport(
             title=f"Decision: {intent}",
