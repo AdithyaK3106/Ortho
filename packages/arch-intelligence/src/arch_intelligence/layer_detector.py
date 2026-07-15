@@ -106,19 +106,25 @@ class LayerDetector:
         return layers
 
     def _infer_layer_name(self, layer_num: int, file_ids: list, file_map: dict) -> str:
-        """Infer layer name from semantic keywords in file paths."""
-        if layer_num == 0:
-            return "Data"
-        elif layer_num == 1:
-            return "Business"
-        elif layer_num == 2:
-            return "Presentation"
-        
-        # Check semantic keywords
+        """Infer layer name from semantic keywords in file paths.
+
+        Layer *numbers* come from topological depth in the import graph --
+        a purely structural signal that says nothing about what a layer is
+        for. Naming layers 0/1/2 "Data"/"Business"/"Presentation"
+        unconditionally (regardless of whether any matching keyword is
+        actually present) asserts a specific 3-tier enterprise architecture
+        onto every codebase, including flat/ML/CLI repos that have no such
+        thing -- and downstream, guardrails reports disagreements with that
+        fabricated hierarchy as "layer_boundaries" errors. Only use a
+        semantic name when real keyword evidence supports it; otherwise
+        report the neutral, structural "Layer N" (see
+        docs/archive/PRODUCTION_AUDIT_2026-07-15.md for the false-positive
+        this caused on a real unseen repo).
+        """
         for fid in file_ids:
             path = file_map.get(fid, type('', (), {'rel_path': ''})()).rel_path.lower()
             for keyword in self.SEMANTIC_KEYWORDS.get(layer_num, []):
                 if keyword in path:
                     return keyword.capitalize()
-        
+
         return f"Layer {layer_num}"

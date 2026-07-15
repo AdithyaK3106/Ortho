@@ -10,7 +10,10 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from arch_intelligence.arch_detector import ArchitectureDetector
 from arch_intelligence.arch_detector import File as ArchFile
+from arch_intelligence.arch_detector import ImportEdge as AIImportEdge
+from arch_intelligence.arch_detector import Symbol as AISymbol
 from arch_intelligence.layer_detector import LayerDetector
 from arch_intelligence.types import ArchitectureModel, ArchStyle
 from repo_intelligence.call_graph import CallGraphBuilder, CallEdge
@@ -94,11 +97,20 @@ def scan_repository(path: str) -> ScanResult:
     layer_edges = _build_layer_import_edges(import_edges_by_file, file_to_module, arch_files)
     layers = LayerDetector().extract_layers(layer_edges, arch_files)
 
+    ai_import_graph = _build_ai_import_graph(import_edges_by_file, file_to_module)
+    ai_symbols = _build_ai_symbols(symbols_by_file)
+    style_result = ArchitectureDetector().detect(call_edges, ai_import_graph, ai_symbols, arch_files)
+
     arch_model = ArchitectureModel(
         repo_id=str(repo_root),
-        style=ArchStyle.UNKNOWN,
-        style_confidence=0.0,
-        layers=layers,
+        style=style_result.style,
+        style_confidence=style_result.confidence,
+        # Layer names (Data/Business/Presentation) only mean something when
+        # the repo actually has a layered-style hierarchy; a flat/microservices/
+        # unknown-style repo gets fake tier labels from pure topological depth
+        # otherwise, and guardrails reports disagreements with that fiction as
+        # errors (see docs/archive/PRODUCTION_AUDIT_2026-07-15.md finding).
+        layers=layers if _style_implies_layers(style_result.style, style_result.confidence) else [],
     )
 
     return ScanResult(
@@ -132,3 +144,53 @@ def _build_layer_import_edges(
             if target_file_id is not None and target_file_id != file_key:
                 edges.append(_LayerImportEdge(importer_file_id=file_key, imported_file_id=target_file_id))
     return edges
+
+
+def _build_ai_import_graph(
+    import_edges_by_file: dict[str, list[ImportEdge]],
+    file_to_module: dict[str, str],
+) -> list[AIImportEdge]:
+    """Convert repo_intelligence ImportEdges to arch_intelligence's shape
+    (adds imported_file_id/is_external) for ArchitectureDetector.detect()."""
+    module_to_file_id = {module: file_id for file_id, module in file_to_module.items()}
+
+    edges: list[AIImportEdge] = []
+    for file_key, import_edges in import_edges_by_file.items():
+        for edge in import_edges:
+            target_file_id = module_to_file_id.get(edge.target_module)
+            if target_file_id is None:
+                for module, file_id in module_to_file_id.items():
+                    if module.endswith(f".{edge.target_module}"):
+                        target_file_id = file_id
+                        break
+            edges.append(AIImportEdge(
+                importer_file_id=file_key,
+                imported_file_id=target_file_id or "",
+                imported_module=edge.target_module,
+                is_external=target_file_id is None,
+            ))
+    return edges
+
+
+def _build_ai_symbols(symbols_by_file: dict[str, list[Symbol]]) -> list[AISymbol]:
+    """Flatten repo_intelligence's per-file symbol dict into arch_intelligence's
+    flat (id, name, file_id) shape for ArchitectureDetector.detect()."""
+    symbols: list[AISymbol] = []
+    for file_key, file_symbols in symbols_by_file.items():
+        for sym in file_symbols:
+            symbols.append(AISymbol(id=f"{file_key}::{sym.name}", name=sym.name, file_id=file_key))
+    return symbols
+
+
+# Styles whose Data/Business/Presentation (or equivalent) layer labels reflect
+# a real detected hierarchy, not just topological depth in the import graph.
+# FLAT/MICROSERVICES/UNKNOWN/LOW_CONFIDENCE repos get no layers at all --
+# reporting "layer_boundaries" violations against a fabricated tier structure
+# is the primary source of guardrails false positives (see
+# docs/archive/PRODUCTION_AUDIT_2026-07-15.md).
+_LAYER_BEARING_STYLES = frozenset({ArchStyle.LAYERED, ArchStyle.MVC, ArchStyle.HEXAGONAL})
+_MIN_LAYER_CONFIDENCE = 0.45
+
+
+def _style_implies_layers(style: ArchStyle, confidence: float) -> bool:
+    return style in _LAYER_BEARING_STYLES and confidence >= _MIN_LAYER_CONFIDENCE

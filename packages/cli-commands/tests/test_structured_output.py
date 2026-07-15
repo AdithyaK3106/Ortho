@@ -16,6 +16,12 @@ from decision_engine.types import Recommendation
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _FIXTURE_REPO_CLICK = str(_REPO_ROOT / "repos" / "click")
 _FIXTURE_REPO_REQUESTS = str(_REPO_ROOT / "repos" / "requests")
+# click/requests are small, well-organized repos with no real layer_boundaries
+# or module_sizing issues -- flask is used wherever a test needs a repo
+# guaranteed to have at least one real violation to assert against (after
+# the layer_detector false-positive fix, click/requests correctly report
+# zero violations; see docs/archive/PRODUCTION_AUDIT_2026-07-15.md).
+_FIXTURE_REPO_FLASK = str(_REPO_ROOT / "repos" / "flask")
 
 
 @pytest.fixture
@@ -36,15 +42,15 @@ class TestGuardrailsStructuredOutput:
 
     def test_guardrails_violations_are_real_objects(self, commands: CliCommands) -> None:
         """Each violation in violations list is a GuardrailViolation instance"""
-        result = commands.guardrails(_FIXTURE_REPO_CLICK)
+        result = commands.guardrails(_FIXTURE_REPO_FLASK)
         assert result.violations is not None
-        assert len(result.violations) > 0, "repos/click should have at least one violation"
+        assert len(result.violations) > 0, "repos/flask should have at least one violation"
         for violation in result.violations:
             assert isinstance(violation, GuardrailViolation)
 
     def test_guardrails_violations_have_required_fields(self, commands: CliCommands) -> None:
         """Each GuardrailViolation has all required fields with correct types"""
-        result = commands.guardrails(_FIXTURE_REPO_CLICK)
+        result = commands.guardrails(_FIXTURE_REPO_FLASK)
         assert result.violations is not None
         for v in result.violations:
             # Check all required fields exist and have correct types

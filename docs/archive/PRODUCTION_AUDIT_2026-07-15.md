@@ -1,4 +1,4 @@
-# Ortho v3 — Production Readiness Audit (2026-07-15)
+# Ortho v3 — Production Readiness Audit (2026-07-15, updated 2026-07-16)
 
 Full audit of install path, test suite health, type safety, and an
 end-to-end run against a genuinely unseen repository
@@ -103,6 +103,91 @@ resolution limitation, not a real type bug).
 
 **Verified:** `mypy --strict` on `packages/cli-commands/src` — 0 errors
 (was 4).
+
+### 6. `guardrails()` false-positive noise: fabricated "Data"/"Business"/"Presentation" layer names (2026-07-16 follow-up)
+Root cause of the noisy `guardrails` output flagged when auditing the
+`custom_yolo` end-to-end run ("Business cannot import Data" on a flat ML
+repo with no such architecture). Two independent bugs compounded:
+
+1. **`repo_scanner.py` never ran real architecture-style detection for
+   `guardrails`/`decide`/`refactor`** — it hardcoded
+   `style=ArchStyle.UNKNOWN, style_confidence=0.0` on every scan and ran
+   `LayerDetector.extract_layers()` unconditionally regardless. The real
+   `ArchitectureDetector` (confidence-scored LAYERED/MVC/HEXAGONAL/FLAT/
+   MICROSERVICES/UNKNOWN/AMBIGUOUS classification) was only ever wired
+   into `ortho analyze`, not the guardrails/decide/refactor scan path.
+2. **`LayerDetector._infer_layer_name()` hardcoded layer 0/1/2 to
+   "Data"/"Business"/"Presentation" unconditionally** — regardless of
+   whether the codebase has anything resembling those concerns. Layer
+   *numbers* come from pure topological depth in the import graph (layer 0
+   = imports nothing internal, layer 1 = imports something from layer 0,
+   etc.), which is a legitimate way to derive dependency *direction*, but
+   is not evidence of what a layer semantically *is*. On `custom_yolo`,
+   `models.modules.utils`/`train.py`/`predict.py` — files with zero
+   internal imports — got labeled "Data" purely by having no
+   dependencies, and files one hop deeper got labeled "Business", with
+   full certainty and no confidence signal. `enforcer.py` then reported
+   disagreements with this fabricated hierarchy as `[error]
+   layer_boundaries` violations, reading as an authoritative architectural
+   claim when it was really "a leaf module got imported by something
+   else" — a completely mundane pattern in any codebase.
+
+**Fixed:**
+- `repo_scanner.py` now runs the real `ArchitectureDetector` (same
+  detector `ortho analyze` already used) and stores its actual
+  `style`/`style_confidence` on the `ArchitectureModel`, instead of
+  hardcoding `UNKNOWN`/`0.0`.
+- Layers are only populated (and therefore `layer_boundaries` violations
+  only reported) when the detected style is one that actually implies a
+  directional hierarchy (`LAYERED`, `MVC`, `HEXAGONAL`) at confidence
+  ≥0.45 (the same evidence threshold `ArchitectureDetector` itself already
+  uses). `FLAT`/`MICROSERVICES`/`UNKNOWN`/`AMBIGUOUS`-style repos get zero
+  layers and zero layer_boundaries findings — `module_sizing` and
+  `dependency_direction` (cycle detection) are unaffected, since those are
+  legitimate regardless of architectural style.
+- `LayerDetector._infer_layer_name()` no longer hardcodes "Data"/
+  "Business"/"Presentation" for layers 0/1/2. It uses the same
+  `SEMANTIC_KEYWORDS` matching already defined (checks file paths for
+  repository/model/db/service/business/controller/view/etc.) for *every*
+  layer number, and falls back to the neutral, non-accusatory "Layer N"
+  when no real keyword evidence supports a semantic name — instead of
+  asserting a fictional 3-tier enterprise architecture onto every
+  codebase.
+
+**Verified:**
+- `custom_yolo`: layer names changed from fabricated "Data"/"Business" to
+  honest "Model"/"Layer 1" (real keyword match on `models.*` paths for
+  the first, no fabricated label for the second).
+- `repos/click`, `repos/requests`: detected as `AMBIGUOUS`/`FLAT` style
+  (0.46/0.64 confidence) — correctly report **zero** `layer_boundaries`
+  violations now (previously reported false positives). `repos/flask`
+  (`LAYERED`, 0.65 confidence — a real layered hierarchy) still reports
+  31 real violations, confirming the fix suppresses noise without
+  suppressing genuine signal.
+- Full `arch-intelligence` (124/124), `cli-commands` (all files, ~280
+  tests), `change-planner`/`feature-planner`/`decision-engine`/
+  `impact-analysis` (148/148) suites pass. One test
+  (`test_guardrails_violations_are_real_objects` in
+  `test_structured_output.py`) asserted `repos/click` would have ≥1
+  violation — that assumption was the bug being fixed, so the test now
+  uses `repos/flask` (a fixture with genuine violations) instead.
+  `mypy --strict` on `packages/cli-commands/src` still clean.
+- `test_phase5_3_benchmarks.py` (architecture *style* classification
+  accuracy, gap A below) is unaffected either way — confirmed unchanged
+  at 75%, since this fix touches layer-boundary *reporting*, not the
+  underlying style classifier's accuracy.
+
+**Not fully fixed — honest caveat:** `custom_yolo` is genuinely classified
+`LAYERED` at 0.68 confidence by `ArchitectureDetector`, which is itself a
+classifier with a documented 75%-vs-83.3% accuracy gap (gap A below). So
+`guardrails` still reports `layer_boundaries` violations on `custom_yolo`
+— the *labels* are no longer fabricated ("Layer 1 cannot import Model"
+instead of "Business cannot import Data"), but whether a flat-ish ML
+repo *should* be classified as having a real layered hierarchy at all is
+a separate, unresolved classifier-accuracy question. This fix eliminates
+the specific failure mode of asserting semantically false labels with
+manufactured certainty; it does not eliminate all possible
+false-positive `layer_boundaries` findings on borderline-style repos.
 
 ## Found, documented, NOT fixed (needs its own workflow)
 
@@ -230,8 +315,17 @@ packages/orchestration/tests/test_imports.py             | fix: broken relative 
 packages/orchestration/tests/test_selector_engine.py     | fix: broken relative import
 packages/cli-commands/src/cli_commands/commands.py       | fix: mypy --strict no-any-return (3 sites)
 packages/cli-commands/tests/test_filtering.py             | fix: bound cwd for 2 tests to avoid unbounded scan
+packages/cli-commands/src/cli_commands/repo_scanner.py    | fix: wire real ArchitectureDetector into guardrails/decide/refactor scan path
+packages/arch-intelligence/src/arch_intelligence/layer_detector.py | fix: stop fabricating Data/Business/Presentation layer names
+packages/cli-commands/tests/test_structured_output.py     | fix: use repos/flask fixture (repos/click correctly has zero violations now)
 ```
 
-No behavior of any shipped command changed for end users — every fix here
-is either install/environment plumbing, dead-on-arrival test infrastructure
-(orchestration couldn't even collect before), or test-only cwd scoping.
+Behavior did change for end users in one place: `guardrails`/`decide`/
+`refactor` now report fewer, more honest `layer_boundaries` findings on
+repos without a real detected layered/MVC/hexagonal architecture (see
+finding 6). This is a deliberate, verified accuracy fix, not a
+regression — it removes fabricated violations without touching
+`module_sizing` or `dependency_direction` (cycle) checks, which remain
+unaffected. Every other fix in this document is install/environment
+plumbing, dead-on-arrival test infrastructure (orchestration couldn't
+even collect before), or test-only cwd scoping.
