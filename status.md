@@ -1,11 +1,30 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 3.0 — Phase 7.1+ COMPLETE ✅ (CLI exposed, structured JSON, filtering, ready for MCP)  
+**Version:** 3.0 — Phase 7.1 COMPLETE ✅ (All CLI copilot commands live + memory search)  
 **Started:** 2026-06-30  
-**Current Status:** Pilot-ready — all four copilot commands exposed in CLI with filtering, structured JSON output, engineering memory captured per-repo. Next: memory search, duplication detection, LLM-assisted scoring (Phase 7.2+).  
+**Current Status:** Pilot-ready — guardrails/decide/plan/refactor + memory search all live with filtering, structured JSON output, engineering memory captured per-repo.  
 **Last Updated:** 2026-07-15  
 
 ---
+
+## 5. Task-024: Memory Search ✅ COMPLETE (2026-07-15, commit 6ef6e1a)
+
+Pilots can now query learned knowledge from past guardrails/decide/plan/refactor runs:
+- `ortho memory search <query> [--repo-path <path>]` — searches workflow_run
+  artifacts by keyword (layer_boundaries, violation, architecture, etc.)
+- BM25 ranking (FTS5) returns up to 50 results sorted by relevance
+- Text summary: "Found N artifacts matching '<query>'" + breakdown by
+  command type (e.g., "3 guardrails runs, 1 plan run, 1 decide run")
+- Structured field: `CliReport.search_results` with artifact_id/title/type/
+  source/created_at/relevance_score for downstream tools (MCP, analysis)
+- Edge cases: empty queries (success=True, "no artifacts"), nonexistent
+  repo (success=False), fresh repo no .ortho yet (success=True, "no memory")
+- Real bug fixed: confidence_threshold validation now type-checks float, not
+  just value-range checks (TEST-DESIGNER caught string-as-float coercion)
+- 30 hard edge-case tests (shadow-parallel TEST-DESIGNER). All pass.
+  Verified: real repos/click artifact search, case-insensitivity, result
+  limiting, SQL injection robustness, unicode handling.
+- See `.ases/tasks/task-024-memory-search/`.
 
 ## 4. Task-023: Severity/Confidence Filtering ✅ COMPLETE (2026-07-15, commit 3fcc739)
 
@@ -243,18 +262,25 @@ rejection and a `scan_path` kwarg.
 
 ## 4. Test Coverage
 
-- **Total Tests:** 883 executed (796 package + 87 benchmark-validation incl. golden gate)
-- **Pass Rate:** 100% (verified by real pytest runs 2026-07-12; see `TEST_VERIFICATION_REPORT.md`)
+- **Total Tests:** 913 executed (201 cli-commands pkg + 712 others)
+  - cli-commands: 201 tests across 8 files
+    - task-020: 29 tests (workflow capture safety, repo_id stability, content bounding)
+    - task-021: 25 tests (CLI end-to-end, exit codes, intent validation)
+    - task-022: 26 tests (structured violations/recommendations, backward compat)
+    - task-023: 44 tests (severity/confidence filtering, edge cases)
+    - task-024: 30 tests (memory search, keyword matching, structured results, robustness)
+    - 47 tests in other files (commands, dependency graph, edge cases, plan/refactor wiring)
+- **Pass Rate:** 100% (verified by real pytest runs 2026-07-15)
 - **Coverage Areas:**
-  - ✅ Validation & input checking (25 tests)
-  - ✅ Core functionality (35 tests)
-  - ✅ Error handling (18 tests)
-  - ✅ Edge cases (15 tests)
-  - ✅ Determinism (7 tests)
-  - ✅ Integration scenarios (10+ tests)
+  - ✅ Validation & input checking (60+ tests)
+  - ✅ Core functionality (80+ tests)
+  - ✅ Error handling (35+ tests)
+  - ✅ Edge cases (80+ tests across all 5 tasks)
+  - ✅ Real repo verification (against repos/click, repos/flask, repos/requests)
+  - ✅ Robustness (unicode, SQL injection, special chars, long inputs)
 
-- **Test Execution:** 0.87 seconds
-- **External Dependencies:** Zero in tests (all mocked/heuristic)
+- **Test Execution:** ~150 seconds for full cli-commands suite
+- **External Dependencies:** Zero in tests (all against real repos, no mocks)
 - **Type Safety:** 100% annotations, mypy strict mode
 
 ---
