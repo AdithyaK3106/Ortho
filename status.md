@@ -1,11 +1,27 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 3.0 — Phase 7.1+ COMPLETE ✅ (CLI exposed, structured JSON, ready for MCP)  
+**Version:** 3.0 — Phase 7.1+ COMPLETE ✅ (CLI exposed, structured JSON, filtering, ready for MCP)  
 **Started:** 2026-06-30  
-**Current Status:** MCP-ready — all four copilot commands exposed in CLI, structured JSON output for guardrails/decide, engineering memory captured per-repo. Next: filtering (severity/confidence), memory search, duplication detection.  
+**Current Status:** Pilot-ready — all four copilot commands exposed in CLI with filtering, structured JSON output, engineering memory captured per-repo. Next: memory search, duplication detection, LLM-assisted scoring (Phase 7.2+).  
 **Last Updated:** 2026-07-15  
 
 ---
+
+## 4. Task-023: Severity/Confidence Filtering ✅ COMPLETE (2026-07-15, commit 3fcc739)
+
+Pilots can now filter noise via `--severity` and `--confidence` flags:
+- `guardrails(path, severity_filter="error"|"warning"|None)` — shows only
+  error or warning violations. Filtered counts reported in text summary.
+  Backward-compatible (default None = all).
+- `decide(intent, confidence_threshold=0.0-1.0|None)` — shows only
+  recommendations >= threshold. Falls back to highest-confidence if all
+  filtered. Backward-compatible.
+- CLI: `ortho guardrails --severity error`, `ortho decide --confidence 0.8`.
+  TS-side validation (enum/range checks) before spawn; Python-side argparse
+  validation for defense-in-depth.
+- 44 hard edge-case tests; all pass. Real repo scans confirm filtering
+  behavior. Backward-compat verified.
+- See `.ases/tasks/task-023-filtering/`.
 
 ## 3. Task-022: Structured JSON Output ✅ COMPLETE (2026-07-15, commit 57cfbfb)
 
