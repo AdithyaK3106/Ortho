@@ -1,0 +1,26 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "ortho-mcp-server"
+version = "0.1.0"
+description = "Ortho MCP Server — Claude Code integration for engineering intelligence"
+authors = [{name = "Ortho Team", email = "urbrain369@gmail.com"}]
+
+[tool.poetry]
+name = "ortho-mcp-server"
+version = "0.1.0"
+description = "Ortho MCP Server for Claude Code"
+authors = ["Ortho Team <urbrain369@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+mcp = "^0.1"  # Anthropic's MCP SDK
+
+[tool.poetry.scripts]
+ortho-mcp = "ortho_mcp_server:main"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4"
+mypy = "^1.5"
