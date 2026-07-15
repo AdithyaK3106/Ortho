@@ -106,18 +106,27 @@ resolution limitation, not a real type bug).
 
 ## Found, documented, NOT fixed (needs its own workflow)
 
-### A. Architecture-detection benchmark accuracy regressed: 83.3% → 75%
-`packages/arch-intelligence/tests/test_phase5_3_benchmarks.py` fails 3
-tests. `requests` and `sqlalchemy` now classify as `UNKNOWN` (was `FLAT`)
-because the vendored `repos/sqlalchemy` clone (synced 2026-07-12) contains
-Python 3.14 t-string test fixtures the AST parser can't handle, losing
-enough symbols to push detection confidence below threshold. This is
-environmental drift in a vendored benchmark fixture, not a regression
-introduced by any change in this session — but it's a real, currently-true
-gap that CLAUDE.md's "no simulated metrics" policy requires surfacing.
-**Needs:** either re-pin `repos/sqlalchemy` to a pre-3.14-syntax commit, or
-make the AST adapter tolerant of unparseable files without losing
-detection confidence disproportionately.
+### A. Architecture-detection benchmark accuracy: still 75%, below the 83.3% target
+**Update (2026-07-15, same day, follow-up):** re-pinned `repos/sqlalchemy`
+from an unpinned `HEAD` clone (which had drifted onto SQLAlchemy
+2.1.0b4 — a beta of an unreleased major version, containing Python 3.14
+t-string test fixtures the AST parser can't handle) to the last stable
+release tag, `rel_2_0_51`. All vendored benchmark repos were unpinned
+shallow clones at whatever `HEAD` happened to be on their clone date
+(ranging 2026-05-31 to 2026-07-13) — no version pinning existed anywhere,
+so this kind of drift can recur for any of them. **Fixed:** `sqlalchemy`
+no longer crashes the parser (0 indexing errors, was 4 syntax errors
+before). **Not fixed:** it now classifies as `LAYERED` (confidence 0.51)
+instead of the expected `FLAT` — a genuine architecture-detector accuracy
+gap, unrelated to the parsing crash, and it turns out `requests` has an
+independent `UNKNOWN` misclassification (confidence 0.36) that predates
+and is unrelated to the sqlalchemy issue. Overall benchmark accuracy is
+still 6/8 (75%), just via a different failure now (classifier accuracy,
+not parser crashes).
+**Needs:** (1) pin the remaining 7 vendored repos to release tags too, so
+this class of drift can't recur; (2) separately, real classifier-accuracy
+work on the `FLAT` vs `LAYERED` boundary and on `requests`'s `UNKNOWN`
+case — out of audit scope, needs its own workflow.
 
 ### B. mypy --strict is not actually enforced repo-wide
 Despite CLAUDE.md section 2.3 mandating `mypy --strict`, four
