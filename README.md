@@ -30,16 +30,16 @@ Foundation
 ├── ContextHub (✓ Done)
 └── Architecture Intelligence (✓ Done)
 
-Engineering Intelligence (🚧 Planned)
-├── Change Planner
-├── Feature Planner
-├── Refactoring Advisor
-├── Architecture Guardrails
-├── Engineering Insights
-└── Decision Engine
+Engineering Intelligence (✓ Done — wired to real engines, Phase 7.1)
+├── Change Planner (✓ real blast-radius prediction)
+├── Feature Planner (✓ real intent classification + implementation paths)
+├── Refactoring Advisor (✓ real bloat/coupling/cycle detection)
+├── Architecture Guardrails (✓ real layer-boundary enforcement)
+├── Decision Engine (✓ real multi-source aggregation)
+└── Engineering Memory (✓ every run captured to ContextHub)
 
 AI Execution
-├── Claude
+├── Claude (MCP server in progress — see docs/mcp-server-contract.md)
 ├── Gemini
 ├── GPT
 └── Local Models
@@ -62,6 +62,11 @@ What Ortho can do now:
 ✓ **Context Assembly** — Relevant code bundled with token budgets  
 ✓ **Interactive Dashboard** — Explore architecture, impact, and metrics  
 ✓ **Ground Truth Benchmarks** — 135+ verified test cases + Phase 5 validation  
+✓ **Architecture Guardrails** — Real layer-boundary/circular-dep/module-size checks (`CliCommands.guardrails`)  
+✓ **Decision Support** — Real change-impact + guardrail aggregation (`CliCommands.decide`)  
+✓ **Feature Planning** — Intent classification into ≥3 real implementation paths (`CliCommands.plan`)  
+✓ **Refactoring Advice** — Real bloat/tight-coupling/cycle findings (`CliCommands.refactor`)  
+✓ **Engineering Memory** — Every command run captured to the scanned repo's `.ortho/ortho.db` (ContextHub)  
 
 ---
 
@@ -136,14 +141,20 @@ What Ortho can do now:
 - 🚧 **Call Graph Integration** — Use call patterns for improved layer detection
 - 🚧 **Extended Framework Coverage** — Add Starlette, Pyramid, additional frameworks
 
-### Phase 6+ — Engineering Intelligence (Planned)
+### Phase 6 & 7.1 — Engineering Intelligence ✅ COMPLETE (2026-07-15)
 
-🚧 **Change Planner** — Predict impact before code generation  
-🚧 **Feature Planner** — Suggest implementation paths  
-🚧 **Refactoring Advisor** — Recommend improvements  
-🚧 **Architecture Guardrails** — Enforce patterns and constraints  
-🚧 **Engineering Insights** — Actionable recommendations  
-🚧 **Decision Engine** — Structured decision support  
+✅ **Change Planner** — Real blast-radius prediction over call/import graphs  
+✅ **Feature Planner** — Real intent classification + ≥3 distinct implementation paths  
+✅ **Refactoring Advisor** — Real bloat, tight-coupling, and circular-dependency findings  
+✅ **Architecture Guardrails** — Real layer-boundary enforcement (92% false-positive reduction, task-018)  
+✅ **Decision Engine** — Structured multi-source decision support  
+✅ **Engineering Memory** — Every command captured to ContextHub (task-020)  
+
+### Next: Pilot Readiness
+
+🚧 **CLI exposure** — register `guardrails`/`decide`/`plan`/`refactor` in the `ortho` TypeScript CLI  
+🚧 **MCP Server** — Claude Code integration (contract: `docs/mcp-server-contract.md`)  
+🚧 **Structured JSON output** — machine-readable results alongside text reports  
 
 ---
 
@@ -197,22 +208,43 @@ Ortho provides this understanding.
 ## Quick Start
 
 ```bash
-# Install
+# Install (foundation + engineering intelligence)
+pip install -e shared/storage
 pip install -e packages/repo-intelligence
 pip install -e packages/context-hub
 pip install -e packages/arch-intelligence
-pip install -e packages/orchestration
-pip install -e packages/token-optimizer
+pip install -e packages/impact-analysis
+pip install -e packages/change-planner
+pip install -e packages/feature-planner
+pip install -e packages/refactoring-advisor
+pip install -e packages/arch-guardrails
+pip install -e packages/decision-engine
+pip install -e packages/cli-commands
 
 # Scan a repository
 ortho scan /path/to/repo
 
 # Analyze architecture
 ortho analyze --architecture
-
-# Compute blast radius
-ortho analyze --impact src/core.py
 ```
+
+### Engineering Copilot Commands (Python API)
+
+The four copilot commands are fully wired to real engines (CLI
+registration is the next milestone — until then, use the Python API):
+
+```python
+from cli_commands.commands import CliCommands
+
+cc = CliCommands()
+print(cc.guardrails("/path/to/repo").content)                        # architecture violations
+print(cc.refactor("/path/to/repo").content)                          # bloat/coupling/cycle findings
+print(cc.plan("add rate limiting", scan_path="/path/to/repo").content)   # implementation paths
+print(cc.decide("src/core.py").content)                              # change-impact decision
+```
+
+Every call also records a `workflow_run` memory artifact in the scanned
+repo's `.ortho/ortho.db` — ortho accumulates engineering memory as you use it.
 
 ### Try the Demo
 
@@ -243,17 +275,14 @@ python -m http.server 8000
 
 **Repository Intelligence** answers: "What exists?"
 
-**Engineering Intelligence** will answer: "What should the engineer do?"
+**Engineering Intelligence** answers: "What should the engineer do?" — shipped as of Phase 7.1:
 
-Examples of planned capabilities:
+- **Change Planning** — Before touching a file, know what breaks (`decide` with a file path)
+- **Refactoring Planning** — Real bloat/coupling/cycle findings (`refactor`)
+- **Architecture Review** — Automated guardrail checks (`guardrails`)
+- **Feature Planning** — Implementation strategy from intent classification (`plan`)
 
-- **Change Planning** — Before touching a file, know what breaks
-- **Refactoring Planning** — Suggested improvements with impact estimates
-- **Migration Planning** — Safe paths for architectural changes
-- **Architecture Review** — Automated analysis of proposed changes
-- **Feature Planning** — Implementation strategy based on codebase structure
-
-All clearly **planned**, not yet implemented.
+Still planned: migration planning, LLM-assisted decision scoring (Phase 7.2+).
 
 ---
 
@@ -305,17 +334,18 @@ See [`ortho-v3-frd.md`](ortho-v3-frd.md) for the complete Functional Requirement
 
 ## Deployment Status
 
-**Latest Release:** Phase 5.2 (2026-07-13)  
+**Latest Release:** Phase 7.1 (2026-07-15)  
 **Branch:** `master`  
-**Status:** ✅ **PRODUCTION READY**
+**Status:** ✅ **PRODUCTION READY** (Python API); CLI exposure of copilot commands in progress
 
 ### What's Included
 
-- ✅ Phase 5 multi-evidence architecture detection (83.3% accuracy)
-- ✅ Phase 5.2 calibration tuning (60% improvement)
-- ✅ 8 framework support (Flask, Django, FastAPI, Click, Celery, Starlette, Pyramid, FastStream)
-- ✅ 453/453 tests passing (zero regressions)
-- ✅ Complete documentation and analysis
+- ✅ Phase 5/5.2 multi-evidence architecture detection (83.3% accuracy, 8 frameworks)
+- ✅ Phase 6 engineering intelligence packages (179 tests, 93%+ coverage)
+- ✅ Phase 7.1: all four copilot commands (`guardrails`/`decide`/`plan`/`refactor`) wired to real engines — zero stub output remains (tasks 017–019)
+- ✅ Layer-boundary false-positive noise reduced 92% on real-repo verification (task-018)
+- ✅ ContextHub engineering memory: every command run persisted per-repo (task-020)
+- ✅ 100/100 cli-commands tests passing; full ASES workflow evidence in `.ases/tasks/`
 
 ### Getting Started
 

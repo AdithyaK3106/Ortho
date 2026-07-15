@@ -1,9 +1,38 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 3.0 — Phase 7.1 COMPLETE ✅  
+**Version:** 3.0 — Phase 7.1 COMPLETE ✅ (all 4 copilot commands real + engineering memory)  
 **Started:** 2026-06-30  
-**Current Status:** Production Ready — Review wedge (`ortho guardrails`/`ortho decide`) now runs real analysis, not stubs  
-**Last Updated:** 2026-07-14  
+**Current Status:** Python API pilot-ready — all four copilot commands (`guardrails`/`decide`/`plan`/`refactor`) run real analysis and capture memory to ContextHub. Next: CLI exposure (task-021) + MCP server.  
+**Last Updated:** 2026-07-15  
+
+---
+
+## -2. Task-020: ContextHub Engineering Memory Capture ✅ COMPLETE (2026-07-15, commit a200ad9)
+
+Every `guardrails`/`decide`/`plan`/`refactor` call now ingests a real
+`workflow_run` artifact into `<scanned_root>/.ortho/ortho.db` via
+`ArtifactStore` — ortho accumulates per-repo engineering memory across
+runs (the vNext strategy's core moat). `repo_id` uses the deterministic
+`mint_repo_id` scheme; capture is strictly best-effort (never raises,
+never flips a successful report). TEST-DESIGNER ran as a genuinely blind
+parallel agent from spec.md only. Two real capture-safety bugs found and
+fixed in-task: (1) unconditional `OrthoDatabase` mkdir created directory
+trees for nonexistent scan paths; (2) empty-intent early returns polluted
+the caller's cwd `.ortho/ortho.db` (found by REVIEWER inspecting the live
+project database). 26 new hard-edge-case tests; 100/100 passing.
+See `.ases/tasks/task-020-contexthub-capture/`.
+
+## -1. Task-018 + Task-019 ✅ COMPLETE (2026-07-15, commits 93b4b08 / 5e1ca78)
+
+- **task-018:** layer_boundaries false positives reduced 92% on
+  `repos/click` (83 → 7; zero remaining test/example-path violations) by
+  excluding test/example/vendor directories from layer detection.
+- **task-019:** `plan()`/`refactor()` wired to real
+  `feature-planner`/`refactoring-advisor` engines — zero stub output
+  remains anywhere in `CliCommands`. Real bloat/coupling/cycle findings;
+  duplication/churn deliberately return empty (no real signal source yet,
+  documented gap, not fabricated). Two real bugs fixed in-task (non-str
+  intent crash; pre-existing unbounded-scan test hangs).
 
 ---
 
