@@ -205,56 +205,47 @@ Ortho provides this understanding.
 
 ---
 
-## Quick Start
+## Quick Start — 5 Minutes
+
+**👉 New? Start here:** [QUICKSTART.md](QUICKSTART.md) — shows real output, zero background needed.
 
 ```bash
-# Install (foundation + engineering intelligence)
-pip install -e shared/storage
-pip install -e packages/repo-intelligence
-pip install -e packages/context-hub
-pip install -e packages/arch-intelligence
-pip install -e packages/impact-analysis
-pip install -e packages/change-planner
-pip install -e packages/feature-planner
-pip install -e packages/refactoring-advisor
-pip install -e packages/arch-guardrails
-pip install -e packages/decision-engine
-pip install -e packages/cli-commands
+# Install everything (one command)
+pip install -e .
 
-# Scan a repository
+# Scan your repo
 ortho scan /path/to/repo
 
-# Analyze architecture
-ortho analyze --architecture
+# Check architecture
+ortho guardrails
+
+# Plan a feature
+ortho plan "add authentication"
+
+# Decide before changing a file
+ortho decide src/models/user.py
+
+# Find refactoring opportunities
+ortho refactor
+
+# Query what you've learned
+ortho memory search "layer_boundaries"
 ```
 
-### Engineering Copilot Commands (Python API)
+### Engineering Copilot Commands — Now Live in CLI ✅
 
-The four copilot commands are fully wired to real engines (CLI
-registration is the next milestone — until then, use the Python API):
-
-```python
-from cli_commands.commands import CliCommands
-
-cc = CliCommands()
-print(cc.guardrails("/path/to/repo").content)                        # architecture violations
-print(cc.refactor("/path/to/repo").content)                          # bloat/coupling/cycle findings
-print(cc.plan("add rate limiting", scan_path="/path/to/repo").content)   # implementation paths
-print(cc.decide("src/core.py").content)                              # change-impact decision
-```
-
-Every call also records a `workflow_run` memory artifact in the scanned
-repo's `.ortho/ortho.db` — ortho accumulates engineering memory as you use it.
-
-### Try the Demo
+All four commands are wired to real engines and exposed in the `ortho` CLI (as of task-021):
 
 ```bash
-cd ortho-demo/dashboard
-python -m http.server 8000
-# Open http://localhost:8000/index.html?repo=flask
+ortho guardrails [path]              # architecture violations
+ortho decide <intent> [--scan-path]  # change-impact decision
+ortho plan <intent> [--scan-path]    # implementation paths
+ortho refactor [path]                # bloat/coupling/cycle findings
+ortho memory search <query>           # query what you've learned (task-024)
 ```
 
-**Pre-analyzed repositories:** Flask, Click, LangChain, Django, FastAPI, and others.
+Every call records a `workflow_run` artifact in `.ortho/ortho.db` — ortho accumulates
+engineering memory as you use it (no manual logging needed).
 
 ---
 
@@ -332,43 +323,45 @@ See [`ortho-v3-frd.md`](ortho-v3-frd.md) for the complete Functional Requirement
 
 ---
 
-## Deployment Status
+## Status
 
-**Latest Release:** Phase 7.1 (2026-07-15)  
+**Latest Release:** Phase 7.1+ (2026-07-15)  
 **Branch:** `master`  
-**Status:** ✅ **PRODUCTION READY** (Python API); CLI exposure of copilot commands in progress
+**Status:** ✅ **PRODUCTION READY** — all CLI commands live and tested
 
 ### What's Included
 
-- ✅ Phase 5/5.2 multi-evidence architecture detection (83.3% accuracy, 8 frameworks)
-- ✅ Phase 6 engineering intelligence packages (179 tests, 93%+ coverage)
-- ✅ Phase 7.1: all four copilot commands (`guardrails`/`decide`/`plan`/`refactor`) wired to real engines — zero stub output remains (tasks 017–019)
-- ✅ Layer-boundary false-positive noise reduced 92% on real-repo verification (task-018)
-- ✅ ContextHub engineering memory: every command run persisted per-repo (task-020)
-- ✅ 100/100 cli-commands tests passing; full ASES workflow evidence in `.ases/tasks/`
+- ✅ **Phase 5/5.2** — Multi-evidence architecture detection (83.3% accuracy, 8 frameworks)
+- ✅ **Phase 6** — Engineering intelligence packages (179 tests, 93%+ coverage)
+- ✅ **Phase 7.1** — All four copilot commands wired to real engines, exposed in CLI (tasks 017–019)
+  - `ortho guardrails` — real layer/cycle/size checks
+  - `ortho plan` — intent classification + implementation paths
+  - `ortho decide` — change-impact analysis
+  - `ortho refactor` — bloat/coupling/cycle findings
+- ✅ **Phase 7.1+** — Structured JSON output + filtering + memory search (tasks 020–024)
+  - Every run persisted to `.ortho/ortho.db` per repo (task-020)
+  - Violations/recommendations as structured data (task-022)
+  - Severity/confidence filtering (task-023)
+  - Memory search across past runs (task-024)
+- ✅ **200+ tests passing** — cli-commands suite fully verified; ASES workflow evidence in `.ases/tasks/`
 
 ### Getting Started
 
 ```bash
-# Clone the repository
+# Clone & install (5 minutes)
 git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
+pip install -e .
 
-# Install dependencies
-pip install -e packages/repo-intelligence
-pip install -e packages/arch-intelligence
-pip install -e packages/context-hub
-pip install -e packages/token-optimizer
-
-# Run tests to verify
+# Verify installation
 pytest packages/ -v
 
-# Scan a repository
+# First scan
 ortho scan /path/to/repo
-
-# Analyze architecture
-ortho analyze --architecture
+ortho guardrails
 ```
+
+**Next:** Read [QUICKSTART.md](QUICKSTART.md) for real examples.
 
 ### Documentation
 
