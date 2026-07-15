@@ -177,6 +177,7 @@ class CliCommands:
             title=f"Architecture Check: {target}",
             content=content,
             success=True,
+            violations=violations,
         )
         capture_workflow_run(target, "guardrails", target, report)
         return report
@@ -246,6 +247,7 @@ class CliCommands:
             title=f"Decision: {intent}",
             content=content,
             success=True,
+            recommendations=decision.options,
         )
         capture_workflow_run(scan_target, "decide", intent, report)
         return report
