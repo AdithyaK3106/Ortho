@@ -1,11 +1,11 @@
 """GATE 5 VERIFIER: Import validation tests."""
 
 import pytest
-from .selector.engine import SelectorEngine, ExecutionPlan, ExecutionStep, build_execution_plan
-from .executor.workflow_executor import WorkflowExecutor, InvalidStateTransition
-from .executor.state_store import WorkflowStateStore, WorkflowRun
-from .executor.step_runner import run_step, StepResult
-from .executor.evidence_collector import Evidence, EvidenceType
+from selector.engine import SelectorEngine, ExecutionPlan, ExecutionStep, build_execution_plan
+from executor.workflow_executor import WorkflowExecutor, InvalidStateTransition
+from executor.state_store import WorkflowStateStore, WorkflowRun
+from executor.step_runner import run_step, StepResult
+from executor.evidence_collector import Evidence, EvidenceType
 
 
 class TestImports:

@@ -26,7 +26,7 @@ class _CallGraphView:
         self._queries = RepoGraphQueries(scan.call_edges, scan.import_edges_by_file)
 
     def find_callers(self, symbol: str, depth: int = 1) -> list[str]:
-        return self._queries.find_callers(symbol, depth)
+        return self._queries.find_callers(symbol, depth)  # type: ignore[no-any-return]
 
 
 class _ImportGraphView:
@@ -39,7 +39,7 @@ class _ImportGraphView:
 
     def find_importers(self, file_path: str, include_type: bool = False) -> list[tuple[str, str]]:
         result = self._queries.find_importers(file_path, include_type=True)
-        return result  # type: ignore[return-value]
+        return result  # type: ignore[no-any-return]
 
 
 class _SymbolRegistryView:
@@ -49,7 +49,7 @@ class _SymbolRegistryView:
         self._index = SymbolIndex(scan.symbols_by_file)
 
     def symbols_in_file(self, file_path: str) -> list[str]:
-        return self._index.symbols_in_file(file_path)
+        return self._index.symbols_in_file(file_path)  # type: ignore[no-any-return]
 
 
 class CliCommands:

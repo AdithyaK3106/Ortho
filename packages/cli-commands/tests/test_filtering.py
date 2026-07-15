@@ -17,6 +17,7 @@ Coverage:
 10. Backward compatibility (existing calls without filters)
 11. CLI bridge parameter validation
 """
+import os
 from pathlib import Path
 from typing import Any
 
@@ -508,14 +509,32 @@ class TestEdgeCases:
     """Edge case tests"""
 
     def test_guardrails_none_path_uses_dot(self, commands: CliCommands) -> None:
-        """guardrails(None) defaults to current directory."""
-        result = commands.guardrails(None)
+        """guardrails(None) defaults to current directory.
+
+        Bound cwd to a small fixture -- see test_guardrails_empty_string_path.
+        """
+        original_cwd = os.getcwd()
+        os.chdir(_FIXTURE_REPO_REQUESTS)
+        try:
+            result = commands.guardrails(None)
+        finally:
+            os.chdir(original_cwd)
         # Should handle gracefully (may scan current dir or fail cleanly)
         assert isinstance(result, CliReport)
 
     def test_guardrails_empty_string_path(self, commands: CliCommands) -> None:
-        """guardrails('') is treated as current directory."""
-        result = commands.guardrails("")
+        """guardrails('') is treated as current directory.
+
+        Bound cwd to a small fixture for this call -- the monorepo root's
+        cwd contains repos/ (7800+ vendored files across cloned frameworks),
+        which turns this into an unbounded scan that stalls the suite.
+        """
+        original_cwd = os.getcwd()
+        os.chdir(_FIXTURE_REPO_REQUESTS)
+        try:
+            result = commands.guardrails("")
+        finally:
+            os.chdir(original_cwd)
         # Should handle gracefully
         assert isinstance(result, CliReport)
 

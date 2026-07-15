@@ -8,8 +8,8 @@ Get engineering intelligence on your repository **right now**. No setup, no conf
 git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
 
-# Python engine
-pip install -e .
+# Python engine (root + all 13 workspace packages)
+pip install -e . -e shared/storage -e packages/*
 
 # CLI
 cd apps/cli && npm install && npm run build && cd ../..

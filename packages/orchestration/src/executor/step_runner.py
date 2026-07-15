@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional
 from datetime import datetime
-from .selector.engine import ExecutionStep
+from selector.engine import ExecutionStep
 from .evidence_collector import Evidence, create_agent_execution_evidence, create_error_evidence
 
 

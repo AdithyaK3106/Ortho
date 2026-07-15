@@ -18,7 +18,25 @@ fi
 
 # Step 2: Install
 echo "⚙️  Installing Ortho (Python engine)..."
-pip install -e . > /dev/null 2>&1
+# Root `pip install -e .` alone does NOT install the 13 workspace packages
+# (poetry-core only emits a repo-root .pth, not per-package src links) —
+# each package must be installed editable explicitly.
+pip install \
+  -e . \
+  -e shared/storage \
+  -e packages/repo-intelligence \
+  -e packages/context-hub \
+  -e packages/arch-intelligence \
+  -e packages/impact-analysis \
+  -e packages/change-planner \
+  -e packages/feature-planner \
+  -e packages/refactoring-advisor \
+  -e packages/arch-guardrails \
+  -e packages/decision-engine \
+  -e packages/cli-commands \
+  -e packages/orchestration \
+  -e packages/token-optimizer \
+  > /dev/null 2>&1
 
 ORTHO_DIR="$(pwd)"
 

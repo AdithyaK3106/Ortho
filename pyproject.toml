@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Engineering Intelligence Platform — repository understanding before AI execution"
 authors = [{name = "Ortho Team", email = "urbrain369@gmail.com"}]
 readme = "README.md"
-requires-python = "^3.11"
+requires-python = ">=3.11"
 keywords = ["ai", "engineering", "repository-intelligence", "architecture-analysis"]
 
 [tool.poetry]

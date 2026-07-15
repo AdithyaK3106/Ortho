@@ -1,7 +1,7 @@
 """Unit tests for Evidence contract (spec.md §3.3)."""
 
 import pytest
-from .executor.evidence_collector import (
+from executor.evidence_collector import (
     Evidence,
     EvidenceType,
     create_agent_execution_evidence,

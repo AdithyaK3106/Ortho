@@ -354,7 +354,7 @@ See [`ortho-v3-frd.md`](ortho-v3-frd.md) for the complete Functional Requirement
 # Clone & install (5 minutes)
 git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
-pip install -e .                                        # Python engine
+pip install -e . -e shared/storage -e packages/*         # Python engine
 cd apps/cli && npm install && npm run build && cd ../..  # CLI
 
 # Verify installation

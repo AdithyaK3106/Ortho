@@ -21,7 +21,10 @@ if not exist "Ortho" (
 
 REM Step 2: Install Python engine
 echo [2/4] Installing Ortho (Python engine)...
-pip install -e . >nul 2>&1
+REM Root "pip install -e ." alone does NOT install the 13 workspace packages
+REM (poetry-core only emits a repo-root .pth, not per-package src links) --
+REM each package must be installed editable explicitly.
+pip install -e . -e shared\storage -e packages\repo-intelligence -e packages\context-hub -e packages\arch-intelligence -e packages\impact-analysis -e packages\change-planner -e packages\feature-planner -e packages\refactoring-advisor -e packages\arch-guardrails -e packages\decision-engine -e packages\cli-commands -e packages\orchestration -e packages\token-optimizer >nul 2>&1
 
 for /f "delims=" %%A in ('cd') do set ORTHO_DIR=%%A
 

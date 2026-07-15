@@ -7,6 +7,24 @@
 
 ---
 
+## 6. Production Readiness Audit ✅ COMPLETE (2026-07-15)
+
+Full repo audit: install path, per-package test suites, mypy --strict,
+and a real end-to-end run against an unseen repo (`custom_yolo`, never
+indexed by Ortho before). Fixed a critical install bug (`pip install -e .`
+alone silently skipped 8 of 13 workspace packages on a fresh clone —
+`orchestration` and `token-optimizer` were never importable), broken
+relative imports that made `orchestration`'s entire 105-test suite
+uncollectible, an unbounded-scan regression in 2 tests (same bug class
+task-017 fixed for `decide()`, recurring in test code calling
+`guardrails()`), and 4 mypy --strict violations in cli-commands. Also
+documented (not fixed — needs its own workflow): an 83.3%→75% accuracy
+regression in architecture-detection benchmarks (vendored `repos/sqlalchemy`
+now has Python 3.14 syntax the parser can't handle), pre-existing
+mypy --strict gaps in 5 older packages (206 combined errors), and a
+feature-planner intent-classification miss on non-web-service repos.
+See `docs/archive/PRODUCTION_AUDIT_2026-07-15.md` for full detail.
+
 ## 5. Task-024: Memory Search ✅ COMPLETE (2026-07-15, commit 6ef6e1a)
 
 Pilots can now query learned knowledge from past guardrails/decide/plan/refactor runs:

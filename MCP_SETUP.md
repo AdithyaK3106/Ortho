@@ -32,7 +32,7 @@ git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
 
 # Python engine (also installs the mcp SDK used below)
-pip install -e .
+pip install -e . -e shared/storage -e packages/*
 
 # CLI
 cd apps/cli && npm install && npm run build && cd ../..
@@ -182,7 +182,7 @@ The MCP server needs the Ortho packages installed:
 
 ```bash
 cd /path/to/Ortho
-pip install -e .
+pip install -e . -e shared/storage -e packages/*
 ```
 
 ### "ortho_guardrails: No violations found"
