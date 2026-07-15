@@ -1,13 +1,42 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 3.0 — Phase 7.1 COMPLETE ✅ (all 4 copilot commands real + engineering memory)  
+**Version:** 3.0 — Phase 7.1+ COMPLETE ✅ (CLI exposed, structured JSON, ready for MCP)  
 **Started:** 2026-06-30  
-**Current Status:** Python API pilot-ready — all four copilot commands (`guardrails`/`decide`/`plan`/`refactor`) run real analysis and capture memory to ContextHub. Next: CLI exposure (task-021) + MCP server.  
+**Current Status:** MCP-ready — all four copilot commands exposed in CLI, structured JSON output for guardrails/decide, engineering memory captured per-repo. Next: filtering (severity/confidence), memory search, duplication detection.  
 **Last Updated:** 2026-07-15  
 
 ---
 
-## -2. Task-020: ContextHub Engineering Memory Capture ✅ COMPLETE (2026-07-15, commit a200ad9)
+## 3. Task-022: Structured JSON Output ✅ COMPLETE (2026-07-15, commit 57cfbfb)
+
+`guardrails()` and `decide()` now return structured objects alongside text:
+- `CliReport.violations: Optional[list[GuardrailViolation]]` — populated by
+  guardrails, enables MCP servers and other tools to programmatically
+  access violations without text parsing.
+- `CliReport.recommendations: Optional[list[Recommendation]]` — populated
+  by decide, exposes all recommendation options with source/effort/risk/
+  confidence fields. Machine-readable decision support.
+- Backward-compatible: existing callers accessing only title/content/success
+  see no change. New fields default to `None`. Text output (content field)
+  is identical to pre-task format.
+- 26 hard-edge-case tests; 126/126 full suite pass (zero regressions).
+- See `.ases/tasks/task-022-structured-json-output/`.
+
+## 2. Task-021: CLI Exposure of Copilot Commands ✅ COMPLETE (2026-07-15, commit c5739e5)
+
+All four copilot commands now accessible as top-level `ortho` CLI:
+- `ortho guardrails [path]` — real architecture violation check
+- `ortho decide <intent> [--scan-path]` — multi-source decision support
+- `ortho plan <intent> [--scan-path]` — feature implementation paths
+- `ortho refactor [path]` — bloat/coupling/cycle findings
+- Bridge pattern: copilot.ts → pybridge.ts → copilot.py → CliCommands,
+  mirrors context.ts/context.py precedent verbatim. TS-side intent
+  validation (empty/whitespace check before spawn). All paths explicitly
+  passed from TS (no unbounded cwd fallbacks). Windows UTF-8 fix via
+  binary stdout buffer. 25 hard tests; end-to-end verified against
+  repos/click. See `.ases/tasks/task-021-cli-copilot-commands/`.
+
+## 1. Task-020: ContextHub Engineering Memory Capture ✅ COMPLETE (2026-07-15, commit a200ad9)
 
 Every `guardrails`/`decide`/`plan`/`refactor` call now ingests a real
 `workflow_run` artifact into `<scanned_root>/.ortho/ortho.db` via
