@@ -4,6 +4,10 @@
 
 Transform repository understanding into engineering decisions before any AI writes code.
 
+**→ [Start in 2 minutes](ONBOARD.md) ← NEW USERS START HERE**
+
+---
+
 **Repository Intelligence** → **Architecture Intelligence** → **Context Assembly** → **AI Execution**
 
 ---
@@ -205,31 +209,30 @@ Ortho provides this understanding.
 
 ---
 
-## Quick Start — 5 Minutes
+## Get Started — Pick Your Path
 
-**👉 New? Start here:** [QUICKSTART.md](QUICKSTART.md) — shows real output, zero background needed.
+**⚡ Fastest (2 minutes):** [ONBOARD.md](ONBOARD.md)  
+Copy-paste 4 commands, you're done. Start using Ortho in Claude Code immediately.
+
+**📖 Detailed (5 minutes):** [QUICKSTART.md](QUICKSTART.md)  
+Learn what each tool does with real examples.
+
+**🔗 Setup Claude Code (2 minutes):** [MCP_SETUP.md](MCP_SETUP.md)  
+Detailed MCP configuration + troubleshooting.
+
+---
+
+## CLI Tools (Terminal)
+
+If you prefer command-line:
 
 ```bash
-# Install everything (one command)
-pip install -e .
-
-# Scan your repo
-ortho scan /path/to/repo
-
-# Check architecture
-ortho guardrails
-
-# Plan a feature
-ortho plan "add authentication"
-
-# Decide before changing a file
-ortho decide src/models/user.py
-
-# Find refactoring opportunities
-ortho refactor
-
-# Query what you've learned
-ortho memory search "layer_boundaries"
+ortho scan /path/to/repo              # Build knowledge base
+ortho guardrails                       # Check violations
+ortho plan "add feature"               # Get implementation paths
+ortho decide src/file.py               # Analyze change impact
+ortho refactor                         # Find refactoring opportunities
+ortho memory search "keyword"          # Search what you've learned
 ```
 
 ### Engineering Copilot Commands — Now Live in CLI ✅
