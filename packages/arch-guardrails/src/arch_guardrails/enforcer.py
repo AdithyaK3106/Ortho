@@ -61,8 +61,24 @@ class ArchitectureEnforcer:
         """
         violations: list[GuardrailViolation] = []
 
-        # Check layer boundaries
-        violations.extend(self._check_layer_boundaries())
+        # layer_boundaries is disabled pending a redesign of layer detection.
+        # A false-positive audit against 9 real repos (2026-07-16, see
+        # docs/archive/FALSE_POSITIVE_AUDIT_2026-07-16.md) found this rule
+        # fired 177 times across 5 repos with a 100% false-positive rate:
+        # the current LayerDetector assigns "layer 0" to any module with no
+        # internal imports (a mechanical fact about import topology) and a
+        # semantic name via keyword match, then flags every importer of that
+        # module as a boundary violation -- but "imports a leaf/config/utils
+        # module" is one of the most ordinary patterns in software, not
+        # evidence of an architecture problem. This method (_check_layer_
+        # boundaries) itself is correct given accurate layer data -- see
+        # test_enforcer.py's TestLayerBoundaries, which still exercises it
+        # directly against hand-labeled layers -- the defect is entirely in
+        # what LayerDetector currently reports as "the layers." Re-enable
+        # once layer assignment has real evidence behind it (e.g. persistence/
+        # IO signature, not just topological depth), not before.
+        #
+        # violations.extend(self._check_layer_boundaries())
 
         # Check dependency direction (acyclic)
         violations.extend(self._check_dependency_direction())

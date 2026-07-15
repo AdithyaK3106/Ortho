@@ -20,7 +20,17 @@ def enforcer(
 
 
 class TestLayerBoundaries:
-    """Test 1-5: Layer boundary violations"""
+    """Test 1-5: Layer boundary violations.
+
+    _check_layer_boundaries() is no longer called from check_violations()
+    (disabled 2026-07-16 -- see enforcer.py's check_violations() comment and
+    docs/archive/FALSE_POSITIVE_AUDIT_2026-07-16.md: 100% false-positive
+    rate in real-world use, root-caused to LayerDetector, not this method).
+    These tests call _check_layer_boundaries() directly: the ordering logic
+    itself is still correct given accurate layer data, which is exactly what
+    these hand-labeled mocks provide -- only the current real-world layer
+    *source* is untrustworthy, not this method's boundary-checking logic.
+    """
 
     def test_presentation_to_data_blocked(
         self, enforcer: ArchitectureEnforcer, mock_arch_model: Any, mock_dep_graph: Any
@@ -35,9 +45,8 @@ class TestLayerBoundaries:
         mock_arch_model.get_layers.return_value = ["data", "business", "presentation"]
         mock_dep_graph.get_edges.return_value = [("views.py", "db.py")]
 
-        violations = enforcer.check_violations()
+        layer_violations = enforcer._check_layer_boundaries()
 
-        layer_violations = [v for v in violations if v.rule_id == "layer_boundaries"]
         assert len(layer_violations) > 0
         assert layer_violations[0].severity == "error"
 
@@ -51,9 +60,8 @@ class TestLayerBoundaries:
         }.get(m, "unknown")
         mock_dep_graph.get_edges.return_value = [("service.py", "repo.py")]
 
-        violations = enforcer.check_violations()
+        layer_violations = enforcer._check_layer_boundaries()
 
-        layer_violations = [v for v in violations if v.rule_id == "layer_boundaries"]
         assert len(layer_violations) == 0
 
     def test_data_to_presentation_blocked(
@@ -66,9 +74,8 @@ class TestLayerBoundaries:
         }.get(m, "unknown")
         mock_dep_graph.get_edges.return_value = [("models.py", "forms.py")]
 
-        violations = enforcer.check_violations()
+        layer_violations = enforcer._check_layer_boundaries()
 
-        layer_violations = [v for v in violations if v.rule_id == "layer_boundaries"]
         assert len(layer_violations) > 0
 
     def test_bidirectional_cascade(
@@ -84,9 +91,8 @@ class TestLayerBoundaries:
             ("bus.py", "pres.py"),
         ]
 
-        violations = enforcer.check_violations()
+        layer_violations = enforcer._check_layer_boundaries()
 
-        layer_violations = [v for v in violations if v.rule_id == "layer_boundaries"]
         assert len(layer_violations) >= 1
 
     def test_exception_allowed(
@@ -99,7 +105,7 @@ class TestLayerBoundaries:
         }.get(m, "unknown")
         mock_dep_graph.get_edges.return_value = [("views.py", "db.py")]
 
-        violations = enforcer.check_violations()
+        violations = enforcer._check_layer_boundaries()
 
         # No filtering yet - just verify structure
         assert all(v.severity in ("error", "warning") for v in violations)
