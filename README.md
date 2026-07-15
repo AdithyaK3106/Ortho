@@ -354,12 +354,15 @@ See [`ortho-v3-frd.md`](ortho-v3-frd.md) for the complete Functional Requirement
 # Clone & install (5 minutes)
 git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
-pip install -e .
+pip install -e .                                        # Python engine
+cd apps/cli && npm install && npm run build && cd ../..  # CLI
 
 # Verify installation
 pytest packages/ -v
+node apps/cli/dist/index.js --help
 
-# First scan
+# First scan (alias `ortho` to the built CLI, or use the full node path)
+alias ortho="node $(pwd)/apps/cli/dist/index.js"
 ortho scan /path/to/repo
 ortho guardrails
 ```

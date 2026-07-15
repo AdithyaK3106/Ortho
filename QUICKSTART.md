@@ -8,11 +8,22 @@ Get engineering intelligence on your repository **right now**. No setup, no conf
 git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
 
-# One command installs everything
+# Python engine
 pip install -e .
+
+# CLI
+cd apps/cli && npm install && npm run build && cd ../..
 ```
 
-Done. The CLI is ready.
+The CLI now exists at `apps/cli/dist/index.js`. Run it directly, or
+alias it for convenience:
+
+```bash
+alias ortho="node $(pwd)/apps/cli/dist/index.js"
+```
+
+The rest of this guide assumes `ortho` resolves via that alias (or
+substitute `node apps/cli/dist/index.js` for every `ortho` command below).
 
 ## Scan Your Repo (1 minute)
 

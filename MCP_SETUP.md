@@ -30,7 +30,15 @@ You: "Should I refactor this module?"
 ```bash
 git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
+
+# Python engine (also installs the mcp SDK used below)
 pip install -e .
+
+# CLI
+cd apps/cli && npm install && npm run build && cd ../..
+
+# Optional: alias for convenience (rest of this guide assumes `ortho` works)
+alias ortho="node $(pwd)/apps/cli/dist/index.js"
 ```
 
 ### 2. Scan Your Repository

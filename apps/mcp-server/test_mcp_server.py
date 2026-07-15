@@ -12,7 +12,7 @@ from typing import Any
 import pytest
 
 # Add packages to path (same as MCP server)
-_PROJECT_ROOT = Path(__file__).resolve().parents[3]  # ortho/
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # ortho/
 for _p in (
     _PROJECT_ROOT / "shared" / "storage" / "src",
     _PROJECT_ROOT / "packages" / "cli-commands" / "src",
@@ -251,6 +251,87 @@ class TestOrthoMCPServer:
         assert isinstance(r3.success, bool)
         assert isinstance(r4.success, bool)
         assert isinstance(r5.success, bool)
+
+
+class TestOrthoMCPServerRealProtocol:
+    """
+    Drive the actual MCP server subprocess through the real MCP client/server
+    protocol (stdio transport) — the same mechanism Claude Code uses.
+
+    This exists because TestOrthoMCPServer (above) only calls the handler
+    functions directly in Python, bypassing mcp.server.Server entirely. That
+    style of test cannot catch protocol-level wiring bugs: it previously
+    missed that @server.call_tool() only registers a single handler (each
+    decoration silently overwrites the last), so 4 of 5 tools were
+    unreachable from a real MCP client even though every handler function
+    worked fine in isolation. Only a real client/server round-trip surfaces
+    that class of bug.
+    """
+
+    @pytest.fixture
+    def test_repo(self):
+        candidates = [
+            Path.cwd() / "repos" / "click" / "src" / "click",
+            _PROJECT_ROOT / "repos" / "click" / "src" / "click",
+        ]
+        for path in candidates:
+            if path.exists():
+                return str(path)
+        pytest.skip("Test repository (repos/click) not found")
+
+    @pytest.fixture
+    def server_script(self):
+        script = _PROJECT_ROOT / "apps" / "mcp-server" / "ortho_mcp_server.py"
+        assert script.exists(), f"MCP server script not found at {script}"
+        return script
+
+    @pytest.mark.anyio
+    async def test_all_tools_reachable_via_real_mcp_protocol(self, server_script, test_repo):
+        """
+        Every tool registered in list_tools() must actually be callable via
+        call_tool() through a real client session — not just importable as
+        a Python function.
+        """
+        mcp = pytest.importorskip("mcp", reason="mcp SDK not installed")
+        from mcp import ClientSession, StdioServerParameters
+        from mcp.client.stdio import stdio_client
+
+        server_params = StdioServerParameters(command=sys.executable, args=[str(server_script)])
+
+        async with stdio_client(server_params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+
+                tools_result = await session.list_tools()
+                tool_names = {t.name for t in tools_result.tools}
+                assert tool_names == {
+                    "ortho_guardrails",
+                    "ortho_decide",
+                    "ortho_plan",
+                    "ortho_refactor",
+                    "ortho_memory_search",
+                }
+
+                # Every advertised tool must be reachable, not just the last
+                # one registered (this is exactly the bug that direct
+                # handler-function tests couldn't see).
+                for name, args in [
+                    ("ortho_guardrails", {"path": test_repo}),
+                    ("ortho_decide", {"intent": "add caching", "scan_path": test_repo}),
+                    ("ortho_plan", {"intent": "add logging", "scan_path": test_repo}),
+                    ("ortho_refactor", {"path": test_repo}),
+                    ("ortho_memory_search", {"query": "guardrails", "repo_path": test_repo}),
+                ]:
+                    result = await session.call_tool(name, args)
+                    assert not result.isError, f"{name} returned isError=True: {result.content}"
+                    assert len(result.content) > 0, f"{name} returned empty content"
+                    assert isinstance(result.content[0].text, str)
+                    assert len(result.content[0].text) > 0
+
+
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
 
 
 if __name__ == "__main__":

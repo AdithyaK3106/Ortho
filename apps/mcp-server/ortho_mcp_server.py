@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 # Add packages to path (same pattern as CLI bridges)
-_PROJECT_ROOT = Path(__file__).resolve().parents[3]  # ortho/
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # ortho/
 for _p in (
     _PROJECT_ROOT / "shared" / "storage" / "src",
     _PROJECT_ROOT / "packages" / "cli-commands" / "src",
@@ -60,8 +60,7 @@ def get_commands() -> CliCommands:
 # ============================================================================
 
 
-@server.call_tool()
-async def handle_guardrails(arguments: dict) -> list[types.TextContent | types.ImageContent]:
+async def handle_guardrails(arguments: dict) -> list[types.TextContent]:
     """ortho_guardrails — Check architecture violations."""
     logger.info(f"ortho_guardrails: {arguments}")
 
@@ -88,8 +87,7 @@ async def handle_guardrails(arguments: dict) -> list[types.TextContent | types.I
         return [types.TextContent(type="text", text=f"Error: {e}")]
 
 
-@server.call_tool()
-async def handle_decide(arguments: dict) -> list[types.TextContent | types.ImageContent]:
+async def handle_decide(arguments: dict) -> list[types.TextContent]:
     """ortho_decide — Change impact + strategy."""
     logger.info(f"ortho_decide: {arguments}")
 
@@ -122,8 +120,7 @@ async def handle_decide(arguments: dict) -> list[types.TextContent | types.Image
         return [types.TextContent(type="text", text=f"Error: {e}")]
 
 
-@server.call_tool()
-async def handle_plan(arguments: dict) -> list[types.TextContent | types.ImageContent]:
+async def handle_plan(arguments: dict) -> list[types.TextContent]:
     """ortho_plan — Feature planning."""
     logger.info(f"ortho_plan: {arguments}")
 
@@ -146,8 +143,7 @@ async def handle_plan(arguments: dict) -> list[types.TextContent | types.ImageCo
         return [types.TextContent(type="text", text=f"Error: {e}")]
 
 
-@server.call_tool()
-async def handle_refactor(arguments: dict) -> list[types.TextContent | types.ImageContent]:
+async def handle_refactor(arguments: dict) -> list[types.TextContent]:
     """ortho_refactor — Refactoring opportunities."""
     logger.info(f"ortho_refactor: {arguments}")
 
@@ -166,8 +162,7 @@ async def handle_refactor(arguments: dict) -> list[types.TextContent | types.Ima
         return [types.TextContent(type="text", text=f"Error: {e}")]
 
 
-@server.call_tool()
-async def handle_memory_search(arguments: dict) -> list[types.TextContent | types.ImageContent]:
+async def handle_memory_search(arguments: dict) -> list[types.TextContent]:
     """ortho_memory_search — Query what you've learned (task-024)."""
     logger.info(f"ortho_memory_search: {arguments}")
 
@@ -192,6 +187,31 @@ async def handle_memory_search(arguments: dict) -> list[types.TextContent | type
         return [types.TextContent(type="text", text=output)]
     except Exception as e:
         return [types.TextContent(type="text", text=f"Error: {e}")]
+
+
+# Dispatch table: MCP tool name -> handler
+_TOOL_HANDLERS = {
+    "ortho_guardrails": handle_guardrails,
+    "ortho_decide": handle_decide,
+    "ortho_plan": handle_plan,
+    "ortho_refactor": handle_refactor,
+    "ortho_memory_search": handle_memory_search,
+}
+
+
+@server.call_tool()
+async def dispatch_tool_call(name: str, arguments: dict) -> list[types.TextContent]:
+    """Single MCP call_tool handler — routes to the right Ortho tool by name.
+
+    The SDK only honors the *last* @server.call_tool()-decorated function
+    (each call to the decorator overwrites the single registered handler),
+    so all 5 tools must be dispatched from here rather than each carrying
+    its own decorator.
+    """
+    handler = _TOOL_HANDLERS.get(name)
+    if handler is None:
+        return [types.TextContent(type="text", text=f"Error: unknown tool '{name}'")]
+    return await handler(arguments)
 
 
 # ============================================================================
@@ -303,11 +323,17 @@ async def handle_list_tools() -> list[types.Tool]:
 
 
 async def main():
-    """Start the MCP server."""
+    """Start the MCP server over stdio (the transport Claude Code uses)."""
+    import mcp.server.stdio
+
     logger.info("Starting Ortho MCP Server...")
-    async with server:
+    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         logger.info("Ortho MCP Server is ready. Connect from Claude Code.")
-        await server.wait_for_shutdown()
+        await server.run(
+            read_stream,
+            write_stream,
+            server.create_initialization_options(),
+        )
 
 
 if __name__ == "__main__":

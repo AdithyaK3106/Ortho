@@ -16,7 +16,7 @@ authors = ["Ortho Team <urbrain369@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-mcp = "^0.1"  # Anthropic's MCP SDK
+mcp = "^1.0"  # Anthropic's MCP SDK
 
 [tool.poetry.scripts]
 ortho-mcp = "ortho_mcp_server:main"

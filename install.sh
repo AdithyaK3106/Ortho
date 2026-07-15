@@ -17,8 +17,19 @@ else
 fi
 
 # Step 2: Install
-echo "⚙️  Installing Ortho..."
+echo "⚙️  Installing Ortho (Python engine)..."
 pip install -e . > /dev/null 2>&1
+
+ORTHO_DIR="$(pwd)"
+
+echo "⚙️  Building Ortho CLI..."
+(cd apps/cli && npm install > /dev/null 2>&1 && npm run build > /dev/null 2>&1)
+ORTHO_BIN="$ORTHO_DIR/apps/cli/dist/index.js"
+
+if [ ! -f "$ORTHO_BIN" ]; then
+  echo "✗ CLI build failed — check 'cd apps/cli && npm install && npm run build' manually"
+  exit 1
+fi
 
 # Step 3: Ask for repo
 echo ""
@@ -29,7 +40,7 @@ REPO_PATH=${REPO_PATH:-.}
 # Step 4: Scan
 echo "🔍 Scanning $REPO_PATH..."
 cd "$REPO_PATH"
-ortho scan > /dev/null
+node "$ORTHO_BIN" scan > /dev/null
 
 # Step 5: Setup instructions
 echo ""
@@ -45,8 +56,7 @@ echo "3. Paste this:"
 echo ""
 echo '   Name: ortho'
 echo '   Command: python'
-ORTHO_PATH=$(cd "$(dirname "$(pwd)")"; pwd)/Ortho/apps/mcp-server/ortho_mcp_server.py
-echo "   Args: $ORTHO_PATH"
+echo "   Args: $ORTHO_DIR/apps/mcp-server/ortho_mcp_server.py"
 echo ""
 echo "4. Restart Claude Code"
 echo "5. Ask Claude: 'What violations does my code have?'"

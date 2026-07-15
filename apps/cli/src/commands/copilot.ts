@@ -91,6 +91,6 @@ export const memoryCommand = new Command()
   .option("--repo-path <dir>", "Repository path (default: current directory)")
   .action(async (query: string, options?: { repoPath?: string }) => {
     requireIntent(query, "memory");
-    const args = ["search", query, "--repo-path", options?.repoPath || process.cwd()];
+    const args = [query, "--repo-path", options?.repoPath || process.cwd()];
     await runPython("apps/cli/src/commands/memory_search.py", args);
   });

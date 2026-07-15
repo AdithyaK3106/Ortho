@@ -138,10 +138,11 @@ pytest apps/mcp-server/test_mcp_server.py::TestOrthoMCPServer::test_error_handli
 
 ### "Test passed but MCP server won't start"
 
-The MCP SDK (`mcp` package) isn't installed yet. This is expected — the test suite doesn't require it. When you integrate with Claude Code, you'll install it:
+The MCP SDK (`mcp` package) is installed as part of `pip install -e .` (root
+`pyproject.toml` declares it). If it's still missing:
 
 ```bash
-pip install mcp
+pip install -e .
 python apps/mcp-server/ortho_mcp_server.py  # Should start now
 ```
 
@@ -151,9 +152,8 @@ python apps/mcp-server/ortho_mcp_server.py  # Should start now
 
 Once tests pass:
 
-1. Install the MCP SDK: `pip install mcp`
-2. Follow `MCP_SETUP.md` to configure Claude Code
-3. Test in Claude Code with a real conversation
+1. Follow `MCP_SETUP.md` to configure Claude Code
+2. Test in Claude Code with a real conversation
 
 ---
 

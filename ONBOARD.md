@@ -4,15 +4,38 @@ Copy-paste these 4 commands. You'll have real architecture intelligence in your 
 
 ---
 
-## Step 1: Install (30 seconds)
+## Step 1: Install (1 minute)
 
 ```bash
 git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
+
+# Python engine (analysis, MCP server)
 pip install -e .
+
+# CLI (the `ortho` command itself)
+cd apps/cli
+npm install
+npm run build
+cd ../..
 ```
 
-Done.
+Done. There's no global install step — you run the CLI directly from
+where you built it:
+
+```bash
+node apps/cli/dist/index.js --help
+```
+
+**Tip:** save yourself typing by aliasing it (add to `~/.bashrc` or
+`~/.zshrc`, adjusting the path to where you cloned Ortho):
+
+```bash
+alias ortho="node /path/to/Ortho/apps/cli/dist/index.js"
+```
+
+The rest of this guide uses `ortho` — substitute the full
+`node apps/cli/dist/index.js` form (or your alias) if you skipped that.
 
 ---
 
