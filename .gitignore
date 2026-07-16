@@ -41,3 +41,6 @@ Repos/
 /ORTHO_CAPABILITIES_SUMMARY.md
 /ORTHO_FEATURE_TEST_REPORT.md
 /TEST_RESULTS_INDEX.md
+
+# Machine-local Claude Code settings
+.claude/settings.local.json

@@ -7,7 +7,7 @@ Quick reference for integrating Ortho with popular AI coding tools and CI/CD sys
 ## 1. Claude Code (MCP Server) ⭐ **START HERE**
 
 ### Status
-- Engine: ✅ Complete (all 5 tools real and tested)
+- Engine: ✅ Complete (all 10 tools real and tested — see `MCP_SETUP.md` for the current list)
 - MCP Spec: ✅ Complete (see `docs/mcp-server-contract.md`)
 - Server Implementation: 🚧 Needs to be built
 

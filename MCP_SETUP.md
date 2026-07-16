@@ -6,12 +6,17 @@ Connect Ortho to Claude Code in **2 minutes**. No auth, no cloud, all local.
 
 ## What This Does
 
-After setup, Claude Code will have 5 new tools:
+After setup, Claude Code will have 10 new tools:
 
+- ✅ **ortho_review** — Unified architecture check + decision summary (one scan; prefer this over calling guardrails/decide separately)
 - 🛡️ **ortho_guardrails** — Check architecture violations
-- 🎯 **ortho_decide** — Change impact + strategy  
+- 🎯 **ortho_decide** — Change impact + strategy
 - 📋 **ortho_plan** — Feature planning
 - ♻️ **ortho_refactor** — Refactoring opportunities
+- 👍 **ortho_feedback** — Accept/reject a finding, with a reason future runs will cite
+- ❓ **ortho_ask** — Structural Q&A grounded in the real call/import graph
+- 🔗 **ortho_orchestrate** — Chain plan + decide + review into one report
+- 🔁 **ortho_cross_repo** — Find structurally similar code shared across 2-5 repos
 - 🔍 **ortho_memory_search** — Query what you've learned
 
 Claude can call these during conversation:
@@ -32,7 +37,10 @@ git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
 
 # Python engine (also installs the mcp SDK used below)
-pip install -e . -e shared/storage -e packages/*
+# Installs all 13 workspace packages -- `pip install -e packages/*` does
+# NOT work (some entries under packages/ aren't installable Python
+# packages), so use the project's own install script instead:
+./install.sh   # Windows: install.bat
 
 # CLI
 cd apps/cli && npm install && npm run build && cd ../..
@@ -182,7 +190,7 @@ The MCP server needs the Ortho packages installed:
 
 ```bash
 cd /path/to/Ortho
-pip install -e . -e shared/storage -e packages/*
+./install.sh   # Windows: install.bat
 ```
 
 ### "ortho_guardrails: No violations found"

@@ -154,11 +154,20 @@ What Ortho can do now:
 ✅ **Decision Engine** — Structured multi-source decision support  
 ✅ **Engineering Memory** — Every command captured to ContextHub (task-020)  
 
-### Next: Pilot Readiness
+### vNext — Engineering Decision Engine ✅ BUILT (2026-07-16)
 
-🚧 **CLI exposure** — register `guardrails`/`decide`/`plan`/`refactor` in the `ortho` TypeScript CLI  
-🚧 **MCP Server** — Claude Code integration (contract: `docs/mcp-server-contract.md`)  
-🚧 **Structured JSON output** — machine-readable results alongside text reports  
+All four phases of the vNext roadmap (see `PILOT_READINESS.md`):
+
+✅ **Evidence Engine** — every finding carries real, checkable evidence (measured counts, real import edges); "Risk: High" never stands alone  
+✅ **Unified `ortho review`** — one command: guardrails + decision synthesis + test intelligence, one report  
+✅ **Test Intelligence** — recommends real, disk-verified test files for affected modules; reports genuine coverage gaps  
+✅ **Accept/Reject Feedback Loop** — `ortho feedback reject "<finding>" --reason "..."`; future runs cite *"rejected before, here's why"*, not just "seen before"  
+✅ **Repository Q&A** — `ortho ask "how does auth work"`, answered from the real call/import graph, never fabricated  
+✅ **Cross-Repo Intelligence** — real AST-structural code reuse across 2-5 repos  
+✅ **Workflow Orchestration** — `ortho orchestrate` chains plan → decide → review into one report (never auto-approves — the developer decides)  
+✅ **MCP Server** — 10 tools live in Claude Code (`MCP_SETUP.md`), verified via real stdio protocol round-trip  
+
+**Status:** feature-complete and audited (1375 tests passing, zero known regressions) — but zero real users yet. The pilot is the next step, not more features. See `PILOT_READINESS.md` for the honest gap analysis.
 
 ---
 
@@ -228,23 +237,16 @@ If you prefer command-line:
 
 ```bash
 ortho scan /path/to/repo              # Build knowledge base
-ortho guardrails                       # Check violations
-ortho plan "add feature"               # Get implementation paths
-ortho decide src/file.py               # Analyze change impact
-ortho refactor                         # Find refactoring opportunities
-ortho memory search "keyword"          # Search what you've learned
-```
-
-### Engineering Copilot Commands — Now Live in CLI ✅
-
-All four commands are wired to real engines and exposed in the `ortho` CLI (as of task-021):
-
-```bash
-ortho guardrails [path]              # architecture violations
-ortho decide <intent> [--scan-path]  # change-impact decision
-ortho plan <intent> [--scan-path]    # implementation paths
-ortho refactor [path]                # bloat/coupling/cycle findings
-ortho memory search <query>           # query what you've learned (task-024)
+ortho review [path]                   # THE command: violations + decision + test intel, one report
+ortho guardrails [path]               # Architecture violations (with evidence)
+ortho plan "add feature"              # Get implementation paths
+ortho decide src/file.py              # Analyze change impact + recommended tests
+ortho refactor [path]                 # Find refactoring opportunities
+ortho ask "how does auth work"        # Structural Q&A from the real call/import graph
+ortho orchestrate "add caching"       # plan + decide + review chained into one report
+ortho cross-repo <pathA> <pathB>      # Structurally shared code across repos
+ortho feedback reject "<finding>" --reason "..."   # Teach ortho; future runs cite your reason
+ortho memory <query>                  # Search what you've learned
 ```
 
 Every call records a `workflow_run` artifact in `.ortho/ortho.db` — ortho accumulates

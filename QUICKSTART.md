@@ -9,7 +9,8 @@ git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
 
 # Python engine (root + all 13 workspace packages)
-pip install -e . -e shared/storage -e packages/*
+# Note: `pip install -e packages/*` breaks on non-package dirs — use the script:
+./install.sh   # Windows: install.bat
 
 # CLI
 cd apps/cli && npm install && npm run build && cd ../..

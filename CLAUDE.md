@@ -76,29 +76,30 @@ All tests MUST be run and verified. Simulated logs are strictly prohibited.
 
 ## 5. Current Status & Active Work
 
-**✅ PHASES 1-3 COMPLETE & VERIFIED**
-- Phase 1: Foundation (repo intelligence, context hub)
-- Phase 2: Reasoning (call graph, imports, architecture detection)
-- Phase 3: Execution (intent routing, selector engine, token optimizer)
+**✅ ORIGINAL PHASES 1-6 COMPLETE & VERIFIED** (foundation, reasoning,
+execution, architecture intelligence, engineering intelligence — see git
+history and `docs/archive/` for per-phase detail).
 
-**✅ PHASE 5 COMPLETE WITH FIXES**
-- Architecture intelligence: Microservices detection fixed
-- Orchestration: Import paths standardized
-- 24/24 tests passing, 19 hard edge-case tests
+**✅ vNEXT ROADMAP: ALL FOUR PHASES BUILT & AUDITED (2026-07-16)**
+Ortho is now the Engineering Decision Engine described in
+`PILOT_READINESS.md`, not just a scanner:
+- **Evidence Engine** — every finding carries real, checkable evidence
+- **Unified `ortho review`** + **Test Intelligence** (recommended tests,
+  coverage gaps)
+- **Accept/reject feedback loop** — "rejected before, here's why"
+  citations (the moat)
+- **Repository Q&A** (`ask`), **Cross-Repo Intelligence** (`cross-repo`),
+  **Workflow Orchestration** (`orchestrate`)
+- 9 CLI commands, 10 MCP tools — all verified end-to-end
 
-**✅ PHASE 6 COMPLETE & PRODUCTION READY**
-- 6 components: change-planner, feature-planner, refactoring-advisor, arch-guardrails, decision-engine, cli-commands
-- 179 tests (100% passing), 93.2% avg coverage
-- 83 hard edge-case tests created
-- Zero bugs found
-
-**⏳ PHASE 7 (Next): LLM Integration & Feedback Loop**
-- Claude API integration for decision scoring
-- Feedback collection and calibration
-- Advanced recommendation workflows
-
-**Summary:**
-- **Total Tests:** 303 (Phase 5 + 6)
-- **Pass Rate:** 100%
-- **Coverage:** 93%+
-- **Production Status:** Ready for deployment
+**Summary (full independent audit, 2026-07-16):**
+- **Total Tests:** 1375 passed, 3 failed (all pre-existing/documented
+  architecture-classifier benchmark gaps), zero new regressions
+- **mypy --strict:** clean on all active packages incl. all new files
+  (arch-intelligence's 106 pre-existing errors are legacy, documented)
+- **Known limits:** `layer_boundaries` redesigned but never observed
+  firing on real repos (only synthetic fixture proof); `cross-repo`
+  symbol-count-guarded against its O(n²) cliff
+- **Production Status:** feature-complete and audited — **blocked on the
+  five-pilot study, not on engineering.** Next work is pilot recruitment
+  per `PILOT_READINESS.md` §14, not new features.

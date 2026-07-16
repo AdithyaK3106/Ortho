@@ -1,8 +1,8 @@
 # Ortho v3 — Complete Features List
 
 **Version:** 3.0  
-**Status:** Phase 4 COMPLETE (Optimization Layer)  
-**Last Updated:** 2026-07-12  
+**Status:** vNext COMPLETE (Engineering Decision Engine — all four roadmap phases)  
+**Last Updated:** 2026-07-16  
 
 ---
 
@@ -478,6 +478,27 @@ ortho analyze --impact <file>       # Change impact for file
 ortho analyze --debt                # Technical debt report
 ortho analyze --deps                # Dependency health report
 ```
+
+### Engineering Decision Engine (vNext, 2026-07-16)
+
+```bash
+ortho review [path]                 # Unified: violations + decision + test intelligence, one scan
+ortho guardrails [path]             # Architecture violations, each with checkable evidence
+ortho decide <file|intent>          # Change impact + recommended tests + coverage gaps
+ortho plan "<intent>"               # Implementation paths ranked by effort/risk
+ortho refactor [path]               # Bloat/coupling/cycle findings with evidence
+ortho ask "<question>"              # Structural Q&A from the real call/import graph
+ortho orchestrate "<intent>"        # plan + decide + review chained; human approves, never auto-merges
+ortho cross-repo <pathA> <pathB>    # Real AST-structural code reuse across 2-5 repos
+ortho feedback accept|reject "<rule_id> <location>" [--reason]
+                                    # Record decisions; future runs cite "rejected before: <why>"
+ortho memory <query>                # Search accumulated engineering memory
+```
+
+Every finding carries evidence (`✓` lines: measured counts, real import
+edges). Every command's run is captured to per-repo engineering memory.
+All 10 capabilities are also exposed as MCP tools for Claude Code
+(`MCP_SETUP.md`).
 
 ### Orchestration Operations
 

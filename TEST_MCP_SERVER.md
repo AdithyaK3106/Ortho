@@ -1,6 +1,6 @@
 # Testing Ortho MCP Server Locally
 
-Verify that the MCP server and all 5 tools work before deploying to Claude Code.
+Verify that the MCP server and all 10 tools work before deploying to Claude Code.
 
 ---
 
@@ -16,7 +16,7 @@ Expected output:
 23 passed in 15s
 ```
 
-All 5 tools are production-ready if tests pass.
+All 10 tools are production-ready if tests pass.
 
 ---
 
@@ -53,7 +53,7 @@ All 5 tools are production-ready if tests pass.
 - ✓ Structured results field populated
 
 ### Integration Tests
-- ✓ All 5 tools work in sequence (no interference)
+- ✓ All 10 tools work in sequence (no interference)
 - ✓ Error paths never raise (always return success=True/False)
 - ✓ Structured fields exist on all reports
 
@@ -159,7 +159,7 @@ Once tests pass:
 
 ## Test Files
 
-- `apps/mcp-server/test_mcp_server.py` — 23 tests covering all 5 tools
+- `apps/mcp-server/test_mcp_server.py` — 28 tests covering all 10 tools, including a real stdio protocol round-trip
 - `apps/mcp-server/ortho_mcp_server.py` — the MCP server itself
 
 ---

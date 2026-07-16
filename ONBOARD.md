@@ -11,7 +11,8 @@ git clone https://github.com/AdithyaK3106/Ortho.git
 cd Ortho
 
 # Python engine (analysis, MCP server) — root + all 13 workspace packages
-pip install -e . -e shared/storage -e packages/*
+# Note: `pip install -e packages/*` breaks on non-package dirs — use the script:
+./install.sh   # Windows: install.bat
 
 # CLI (the `ortho` command itself)
 cd apps/cli
@@ -125,7 +126,7 @@ All in Claude Code. All local. Free forever.
 ## Didn't Work?
 
 **"ModuleNotFoundError: No module named 'cli_commands'"**
-→ Did you run `pip install -e . -e shared/storage -e packages/*` from the Ortho directory? Re-run it.
+→ Did you run `./install.sh` (Windows: `install.bat`) from the Ortho directory? Re-run it.
 
 **"MCP tools don't show up in Claude Code"**
 → Restart Claude Code completely (close all windows). Check the MCP config in settings.

@@ -1,11 +1,45 @@
 # Ortho v3 — Status Tracker
 
-**Version:** 3.0 — Phase 7.1 COMPLETE ✅ (All CLI copilot commands live + memory search)  
+**Version:** 3.0 — vNext COMPLETE ✅ (Engineering Decision Engine: all four roadmap phases built + audited)  
 **Started:** 2026-06-30  
-**Current Status:** Pilot-ready — guardrails/decide/plan/refactor + memory search all live with filtering, structured JSON output, engineering memory captured per-repo.  
-**Last Updated:** 2026-07-15  
+**Current Status:** Feature-complete and independently audited (1375 tests, zero new regressions). Blocked on the five-pilot study, not engineering — see `PILOT_READINESS.md`.  
+**Last Updated:** 2026-07-16  
 
 ---
+
+## 7. vNext: All Four Roadmap Phases + Full Audit ✅ COMPLETE (2026-07-16)
+
+Built in one directed push (explicitly reversing the roadmap's
+build-Phase-1-first sequencing at the user's request), then independently
+audited:
+
+- **Evidence Engine** — every `GuardrailViolation`/`Recommendation` now
+  cites real, checkable evidence (measured counts, real import edges,
+  real cycle chains); rendered as `✓` lines in all reports.
+- **Unified `ortho review`** — guardrails + decision synthesis + test
+  intelligence in one scan, one report.
+- **Test Intelligence** — disk-verified test recommendations + genuine
+  coverage gaps in `decide`/`review`. Found+fixed: `decide()` silently
+  discarding explicit `--scan-path`; raw dataclass reprs leaking into
+  evidence text.
+- **Accept/reject feedback loop** — `ortho feedback`; next scan cites
+  "Rejected before (date): <reason>" instead of "seen before". Verified
+  end-to-end on celery and django.
+- **Repository Q&A / Cross-Repo Intelligence / Orchestration** — `ask`,
+  `cross-repo`, `orchestrate`; all graph-grounded, never fabricate,
+  orchestrate never auto-approves.
+- **Audit results:** 1375 tests passed (3 pre-existing documented
+  failures, zero new); mypy --strict clean on all active packages (3 new
+  errors found in `repo_qa.py`, fixed); 8-repo false-positive re-audit
+  clean — with the honest caveat that redesigned `layer_boundaries`
+  never fired on any real repo (synthetic-fixture proof only);
+  `cross-repo`'s real 11-minute O(n²) cliff found and guarded (fails
+  fast at >2000 pooled symbols with actionable message); `MCP_SETUP.md`
+  stale tool list + broken install one-liner fixed.
+- **MCP server:** 10 tools, all verified reachable via real stdio
+  protocol round-trip.
+
+**Next:** pilot recruitment per `PILOT_READINESS.md` §14. Not features.
 
 ## 6. Production Readiness Audit ✅ COMPLETE (2026-07-15)
 
