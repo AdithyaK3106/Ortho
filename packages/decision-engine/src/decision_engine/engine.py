@@ -73,7 +73,13 @@ class DecisionEngine:
                     risk=item.cascade_risk,
                     confidence=item.confidence,
                     suggested_fix="Verify all affected modules before commit",
-                    evidence=list(item.evidence)[:3] if item.evidence else [],
+                    # item.evidence is list[ImpactEdge] (a dataclass), not
+                    # list[str] -- render each edge as a readable sentence
+                    # instead of leaking its Python repr into report text.
+                    evidence=[
+                        f"{e.source} → {e.target} ({e.edge_type.value}, distance {e.distance})"
+                        for e in list(item.evidence)[:3]
+                    ] if item.evidence else [],
                 )
             elif source == "feature_planner":
                 return Recommendation(

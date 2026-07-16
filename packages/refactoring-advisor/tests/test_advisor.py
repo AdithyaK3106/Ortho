@@ -246,3 +246,40 @@ class TestAccuracy:
             assert issue.location != ""
             assert issue.recommendation != ""
             assert issue.severity in ("low", "medium", "high")
+
+    def test_evidence_field_actually_populated(self, advisor: RefactoringAdvisor, mock_repo: Any) -> None:
+        """Evidence Engine: every finding must carry real, checkable evidence,
+        not an empty list (a Recommendation without evidence is unacceptable
+        per the product vision -- 'Risk: High' must never stand alone)."""
+        mock_repo.get_tight_couplings.return_value = [("a.py", "b.py")]
+        mock_repo.get_bloated_modules.return_value = [("big.py", 900, 60)]
+        mock_repo.get_circular_deps.return_value = [["x.py", "y.py", "x.py"]]
+
+        issues = advisor.find_issues()
+
+        assert len(issues) >= 3
+        for issue in issues:
+            assert issue.evidence, f"{issue.issue_type} at {issue.location} has no evidence"
+
+    def test_evidence_cites_real_measured_facts(self, advisor: RefactoringAdvisor, mock_repo: Any) -> None:
+        """Bloat evidence must cite the actual measured lines/functions, not
+        a generic message -- a developer must be able to verify it."""
+        mock_repo.get_bloated_modules.return_value = [("big.py", 900, 60)]
+
+        issues = advisor.find_issues()
+        bloat_issue = next(i for i in issues if i.issue_type == "bloat")
+
+        assert any("900" in e for e in bloat_issue.evidence)
+        assert any("60" in e for e in bloat_issue.evidence)
+
+    def test_circular_evidence_capped_for_large_cycles(self, advisor: RefactoringAdvisor, mock_repo: Any) -> None:
+        """A large cycle (e.g. celery's real 41-module SCC) must not produce
+        an unbounded evidence wall -- capped with a '...and N more' marker."""
+        big_cycle = [f"m{i}.py" for i in range(50)] + ["m0.py"]
+        mock_repo.get_circular_deps.return_value = [big_cycle]
+
+        issues = advisor.find_issues()
+        circular_issue = next(i for i in issues if i.issue_type == "circular")
+
+        assert len(circular_issue.evidence) <= 12
+        assert any("more" in e for e in circular_issue.evidence)
