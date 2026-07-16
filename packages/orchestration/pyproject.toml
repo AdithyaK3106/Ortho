@@ -7,7 +7,13 @@ packages = [{ include = "orchestration", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-semantic-router = "^0.0.24"
+# Was pinned to the old 0.0.x line; router.py actually imports
+# semantic_router.routers.SemanticRouter, a 0.1.x-era API that doesn't
+# exist in 0.0.24. Real, previously-unnoticed conflict with root
+# pyproject.toml's semantic-router ^0.1.8 -- masked because every existing
+# dev environment already had 0.1.15 installed. See tree-sitter's identical
+# fix (same commit series) for the same root cause across two packages.
+semantic-router = "^0.1.8"
 pydantic = "^2.0"
 pyyaml = "^6.0"
 
