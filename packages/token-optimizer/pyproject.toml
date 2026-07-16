@@ -7,17 +7,18 @@ packages = [{ include = "token_optimizer", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-# develop = true: without it, poetry/pip builds a separate, non-editable
-# wheel from this path dependency -- a DIFFERENT install of the same
-# distribution from the one install.sh/.bat/.ps1 separately request via
-# `-e packages/orchestration` / `-e packages/context-hub`. pip's resolver
-# then sees two different requirement sources for the identical package
-# name and fails with a self-referential ResolutionImpossible ("the user
-# requested ortho-context-hub, ortho-token-optimizer depends on
-# ortho-context-hub") on a genuinely clean install. develop = true makes
-# this resolve to the same editable install every other -e flag produces.
-ortho-orchestration = { path = "../orchestration", develop = true }
-ortho-context-hub = { path = "../context-hub", develop = true }
+# ortho-orchestration / ortho-context-hub were previously declared here as
+# path dependencies, but token_optimizer's own source never imports
+# either one (grep confirms zero references) -- they were dead weight.
+# Worse: pip install -e (not `poetry install`) doesn't understand
+# poetry's develop=true flag on a path dependency, so it built a second,
+# separate non-editable wheel of context-hub/orchestration alongside the
+# real editable installs install.sh/.bat/.ps1 already request via their
+# own -e packages/X flags, and pip's resolver failed with a
+# self-referential ResolutionImpossible on a genuinely clean install
+# ("the user requested ortho-context-hub, ortho-token-optimizer depends
+# on ortho-context-hub"). Removed rather than worked around, since
+# nothing here actually needs them.
 
 [build-system]
 requires = ["poetry-core"]
