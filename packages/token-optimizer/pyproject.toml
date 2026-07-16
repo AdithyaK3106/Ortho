@@ -7,8 +7,17 @@ packages = [{ include = "token_optimizer", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-ortho-orchestration = { path = "../orchestration" }
-ortho-context-hub = { path = "../context-hub" }
+# develop = true: without it, poetry/pip builds a separate, non-editable
+# wheel from this path dependency -- a DIFFERENT install of the same
+# distribution from the one install.sh/.bat/.ps1 separately request via
+# `-e packages/orchestration` / `-e packages/context-hub`. pip's resolver
+# then sees two different requirement sources for the identical package
+# name and fails with a self-referential ResolutionImpossible ("the user
+# requested ortho-context-hub, ortho-token-optimizer depends on
+# ortho-context-hub") on a genuinely clean install. develop = true makes
+# this resolve to the same editable install every other -e flag produces.
+ortho-orchestration = { path = "../orchestration", develop = true }
+ortho-context-hub = { path = "../context-hub", develop = true }
 
 [build-system]
 requires = ["poetry-core"]
