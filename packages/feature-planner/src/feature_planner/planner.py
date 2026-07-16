@@ -41,10 +41,23 @@ class FeaturePlanner:
         )
 
     def _classify_feature_type(self, intent: str) -> str:
-        """Classify intent as endpoint, service, data_layer, cross_cutting, infrastructure"""
+        """Classify intent as bugfix, endpoint, service, data_layer, cross_cutting, infrastructure"""
         intent_lower = intent.lower()
 
-        if any(word in intent_lower for word in ["auth", "logging", "caching", "feature flag", "monitoring", "rate limiting", "validation"]):
+        # Checked first: bugfix/refactor language should win over incidental
+        # keyword overlap ("fix the auth caching bug" is a bugfix, not
+        # cross_cutting) -- this repo's own architecture-review commands
+        # (guardrails/decide/review) always describe findings in this
+        # vocabulary ("Circular dependency: ... -> Break cycle by
+        # extracting abstraction"), and orchestrate() feeds those finding
+        # descriptions straight into plan_feature() as the intent. Without
+        # this category every such call fell through to the generic
+        # "infrastructure" bucket (Terraform/service-registry suggestions
+        # for a one-file Python refactor) since none of the other four
+        # categories are shaped like "fix a bug", only "add a feature".
+        if any(word in intent_lower for word in ["fix", "bug", "break", "broken", "resolve", "refactor", "cycle", "circular"]):
+            return "bugfix"
+        elif any(word in intent_lower for word in ["auth", "logging", "caching", "feature flag", "monitoring", "rate limiting", "validation"]):
             return "cross_cutting"
         elif any(word in intent_lower for word in ["database", "schema", "migration", "data", "repository"]):
             return "data_layer"
@@ -59,7 +72,9 @@ class FeaturePlanner:
         """Generate candidate paths based on feature type and architecture"""
         style = self.arch_model.get_style()
 
-        if feature_type == "endpoint":
+        if feature_type == "bugfix":
+            return self._bugfix_paths(style)
+        elif feature_type == "endpoint":
             return self._endpoint_paths(style)
         elif feature_type == "service":
             return self._service_paths(style)
@@ -69,6 +84,47 @@ class FeaturePlanner:
             return self._cross_cutting_paths(style)
         else:
             return self._infrastructure_paths(style)
+
+    def _bugfix_paths(self, style: str) -> list[ImplementationPath]:
+        """Generate bugfix/refactor implementation paths -- distinct from
+        the feature-shaped categories above: no new capability is being
+        added, so 'affected_layers' reflects where the fix lands, not a
+        layer being extended."""
+        paths = [
+            ImplementationPath(
+                name="Minimal Targeted Fix",
+                description="Smallest change that resolves the issue in place",
+                affected_layers=["business"],
+                effort="low",
+                risk="low",
+                rationale="Lowest blast radius; preferred when the fix is well-understood",
+            ),
+            ImplementationPath(
+                name="Extract Shared Abstraction",
+                description="Break the coupling/cycle by extracting a shared interface or module",
+                affected_layers=["business", "data"],
+                effort="medium",
+                risk="medium",
+                rationale="Addresses the structural cause, not just the symptom -- standard fix for circular dependencies",
+            ),
+            ImplementationPath(
+                name="Deprecate and Reroute",
+                description="Mark the problematic path deprecated, route callers through a new one",
+                affected_layers=["business", "presentation"],
+                effort="medium",
+                risk="low",
+                rationale="Safer for widely-called code; avoids a single big-bang change",
+            ),
+            ImplementationPath(
+                name="Full Rewrite of Affected Module",
+                description="Rewrite the module cleanly instead of patching around the issue",
+                affected_layers=["business"],
+                effort="high",
+                risk="high",
+                rationale="Only worth it if the module has accumulated enough debt that patching keeps costing more",
+            ),
+        ]
+        return paths
 
     def _endpoint_paths(self, style: str) -> list[ImplementationPath]:
         """Generate endpoint implementation paths"""

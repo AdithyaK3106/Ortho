@@ -127,6 +127,57 @@ class TestCrossCuttingFeatures:
         assert len(result.paths) >= 3
 
 
+class TestBugfixFeatures:
+    """Regression guard for a real bug found live: orchestrate() feeds
+    architecture-finding descriptions ("Circular dependency: ... -> Break
+    cycle by extracting abstraction") straight into plan_feature() as the
+    intent, but none of the original 5 categories are shaped like "fix a
+    bug" -- only "add a feature". Every such call silently fell through to
+    "infrastructure" and produced nonsense (Terraform/service-registry
+    suggestions for a one-file circular-import fix)."""
+
+    def test_break_circular_import(self, planner: FeaturePlanner) -> None:
+        """The exact intent string that surfaced the bug."""
+        result = planner.plan_feature("break the concurrency circular import")
+
+        assert result.feature_type == "bugfix"
+        assert len(result.paths) >= 3
+
+    def test_fix_bug_wording(self, planner: FeaturePlanner) -> None:
+        result = planner.plan_feature("fix the login validation bug")
+
+        assert result.feature_type == "bugfix"
+
+    def test_bugfix_wins_over_incidental_keyword_overlap(self, planner: FeaturePlanner) -> None:
+        """'fix the login validation bug' also contains 'validation', a
+        cross_cutting keyword -- bugfix language must win, since the intent
+        is to repair something, not add a new cross-cutting concern."""
+        result = planner.plan_feature("fix the login validation bug")
+
+        assert result.feature_type == "bugfix"
+        assert result.feature_type != "cross_cutting"
+
+    def test_refactor_wording(self, planner: FeaturePlanner) -> None:
+        result = planner.plan_feature("refactor the payment processor")
+
+        assert result.feature_type == "bugfix"
+
+    def test_genuine_feature_requests_unaffected(self, planner: FeaturePlanner) -> None:
+        """The new bugfix category must not swallow real feature requests
+        that happen to share no bugfix vocabulary."""
+        assert planner.plan_feature("add user authentication").feature_type == "cross_cutting"
+        assert planner.plan_feature("add a database migration for user roles").feature_type == "data_layer"
+        assert planner.plan_feature("add caching to the formatter").feature_type == "cross_cutting"
+
+    def test_bugfix_paths_have_rationale_and_valid_enums(self, planner: FeaturePlanner) -> None:
+        result = planner.plan_feature("fix the circular dependency")
+
+        assert len(result.paths) >= 3
+        assert all(p.rationale for p in result.paths)
+        assert all(p.effort in ("low", "medium", "high") for p in result.paths)
+        assert all(p.risk in ("low", "medium", "high") for p in result.paths)
+
+
 class TestVarietyRequirement:
     """Test 14-15: Verify variety in paths"""
 
