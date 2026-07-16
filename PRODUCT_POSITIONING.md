@@ -345,10 +345,11 @@ See `docs/mcp-server-contract.md` for exact tool schemas. TL;DR:
 ## Next Actions
 
 1. **[ ] Publish this doc** — put on `README.md` or prominent landing page
-2. **[ ] Build MCP server** — your friend: implement 5 tools against spec
+2. **[x] Build MCP server** — done; 10 tools live (`MCP_SETUP.md`), verified via real stdio protocol round-trip
 3. **[ ] CLI marketing** — "Ortho: Engineering Intelligence for Your AI Assistant"
 4. **[ ] Demo video** — 2-3 minute walkthrough (scan → guardrails → plan → AI integration)
 5. **[ ] GH sponsorship** — make it easy for companies to fund development
+6. **[ ] Run the five-pilot study** — the actual next blocker; see `PILOT_READINESS.md`. Everything above is secondary until real users have touched this.
 
 ---
 
