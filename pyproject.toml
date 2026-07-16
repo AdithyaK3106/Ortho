@@ -19,17 +19,26 @@ authors = ["Ortho Team <urbrain369@gmail.com>"]
 readme = "README.md"
 
 # NOTE: this package intentionally does NOT bundle the 13 workspace
-# packages' source via `packages = [...]` (removed 2026-07-16). Every real
-# install path (install.sh/install.bat/install.ps1) already installs each
-# workspace package separately and editable via its own `-e packages/X`
-# flag -- that is the actual, working mechanism (see install.sh's own
-# comment: "Root `pip install -e .` alone does NOT install the 13
-# workspace packages"). Bundling the same source a second time here made
-# pip's resolver see two different installs of the same package (e.g.
+# packages' source (removed 2026-07-16). Every real install path
+# (install.sh/install.bat/install.ps1) already installs each workspace
+# package separately and editable via its own `-e packages/X` flag --
+# that is the actual, working mechanism (see install.sh's own comment:
+# "Root `pip install -e .` alone does NOT install the 13 workspace
+# packages"). Bundling the same source a second time here made pip's
+# resolver see two different installs of the same package (e.g.
 # context-hub bundled into root AND separately editable-installed) and
 # fail with a self-referential ResolutionImpossible on a genuinely clean
-# install -- reproduced and root-caused via a real install.ps1 test run
-# against an environment with no prior Ortho packages installed.
+# install -- reproduced and root-caused via a real install.ps1 test run.
+#
+# Points at ./ortho/ -- a trivial one-file package (see ortho/__init__.py)
+# added for the same reason: poetry-core's masonry build backend requires
+# a real, locatable module even for a pure dependency-aggregator, and
+# treats an omitted `packages` key and an explicit `packages = []` the
+# same way (both fail identically with "ModuleOrPackageNotFoundError: No
+# file/folder found for package ortho" on a real `pip install -e .` build
+# -- `--dry-run` does not catch this, since it skips the actual build
+# step; only surfaced on a genuinely clean install.ps1 test run).
+packages = [{ include = "ortho" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
