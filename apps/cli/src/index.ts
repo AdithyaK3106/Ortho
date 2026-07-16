@@ -13,10 +13,15 @@ import { rejectCommand } from "./commands/reject";
 import { historyCommand } from "./commands/history";
 import { contextCommand } from "./commands/context";
 import {
+  reviewCommand,
   guardrailsCommand,
   decideCommand,
   planCommand,
   refactorCommand,
+  feedbackCommand,
+  askCommand,
+  orchestrateCommand,
+  crossRepoCommand,
   memoryCommand,
 } from "./commands/copilot";
 
@@ -61,10 +66,15 @@ program.addCommand(historyCommand);
 program.addCommand(contextCommand);
 
 // task-021: engineering copilot commands (real CliCommands engines)
+program.addCommand(reviewCommand);
 program.addCommand(guardrailsCommand);
 program.addCommand(decideCommand);
 program.addCommand(planCommand);
 program.addCommand(refactorCommand);
+program.addCommand(feedbackCommand);
+program.addCommand(askCommand);
+program.addCommand(orchestrateCommand);
+program.addCommand(crossRepoCommand);
 
 // task-024: memory search (query workflow_run artifacts)
 program.addCommand(memoryCommand);

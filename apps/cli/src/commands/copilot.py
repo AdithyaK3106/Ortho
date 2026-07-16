@@ -37,6 +37,10 @@ def _main() -> None:
     parser = argparse.ArgumentParser(description="ortho engineering copilot")
     subparsers = parser.add_subparsers(dest="action", required=True)
 
+    review_parser = subparsers.add_parser("review", help="Unified guardrails + decision summary")
+    review_parser.add_argument("--path", required=True, help="Directory to scan")
+    review_parser.add_argument("--severity", choices=["error", "warning"], help="Filter violations by severity")
+
     guardrails_parser = subparsers.add_parser("guardrails", help="Architecture violation check")
     guardrails_parser.add_argument("--path", required=True, help="Directory to scan")
     guardrails_parser.add_argument("--severity", choices=["error", "warning"], help="Filter violations by severity")
@@ -53,12 +57,35 @@ def _main() -> None:
     refactor_parser = subparsers.add_parser("refactor", help="Refactoring findings")
     refactor_parser.add_argument("--path", required=True, help="Directory to scan")
 
+    feedback_parser = subparsers.add_parser("feedback", help="Record accept/reject on a finding")
+    feedback_parser.add_argument("decision", choices=["accept", "reject"], help="accept or reject")
+    feedback_parser.add_argument("finding_key", help='"{rule_id} {location}" as shown in guardrails/decide/review output')
+    feedback_parser.add_argument("--path", required=True, help="Repository path")
+    feedback_parser.add_argument("--reason", default="", help="Why (shown on future runs if rejected)")
+
+    ask_parser = subparsers.add_parser("ask", help="Repository Understanding: structural Q&A")
+    ask_parser.add_argument("question", help="Question, e.g. 'how does auth work'")
+    ask_parser.add_argument("--scan-path", required=True, help="Directory to scan")
+
+    orchestrate_parser = subparsers.add_parser("orchestrate", help="Chain plan+decide+review into one report")
+    orchestrate_parser.add_argument("intent", help="Free-text intent")
+    orchestrate_parser.add_argument("--scan-path", required=True, help="Directory to scan")
+
+    cross_repo_parser = subparsers.add_parser("cross-repo", help="Shared/reusable code across 2-5 real repos")
+    cross_repo_parser.add_argument("paths", nargs="+", help="2-5 repository paths to compare")
+    cross_repo_parser.add_argument("--threshold", type=float, default=0.7, help="Similarity threshold 0.0-1.0")
+
     args = parser.parse_args()
 
     from cli_commands.commands import CliCommands
 
     commands = CliCommands()
-    if args.action == "guardrails":
+    if args.action == "review":
+        kwargs = {}
+        if hasattr(args, "severity") and args.severity:
+            kwargs["severity_filter"] = args.severity
+        report = commands.review(args.path, **kwargs)
+    elif args.action == "guardrails":
         kwargs = {}
         if hasattr(args, "severity") and args.severity:
             kwargs["severity_filter"] = args.severity
@@ -76,6 +103,14 @@ def _main() -> None:
         report = commands.decide(args.intent, **kwargs)
     elif args.action == "plan":
         report = commands.plan(args.intent, scan_path=args.scan_path)
+    elif args.action == "feedback":
+        report = commands.feedback(args.path, args.finding_key, args.decision, args.reason)
+    elif args.action == "ask":
+        report = commands.ask(args.scan_path, args.question, scan_path=args.scan_path)
+    elif args.action == "orchestrate":
+        report = commands.orchestrate(args.intent, scan_path=args.scan_path)
+    elif args.action == "cross-repo":
+        report = commands.cross_repo(args.paths, threshold=args.threshold)
     else:
         report = commands.refactor(args.path)
 

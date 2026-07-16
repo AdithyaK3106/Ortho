@@ -49,6 +49,34 @@ class TestOrthoMCPServer:
         pytest.skip("Test repository (repos/click) not found")
 
     # ========================================================================
+    # Tool 0: ortho_review
+    # ========================================================================
+
+    def test_review_basic(self, commands, test_repo):
+        """ortho_review: basic call succeeds."""
+        report = commands.review(test_repo)
+        assert report.success is True
+        assert report.title is not None
+        assert len(report.content) > 0
+
+    def test_review_with_severity_filter(self, commands, test_repo):
+        """ortho_review: severity filter works."""
+        report_error = commands.review(test_repo, severity_filter="error")
+        report_warning = commands.review(test_repo, severity_filter="warning")
+        assert report_error.success is True
+        assert report_warning.success is True
+
+    def test_review_nonexistent_path(self, commands):
+        """ortho_review: nonexistent path returns success=False."""
+        report = commands.review("/definitely/not/a/real/path")
+        assert report.success is False
+
+    def test_review_has_structured_output(self, commands, test_repo):
+        """ortho_review: returns structured violations, same shape as guardrails."""
+        report = commands.review(test_repo)
+        assert report.violations is None or isinstance(report.violations, list)
+
+    # ========================================================================
     # Tool 1: ortho_guardrails
     # ========================================================================
 
@@ -216,14 +244,15 @@ class TestOrthoMCPServer:
     # ========================================================================
 
     def test_all_tools_work_sequentially(self, commands, test_repo):
-        """All 5 tools work in sequence without interference."""
+        """All 6 tools work in sequence without interference."""
+        r0 = commands.review(test_repo)
         r1 = commands.guardrails(test_repo)
         r2 = commands.decide("add feature", scan_path=test_repo)
         r3 = commands.plan("new module", scan_path=test_repo)
         r4 = commands.refactor(test_repo)
         r5 = commands.search_memory(test_repo, "test")
 
-        assert all([r1.success, r2.success, r3.success, r4.success, r5.success])
+        assert all([r0.success, r1.success, r2.success, r3.success, r4.success, r5.success])
 
     def test_structured_output_compatibility(self, commands, test_repo):
         """Structured output fields exist (for Claude Code formatting)."""
@@ -305,10 +334,15 @@ class TestOrthoMCPServerRealProtocol:
                 tools_result = await session.list_tools()
                 tool_names = {t.name for t in tools_result.tools}
                 assert tool_names == {
+                    "ortho_review",
                     "ortho_guardrails",
                     "ortho_decide",
                     "ortho_plan",
                     "ortho_refactor",
+                    "ortho_feedback",
+                    "ortho_orchestrate",
+                    "ortho_cross_repo",
+                    "ortho_ask",
                     "ortho_memory_search",
                 }
 
@@ -316,10 +350,15 @@ class TestOrthoMCPServerRealProtocol:
                 # one registered (this is exactly the bug that direct
                 # handler-function tests couldn't see).
                 for name, args in [
+                    ("ortho_review", {"path": test_repo}),
                     ("ortho_guardrails", {"path": test_repo}),
                     ("ortho_decide", {"intent": "add caching", "scan_path": test_repo}),
                     ("ortho_plan", {"intent": "add logging", "scan_path": test_repo}),
                     ("ortho_refactor", {"path": test_repo}),
+                    ("ortho_feedback", {"finding_key": "module_sizing test.py", "decision": "accept", "path": test_repo}),
+                    ("ortho_orchestrate", {"intent": "add caching", "scan_path": test_repo}),
+                    ("ortho_cross_repo", {"paths": [test_repo, test_repo]}),
+                    ("ortho_ask", {"question": "how does formatting work", "scan_path": test_repo}),
                     ("ortho_memory_search", {"query": "guardrails", "repo_path": test_repo}),
                 ]:
                     result = await session.call_tool(name, args)
