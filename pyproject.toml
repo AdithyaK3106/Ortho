@@ -38,7 +38,14 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.11"
 # Core dependencies (from existing packages)
-tree-sitter = "^0.21"
+# Pinned to match packages/repo-intelligence's exact pin (tree-sitter-languages
+# 1.9.1 requires tree-sitter==0.20.4) -- a real, previously-unnoticed
+# dependency conflict here made a genuinely clean `pip install -e .` fail
+# with ResolutionImpossible; every existing dev environment already had
+# 0.20.4 installed from working on repo-intelligence directly, which masked
+# it. Root's stated range must match what the workspace packages actually
+# require, not an independent guess.
+tree-sitter = "==0.20.4"
 semantic-router = "^0.1.8"
 pydantic = "^2.0"
 numpy = "^1.24"
