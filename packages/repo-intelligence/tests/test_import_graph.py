@@ -3,8 +3,6 @@
 import pytest
 from repo_intelligence.import_graph import ImportGraphBuilder, ImportEdge
 
-pytestmark = pytest.mark.xfail(reason="ImportGraphBuilder.extract_imports() tree walking incomplete")
-
 
 @pytest.fixture
 def builder():
@@ -103,6 +101,12 @@ class MyClass:
         edges = builder.extract_imports(str(no_import_file))
         assert len(edges) == 0
 
+    @pytest.mark.xfail(
+        reason="asserts extract_imports raises on syntax errors, but the "
+        "tree-sitter builder deliberately parses malformed source without "
+        "raising (returns partial/empty edges) -- see repo_scanner.py's "
+        "no-try/except rationale; test contract predates that design"
+    )
     def test_syntax_error_handling(self, builder, tmp_path):
         """Handle syntax errors in files."""
         bad_file = tmp_path / "bad.py"
@@ -111,6 +115,11 @@ class MyClass:
         with pytest.raises(Exception):
             builder.extract_imports(str(bad_file))
 
+    @pytest.mark.xfail(
+        reason="asserts extract_imports raises FileNotFoundError, but the "
+        "builder returns [] for unreadable paths by design (same rationale "
+        "as test_syntax_error_handling above)"
+    )
     def test_nonexistent_file(self, builder):
         """Handle nonexistent files."""
         with pytest.raises(FileNotFoundError):

@@ -4,8 +4,6 @@ import pytest
 from pathlib import Path
 from repo_intelligence.module_detector import ModuleDetector, Module
 
-pytestmark = pytest.mark.xfail(reason="ModuleDetector.detect_modules() has incomplete logic for namespace package detection")
-
 
 @pytest.fixture
 def detector():
@@ -44,6 +42,7 @@ def sample_project_structure(tmp_path):
 class TestPackageDetection:
     """Test detection of Python packages."""
 
+    @pytest.mark.xfail(reason="ModuleDetector.detect_modules() has incomplete logic for namespace package detection")
     def test_detect_regular_package(self, detector, sample_project_structure):
         """Detect regular packages with __init__.py."""
         modules = detector.detect_modules(str(sample_project_structure))
@@ -83,6 +82,7 @@ class TestPackageDetection:
         if mypackage:
             assert mypackage[0].is_package
 
+    @pytest.mark.xfail(reason="ModuleDetector.detect_modules() has incomplete logic for namespace package detection")
     def test_single_module_detection(self, detector, sample_project_structure):
         """Detect single Python modules."""
         modules = detector.detect_modules(str(sample_project_structure))
@@ -131,6 +131,7 @@ class TestModuleStructure:
         for module in modules:
             assert Path(module.path).exists()
 
+    @pytest.mark.xfail(reason="ModuleDetector.detect_modules() has incomplete logic for namespace package detection")
     def test_submodule_names(self, detector, sample_project_structure):
         """Submodules should have correct names."""
         modules = detector.detect_modules(str(sample_project_structure))
@@ -142,6 +143,7 @@ class TestModuleStructure:
 class TestComplexHierarchy:
     """Test detection of complex package hierarchies."""
 
+    @pytest.mark.xfail(reason="ModuleDetector.detect_modules() has incomplete logic for namespace package detection")
     def test_deep_nesting(self, detector, tmp_path):
         """Handle deeply nested packages."""
         deep = tmp_path / "a" / "b" / "c" / "d"
@@ -169,6 +171,7 @@ class TestComplexHierarchy:
 class TestEdgeCases:
     """Test edge cases in module detection."""
 
+    @pytest.mark.xfail(reason="ModuleDetector.detect_modules() has incomplete logic for namespace package detection")
     def test_symlink_handling(self, detector, tmp_path):
         """Handle symlinks appropriately."""
         # Create a module
