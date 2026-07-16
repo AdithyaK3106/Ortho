@@ -92,7 +92,7 @@ class TestLayerDetector:
     """Tests for LayerDetector."""
 
     def test_extract_layers_from_dag(self, layer_detector):
-        """Test layer extraction from simple DAG."""
+        """Test layer extraction with real persistence/framework evidence."""
         import_graph = [
             ImportEdge(importer_file_id="b.py", imported_file_id="a.py"),
             ImportEdge(importer_file_id="c.py", imported_file_id="b.py"),
@@ -102,11 +102,12 @@ class TestLayerDetector:
             File(id="b.py", rel_path="service/logic.py"),
             File(id="c.py", rel_path="api/handler.py"),
         ]
-        
-        layers = layer_detector.extract_layers(import_graph, files)
-        
+        external = {"a.py": {"sqlalchemy"}, "c.py": {"flask"}}
+
+        layers = layer_detector.extract_layers(import_graph, files, external)
+
         assert len(layers) >= 1
-        assert all(0 <= layer.number <= 2 for layer in layers)
+        assert all(0 <= layer.number <= 1 for layer in layers)
 
     def test_layer_numbering(self, layer_detector):
         """Test that layers are numbered consistently."""
@@ -119,16 +120,19 @@ class TestLayerDetector:
             assert all(isinstance(layer.number, int) for layer in layers)
 
     def test_semantic_naming_detection(self, layer_detector):
-        """Test semantic naming (repository -> Layer 0, etc)."""
+        """Test semantic naming: a module with a real persistence-library
+        import gets classified as Data, not from path keywords alone."""
         import_graph = [ImportEdge(importer_file_id="service.py", imported_file_id="repository.py")]
         files = [
             File(id="repository.py", rel_path="data/repository.py"),
             File(id="service.py", rel_path="logic/service.py"),
         ]
-        
-        layers = layer_detector.extract_layers(import_graph, files)
-        
+        external = {"repository.py": {"sqlalchemy"}}
+
+        layers = layer_detector.extract_layers(import_graph, files, external)
+
         assert len(layers) >= 1
+        assert layers[0].name == "Data"
 
 
 class TestSubsystemDetector:

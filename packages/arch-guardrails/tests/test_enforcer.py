@@ -22,14 +22,16 @@ def enforcer(
 class TestLayerBoundaries:
     """Test 1-5: Layer boundary violations.
 
-    _check_layer_boundaries() is no longer called from check_violations()
-    (disabled 2026-07-16 -- see enforcer.py's check_violations() comment and
-    docs/archive/FALSE_POSITIVE_AUDIT_2026-07-16.md: 100% false-positive
-    rate in real-world use, root-caused to LayerDetector, not this method).
-    These tests call _check_layer_boundaries() directly: the ordering logic
-    itself is still correct given accurate layer data, which is exactly what
-    these hand-labeled mocks provide -- only the current real-world layer
-    *source* is untrustworthy, not this method's boundary-checking logic.
+    _check_layer_boundaries() is called from check_violations() again as of
+    2026-07-16 -- see enforcer.py's check_violations() comment and
+    docs/archive/FALSE_POSITIVE_AUDIT_2026-07-16.md: it was disabled after a
+    100% false-positive rate in real-world use, root-caused to LayerDetector
+    (not this method) defaulting every import-graph leaf to layer 0. That's
+    fixed by requiring real persistence/framework-import evidence before a
+    module gets a layer at all (see layer_detector.py). These tests call
+    _check_layer_boundaries() directly against hand-labeled mock layers,
+    independent of LayerDetector, so they keep exercising the ordering logic
+    in isolation regardless of how layers are sourced upstream.
     """
 
     def test_presentation_to_data_blocked(
@@ -305,3 +307,90 @@ class TestAccuracy:
 
         circ_violations = [v for v in violations if v.rule_id == "dependency_direction"]
         assert len(circ_violations) >= len(cycles)
+
+
+class TestEvidenceEngine:
+    """Evidence Engine: every violation must carry real, checkable evidence
+    -- 'Risk: High' must never stand alone (product vision). Evidence must
+    cite concrete facts a developer can independently verify, not fabricate
+    anything not present in the input data."""
+
+    def test_layer_boundaries_evidence_cites_real_modules(
+        self, enforcer: ArchitectureEnforcer, mock_arch_model: Any, mock_dep_graph: Any
+    ) -> None:
+        mock_arch_model.get_layer_for_module.side_effect = lambda m: {
+            "views.py": "presentation",
+            "db.py": "data",
+        }.get(m, "unknown")
+        mock_arch_model.get_layers.return_value = ["data", "business", "presentation"]
+        mock_dep_graph.get_edges.return_value = [("views.py", "db.py")]
+
+        violations = enforcer._check_layer_boundaries()
+
+        assert len(violations) > 0
+        v = violations[0]
+        assert v.evidence, "layer_boundaries violation has no evidence"
+        assert any("views.py" in e for e in v.evidence)
+        assert any("db.py" in e for e in v.evidence)
+
+    def test_dependency_direction_evidence_cites_real_edges(
+        self, enforcer: ArchitectureEnforcer, mock_arch_model: Any, mock_dep_graph: Any
+    ) -> None:
+        mock_dep_graph.find_cycles.return_value = [["A", "B", "C", "A"]]
+
+        violations = enforcer.check_violations()
+        circ = [v for v in violations if v.rule_id == "dependency_direction"][0]
+
+        assert circ.evidence
+        assert any("A → B" in e for e in circ.evidence)
+        assert any("B → C" in e for e in circ.evidence)
+        assert any("distinct modules" in e for e in circ.evidence)
+
+    def test_dependency_direction_evidence_capped_for_large_cycle(
+        self, enforcer: ArchitectureEnforcer, mock_arch_model: Any, mock_dep_graph: Any
+    ) -> None:
+        """A 41-module cycle (celery's real one) must not dump 40 evidence
+        lines -- capped with a '...and N more' marker."""
+        big_cycle = [f"m{i}" for i in range(41)] + ["m0"]
+        mock_dep_graph.find_cycles.return_value = [big_cycle]
+
+        violations = enforcer.check_violations()
+        circ = [v for v in violations if v.rule_id == "dependency_direction"][0]
+
+        assert len(circ.evidence) <= 12
+        assert any("more" in e for e in circ.evidence)
+
+    def test_module_sizing_evidence_cites_measured_values(
+        self, enforcer: ArchitectureEnforcer, mock_arch_model: Any, mock_metrics: Any
+    ) -> None:
+        mock_arch_model.get_modules.return_value = ["big.py"]
+        mock_metrics.get_module_lines.return_value = 733
+        mock_metrics.get_module_functions.return_value = 30
+
+        violations = enforcer.check_violations()
+        size_v = [v for v in violations if v.rule_id == "module_sizing"][0]
+
+        assert size_v.evidence
+        assert any("733" in e for e in size_v.evidence)
+        assert any("233" in e for e in size_v.evidence)  # 733 - 500 over limit
+
+    def test_all_violation_types_have_nonempty_evidence(
+        self, enforcer: ArchitectureEnforcer, mock_arch_model: Any, mock_dep_graph: Any, mock_metrics: Any
+    ) -> None:
+        """No rule_id may produce a finding with empty evidence -- that
+        would be exactly the gap the Evidence Engine exists to close."""
+        mock_arch_model.get_layer_for_module.side_effect = lambda m: {
+            "views.py": "presentation", "db.py": "data",
+        }.get(m, "unknown")
+        mock_arch_model.get_layers.return_value = ["data", "business", "presentation"]
+        mock_dep_graph.get_edges.return_value = [("views.py", "db.py")]
+        mock_dep_graph.find_cycles.return_value = [["A", "B", "A"]]
+        mock_arch_model.get_modules.return_value = ["big.py"]
+        mock_metrics.get_module_lines.return_value = 600
+        mock_metrics.get_module_functions.return_value = 60
+
+        violations = enforcer.check_violations()
+
+        assert len(violations) >= 4
+        for v in violations:
+            assert v.evidence, f"{v.rule_id} at {v.location} has empty evidence"

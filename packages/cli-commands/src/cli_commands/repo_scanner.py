@@ -95,7 +95,8 @@ def scan_repository(path: str) -> ScanResult:
         arch_files.append(ArchFile(id=file_key, rel_path=str(py_file.relative_to(repo_root))))
 
     layer_edges = _build_layer_import_edges(import_edges_by_file, file_to_module, arch_files)
-    layers = LayerDetector().extract_layers(layer_edges, arch_files)
+    external_imports = _build_external_imports_by_file(import_edges_by_file, file_to_module)
+    layers = LayerDetector().extract_layers(layer_edges, arch_files, external_imports)
 
     ai_import_graph = _build_ai_import_graph(import_edges_by_file, file_to_module)
     ai_symbols = _build_ai_symbols(symbols_by_file)
@@ -144,6 +145,34 @@ def _build_layer_import_edges(
             if target_file_id is not None and target_file_id != file_key:
                 edges.append(_LayerImportEdge(importer_file_id=file_key, imported_file_id=target_file_id))
     return edges
+
+
+def _build_external_imports_by_file(
+    import_edges_by_file: dict[str, list[ImportEdge]],
+    file_to_module: dict[str, str],
+) -> dict[str, set[str]]:
+    """Top-level external module name per import, keyed by importing file --
+    the real signature evidence LayerDetector needs (does this file actually
+    import a DB/ORM library or a web framework), as opposed to import-graph
+    topology. An import is "external" here if its target doesn't resolve to
+    a file in this repo, matching _build_ai_import_graph's is_external test."""
+    module_to_file_id = {module: file_id for file_id, module in file_to_module.items()}
+
+    result: dict[str, set[str]] = {}
+    for file_key, import_edges in import_edges_by_file.items():
+        externals: set[str] = set()
+        for edge in import_edges:
+            target_file_id = module_to_file_id.get(edge.target_module)
+            if target_file_id is None:
+                for module in module_to_file_id:
+                    if module.endswith(f".{edge.target_module}"):
+                        target_file_id = module
+                        break
+            if target_file_id is None:
+                externals.add(edge.target_module.split(".")[0].lower())
+        if externals:
+            result[file_key] = externals
+    return result
 
 
 def _build_ai_import_graph(

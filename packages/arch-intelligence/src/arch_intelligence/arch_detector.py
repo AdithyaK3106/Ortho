@@ -576,9 +576,14 @@ class ArchitectureDetector:
         # Framework detection
         fw_boost, fw_evidence = self._framework_boost(sig, ArchStyle.LAYERED)
 
-        # Dampen implicit structure signal when there's no vocabulary evidence
-        # but high coupling (suggests flat, not layered despite import topology)
-        has_vocabulary = len(bands) >= 2
+        # Vocabulary alone (band-named directories present) is not evidence of
+        # layering if those "layers" never actually import each other -- e.g.
+        # an ORM library with sibling core/ and orm/ packages that don't
+        # depend on one another isn't layered, it just has layer-sounding
+        # directory names. Real layering requires the bands to actually be
+        # wired together directionally, so vocabulary only counts as strong
+        # evidence when there's at least one real cross-band import edge.
+        has_vocabulary = len(bands) >= 2 and bool(banded_edges)
         has_high_coupling = coupling['density'] > 0.15 and coupling['avg_fan_in'] > 2.0
         # Full weight (0.18) if vocabulary present; dampened (0.05) if no vocab AND high coupling;
         # low weight (0.05) if no vocab AND no high coupling (truly flat structure)
@@ -590,7 +595,7 @@ class ArchitectureDetector:
             implicit_structure_weight = 0.05  # Low weight for flat structures
 
         signals_list = [
-            (0.20, len(bands) >= 2,
+            (0.20, has_vocabulary,
              f"Layer vocabulary present in structure: {matched}"),
             (0.08, len(bands) == 3,
              "All three layer bands (presentation/business/data) present"),
@@ -598,9 +603,10 @@ class ArchitectureDetector:
              f"Import graph forms {sig.dag_depth}-level dependency chain"),
             (0.13, sig.cycle_ratio < 0.1 and bool(sig.internal_imports),
              f"Low import-cycle ratio ({sig.cycle_ratio:.1%})"),
-            # Only fire implicit structure if 2+ vocabulary bands are present (true layering)
-            # Single band is just naming convention (e.g., only 'models/' dir), not true layering
-            (implicit_structure_weight, has_implicit_structure and len(bands) >= 2,
+            # Only fire implicit structure if vocabulary bands actually
+            # interact (see has_vocabulary above) -- band-named dirs with no
+            # cross-band imports are parallel modules, not true layering.
+            (implicit_structure_weight, has_implicit_structure and has_vocabulary,
              f"Implicit layer structure detected ({implicit_layers} layers via dependency partition)"),
             (0.08, bool(banded_edges) and flow_ratio >= 0.7,
              f"{flow_ratio:.0%} of cross-layer imports flow downward "

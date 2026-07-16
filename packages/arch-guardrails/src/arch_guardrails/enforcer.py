@@ -61,24 +61,16 @@ class ArchitectureEnforcer:
         """
         violations: list[GuardrailViolation] = []
 
-        # layer_boundaries is disabled pending a redesign of layer detection.
-        # A false-positive audit against 9 real repos (2026-07-16, see
-        # docs/archive/FALSE_POSITIVE_AUDIT_2026-07-16.md) found this rule
-        # fired 177 times across 5 repos with a 100% false-positive rate:
-        # the current LayerDetector assigns "layer 0" to any module with no
-        # internal imports (a mechanical fact about import topology) and a
-        # semantic name via keyword match, then flags every importer of that
-        # module as a boundary violation -- but "imports a leaf/config/utils
-        # module" is one of the most ordinary patterns in software, not
-        # evidence of an architecture problem. This method (_check_layer_
-        # boundaries) itself is correct given accurate layer data -- see
-        # test_enforcer.py's TestLayerBoundaries, which still exercises it
-        # directly against hand-labeled layers -- the defect is entirely in
-        # what LayerDetector currently reports as "the layers." Re-enable
-        # once layer assignment has real evidence behind it (e.g. persistence/
-        # IO signature, not just topological depth), not before.
-        #
-        # violations.extend(self._check_layer_boundaries())
+        # layer_boundaries: re-enabled 2026-07-16 after LayerDetector was
+        # redesigned to require real evidence (a module actually importing a
+        # known persistence/ORM library or a known web/API/CLI framework)
+        # instead of import-graph topological depth, which caused a 100%
+        # false-positive rate on the 9-repo audit (see
+        # docs/archive/FALSE_POSITIVE_AUDIT_2026-07-16.md). Modules with no
+        # such evidence are now excluded from layer assignment entirely
+        # (get_layer_for_module returns "unknown", which this method already
+        # skips) rather than defaulted into layer 0.
+        violations.extend(self._check_layer_boundaries())
 
         # Check dependency direction (acyclic)
         violations.extend(self._check_dependency_direction())
@@ -114,7 +106,13 @@ class ArchitectureEnforcer:
                         severity="error",
                         location=f"{source} → {target}",
                         message=f"{source_layer} cannot import {target_layer}",
-                        suggested_fix="Invert dependency or use abstraction"
+                        suggested_fix="Invert dependency or use abstraction",
+                        evidence=[
+                            f"{source} is classified {source_layer} (layer index {src_idx})",
+                            f"{target} is classified {target_layer} (layer index {tgt_idx})",
+                            f"declared layer order: {' < '.join(layers)}",
+                            f"real import edge {source} → {target} found in the dependency graph",
+                        ],
                     ))
 
         return violations
@@ -125,12 +123,23 @@ class ArchitectureEnforcer:
         cycles = self.dep_graph.find_cycles()
 
         for cycle in cycles:
+            # cycle is a closed loop: [a, b, c, a]. Each consecutive pair is a
+            # real edge from the dependency graph, not a fabricated claim.
+            # Capped at 10 edges: a large SCC (celery's real 41-module cycle)
+            # would otherwise turn "evidence" into an unreadable wall of text.
+            edges_in_cycle = [f"{cycle[i]} → {cycle[i + 1]}" for i in range(len(cycle) - 1)]
+            shown_edges = edges_in_cycle[:10]
+            evidence = [f"{len(cycle) - 1}-module cycle: {len(set(cycle))} distinct modules"]
+            evidence.extend(f"real import edge: {edge}" for edge in shown_edges)
+            if len(edges_in_cycle) > len(shown_edges):
+                evidence.append(f"...and {len(edges_in_cycle) - len(shown_edges)} more edges in this cycle")
             violations.append(GuardrailViolation(
                 rule_id="dependency_direction",
                 severity="error",
                 location=" → ".join(cycle),
                 message=f"Circular dependency: {' → '.join(cycle)}",
-                suggested_fix="Break cycle by extracting abstraction"
+                suggested_fix="Break cycle by extracting abstraction",
+                evidence=evidence,
             ))
 
         return violations
@@ -151,7 +160,11 @@ class ArchitectureEnforcer:
                     severity="warning",
                     location=module,
                     message=f"Module exceeds {max_lines} lines ({lines})",
-                    suggested_fix="Split into focused modules"
+                    suggested_fix="Split into focused modules",
+                    evidence=[
+                        f"{module} measured at {lines} lines (limit: {max_lines})",
+                        f"{lines - max_lines} lines over the limit",
+                    ],
                 ))
 
             if functions > max_functions:
@@ -160,7 +173,11 @@ class ArchitectureEnforcer:
                     severity="warning",
                     location=module,
                     message=f"Module exceeds {max_functions} functions ({functions})",
-                    suggested_fix="Group related functions into new modules"
+                    suggested_fix="Group related functions into new modules",
+                    evidence=[
+                        f"{module} measured at {functions} functions (limit: {max_functions})",
+                        f"{functions - max_functions} functions over the limit",
+                    ],
                 ))
 
         return violations

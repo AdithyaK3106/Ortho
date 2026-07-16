@@ -79,11 +79,16 @@ class TestArchModelAdapter:
 
     def test_real_arch_model_from_detector(self, tmp_path: Path) -> None:
         """Real-repo scan test (mandatory per spec.md): build a genuine
-        ArchitectureModel via LayerDetector against small real files, wrap it."""
+        ArchitectureModel via LayerDetector against small real files, wrap it.
+
+        LayerDetector requires real signature evidence (an import of a known
+        persistence/web library) to assign a layer -- a plain internal
+        import between two files, with no such evidence, correctly resolves
+        to "unknown" now (see layer_detector.py's module docstring)."""
         f1 = tmp_path / "data_repo.py"
         f2 = tmp_path / "service.py"
-        f1.write_text("class Repo:\n    pass\n", encoding="utf-8")
-        f2.write_text("from data_repo import Repo\n\nclass Service:\n    pass\n", encoding="utf-8")
+        f1.write_text("import sqlalchemy\n\nclass Repo:\n    pass\n", encoding="utf-8")
+        f2.write_text("import flask\nfrom data_repo import Repo\n\nclass Service:\n    pass\n", encoding="utf-8")
 
         files = [
             File(id=str(f1), rel_path="data_repo.py"),
@@ -96,13 +101,13 @@ class TestArchModelAdapter:
                 self.imported_file_id = imported
 
         edges = [_Edge(str(f2), str(f1))]
-        layers = LayerDetector().extract_layers(edges, files)
+        external = {str(f1): {"sqlalchemy"}, str(f2): {"flask"}}
+        layers = LayerDetector().extract_layers(edges, files, external)
         model = _model(layers)
 
         file_to_module = {str(f1): "data_repo", str(f2): "service"}
         adapter = ArchModelAdapter(model, file_to_module)
 
         assert isinstance(adapter.get_layers(), list)
-        # service depends on data_repo, so data_repo should resolve to a lower/equal layer
         assert adapter.get_layer("data_repo") != "unknown"
         assert adapter.get_layer("service") != "unknown"

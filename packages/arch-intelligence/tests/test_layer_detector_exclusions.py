@@ -54,13 +54,21 @@ class TestIsExcludedHelper:
 
 
 class TestExtractLayersExclusion:
+    """LayerDetector (redesigned 2026-07-16, see layer_detector.py's module
+    docstring) only assigns a layer when a file has real signature evidence
+    -- an external import matching a known persistence or web/API/CLI
+    library -- not from import-graph topology or path keywords alone.
+    These tests supply that evidence via external_imports_by_file so the
+    exclusion behavior (still path-based) can be verified independently."""
+
     def test_test_file_excluded_from_layers(self) -> None:
         files = [
             File(id="core.py", rel_path="src/core.py"),
             File(id="test_core.py", rel_path="tests/test_core.py"),
         ]
         edges = [_Edge("test_core.py", "core.py")]
-        layers = LayerDetector().extract_layers(edges, files)
+        external = {"core.py": {"sqlalchemy"}, "test_core.py": {"sqlalchemy"}}
+        layers = LayerDetector().extract_layers(edges, files, external)
         all_file_ids = {fid for layer in layers for fid in layer.file_ids}
         assert "test_core.py" not in all_file_ids
         assert "core.py" in all_file_ids
@@ -71,13 +79,14 @@ class TestExtractLayersExclusion:
             File(id="demo.py", rel_path="examples/demo.py"),
         ]
         edges = [_Edge("demo.py", "core.py")]
-        layers = LayerDetector().extract_layers(edges, files)
+        external = {"core.py": {"sqlalchemy"}, "demo.py": {"sqlalchemy"}}
+        layers = LayerDetector().extract_layers(edges, files, external)
         all_file_ids = {fid for layer in layers for fid in layer.file_ids}
         assert "demo.py" not in all_file_ids
 
     def test_all_files_excluded_returns_empty(self) -> None:
         files = [File(id="a.py", rel_path="tests/a.py")]
-        layers = LayerDetector().extract_layers([], files)
+        layers = LayerDetector().extract_layers([], files, {"a.py": {"sqlalchemy"}})
         assert layers == []
 
     def test_mixed_production_and_test_files(self) -> None:
@@ -94,21 +103,28 @@ class TestExtractLayersExclusion:
             _Edge("test_b.py", "service.py"),
             _Edge("demo.py", "service.py"),
         ]
-        layers = LayerDetector().extract_layers(edges, files)
+        external = {
+            "data.py": {"sqlalchemy"},
+            "service.py": {"flask"},
+            "test_a.py": {"sqlalchemy"},
+            "test_b.py": {"flask"},
+            "demo.py": {"flask"},
+        }
+        layers = LayerDetector().extract_layers(edges, files, external)
         all_file_ids = {fid for layer in layers for fid in layer.file_ids}
         assert all_file_ids == {"data.py", "service.py"}
 
     def test_import_edge_between_excluded_and_included_dropped(self) -> None:
         """A test file importing a production file must not affect that
-        production file's own layer number (edges to/from excluded files
-        are dropped, not just the files themselves)."""
+        production file's own layer assignment (excluded files contribute
+        no evidence and get no layer)."""
         files = [
             File(id="data.py", rel_path="src/data.py"),
             File(id="test_data.py", rel_path="tests/test_data.py"),
         ]
         edges = [_Edge("test_data.py", "data.py")]
-        layers = LayerDetector().extract_layers(edges, files)
-        # data.py has no incoming edges from production code -> layer 0
+        external = {"data.py": {"sqlalchemy"}, "test_data.py": {"sqlalchemy"}}
+        layers = LayerDetector().extract_layers(edges, files, external)
         assert len(layers) == 1
         assert layers[0].number == 0
         assert layers[0].file_ids == ["data.py"]
@@ -119,24 +135,25 @@ class TestExtractLayersExclusion:
             File(id="test_utils.py", rel_path="src/test_utils.py"),
         ]
         edges = [_Edge("test_utils.py", "core.py")]
-        layers = LayerDetector().extract_layers(edges, files)
+        external = {"core.py": {"sqlalchemy"}, "test_utils.py": {"sqlalchemy"}}
+        layers = LayerDetector().extract_layers(edges, files, external)
         all_file_ids = {fid for layer in layers for fid in layer.file_ids}
         assert "test_utils.py" in all_file_ids
 
     def test_existing_behavior_unchanged_for_pure_production_input(self) -> None:
-        """Regression guard: production-only input behaves identically to
-        pre-fix behavior (this mirrors test_layer_detector.py's existing
-        fixture)."""
+        """Regression guard: production-only input with real signature
+        evidence still gets classified."""
         files = [
             File(id="a.py", rel_path="data/db.py"),
             File(id="b.py", rel_path="service/logic.py"),
             File(id="c.py", rel_path="api/handler.py"),
         ]
         edges = [_Edge("b.py", "a.py"), _Edge("c.py", "b.py")]
-        layers = LayerDetector().extract_layers(edges, files)
+        external = {"a.py": {"sqlalchemy"}, "c.py": {"flask"}}
+        layers = LayerDetector().extract_layers(edges, files, external)
         assert len(layers) >= 1
         all_file_ids = {fid for layer in layers for fid in layer.file_ids}
-        assert all_file_ids == {"a.py", "b.py", "c.py"}
+        assert all_file_ids == {"a.py", "c.py"}
 
 
 class TestRealRepoRegression:

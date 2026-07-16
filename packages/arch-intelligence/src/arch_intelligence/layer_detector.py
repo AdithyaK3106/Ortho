@@ -1,4 +1,20 @@
-﻿"""Layer detection via topological sort."""
+"""Layer detection via real persistence/framework signatures.
+
+Redesigned 2026-07-16 (see docs/archive/FALSE_POSITIVE_AUDIT_2026-07-16.md):
+the previous version assigned layer 0 to any module with zero internal
+imports (a purely topological fact -- config.py, typing.py, and other
+ordinary leaf modules all landed there) and then named that layer via
+directory-keyword match. That produced a 100% false-positive rate on every
+real repo it fired on in the audit's 9-repo sample: "imports a leaf module"
+is not evidence of a layer-boundary violation.
+
+This version only assigns a module to "Data" or "Presentation" when there
+is real, checkable evidence for it: the module actually imports a known
+persistence/ORM/DB-client library (Data) or a known web/API/CLI framework
+(Presentation). A module with no such evidence is left unclassified and
+excluded from layer-boundary checking entirely, rather than defaulted into
+a layer it may have nothing to do with.
+"""
 
 from typing import Optional
 from .types import Layer
@@ -12,6 +28,24 @@ _EXCLUDED_SEGMENTS = frozenset({
     "tests", "test", "examples", "example", "__tests__", "vendor", "node_modules",
 })
 
+# Real, checkable signatures: does this module actually import a library
+# that does persistence/IO, or actually import a web/API/CLI framework?
+# Top-level module name only (e.g. "sqlalchemy", not "sqlalchemy.orm").
+_DATA_SIGNATURES = frozenset({
+    "sqlalchemy", "psycopg2", "psycopg", "pymongo", "motor", "redis",
+    "sqlite3", "peewee", "pony", "asyncpg", "aiomysql", "aiosqlite",
+    "pymysql", "mysqlclient", "cassandra", "elasticsearch", "boto3",
+    "dynamodb", "django_orm", "tortoise", "sqlmodel", "alembic",
+})
+_PRESENTATION_SIGNATURES = frozenset({
+    "flask", "fastapi", "django", "starlette", "aiohttp", "tornado",
+    "sanic", "bottle", "pyramid", "falcon", "litestar", "quart",
+    "click", "typer", "grpc", "graphene", "strawberry",
+})
+
+_LAYER_DATA = 0
+_LAYER_PRESENTATION = 1
+
 
 def _is_excluded(rel_path: str) -> bool:
     segments = rel_path.replace("\\", "/").split("/")
@@ -19,112 +53,65 @@ def _is_excluded(rel_path: str) -> bool:
 
 
 class LayerDetector:
-    """Extracts architectural layers from import graph."""
+    """Extracts architectural layers from real persistence/framework signatures."""
 
-    SEMANTIC_KEYWORDS = {
-        0: ["repository", "model", "db", "dao", "persistence"],
-        1: ["service", "business", "logic", "domain", "core"],
-        2: ["controller", "view", "endpoint", "handler", "api"],
-    }
-
-    def extract_layers(self, import_graph: list, files: list) -> list[Layer]:
+    def extract_layers(
+        self,
+        import_graph: list,
+        files: list,
+        external_imports_by_file: Optional[dict] = None,
+    ) -> list[Layer]:
         """
-        Extract layers from import DAG via topological sort.
-        Layer 0 = data (no outgoing), Layer 1 = business, Layer 2 = presentation.
+        Classify modules into Data/Presentation layers using real evidence
+        (imports of known persistence or web/API/CLI libraries), not import
+        topology. Modules with no such evidence are left out of every
+        layer -- unclassified, not defaulted to layer 0 -- so
+        layer_boundaries only fires on modules it has real grounds to
+        judge.
 
-        Files under test/example/vendor directories (see _EXCLUDED_SEGMENTS)
-        are excluded entirely — they are not production architecture.
+        `external_imports_by_file` maps file id -> set of top-level
+        external module names that file imports (e.g. {"sqlalchemy"}).
+        Defaults to {} for callers that don't have this data yet (keeps
+        the old call signature working, just with no layers detected).
         """
+        external_imports_by_file = external_imports_by_file or {}
         files = [f for f in files if not _is_excluded(f.rel_path)]
-
         if not files:
             return []
 
-        file_map = {f.id: f for f in files}
+        data_files: list[str] = []
+        presentation_files: list[str] = []
+        for f in files:
+            modules = {m.lower() for m in external_imports_by_file.get(f.id, set())}
+            data_hits = sorted(modules & _DATA_SIGNATURES)
+            presentation_hits = sorted(modules & _PRESENTATION_SIGNATURES)
+            # A module that imports both a DB client and a web framework
+            # (e.g. a Flask app file that also opens sqlite3) has no single
+            # clear layer identity -- skip rather than guess.
+            if data_hits and not presentation_hits:
+                data_files.append(f.id)
+            elif presentation_hits and not data_hits:
+                presentation_files.append(f.id)
 
-        # Build adjacency (internal imports only)
-        file_ids = {f.id for f in files}
-        imports: dict = {fid: set() for fid in file_ids}
-        
-        for edge in import_graph:
-            if edge.importer_file_id in file_ids and edge.imported_file_id in file_ids:
-                imports[edge.importer_file_id].add(edge.imported_file_id)
-
-        # Topological sort: Kahn's algorithm
-        in_degree = {fid: 0 for fid in file_ids}
-        for fid in file_ids:
-            for target in imports[fid]:
-                in_degree[target] += 1
-
-        queue = [fid for fid in file_ids if in_degree[fid] == 0]
-        topo_order = []
-        
-        while queue:
-            node = queue.pop(0)
-            topo_order.append(node)
-            for target in imports[node]:
-                in_degree[target] -= 1
-                if in_degree[target] == 0:
-                    queue.append(target)
-
-        # Assign layer numbers (0 = deepest, no incoming)
-        file_to_layer = {}
-        for fid in topo_order:
-            deps = [file_to_layer.get(target, 0) for target in imports[fid]]
-            file_to_layer[fid] = max(deps) + 1 if deps else 0
-
-        # Group by layer
-        layers_dict: dict = {}
-        for fid, layer_num in file_to_layer.items():
-            if layer_num not in layers_dict:
-                layers_dict[layer_num] = []
-            layers_dict[layer_num].append(fid)
-
-        # Create Layer objects
-        layers = []
-        for layer_num in sorted(layers_dict.keys()):
-            file_ids_in_layer = layers_dict[layer_num]
-            name = self._infer_layer_name(layer_num, file_ids_in_layer, file_map)
-            
-            depends_on = []
-            for fid in file_ids_in_layer:
-                for imported in imports[fid]:
-                    if imported in file_to_layer:
-                        dep_layer = file_to_layer[imported]
-                        if dep_layer not in depends_on and dep_layer != layer_num:
-                            depends_on.append(dep_layer)
-
-            layer = Layer(
-                id=f"layer_{layer_num}",
-                number=layer_num,
-                name=name,
-                file_ids=file_ids_in_layer,
-                depends_on=depends_on,
-            )
-            layers.append(layer)
-
+        layers: list[Layer] = []
+        if data_files:
+            layers.append(Layer(
+                id=f"layer_{_LAYER_DATA}",
+                number=_LAYER_DATA,
+                name="Data",
+                file_ids=data_files,
+                depends_on=[],
+                confidence=1.0,
+                evidence=[f"imports a known persistence/DB library ({len(data_files)} file(s))"],
+            ))
+        if presentation_files:
+            layers.append(Layer(
+                id=f"layer_{_LAYER_PRESENTATION}",
+                number=_LAYER_PRESENTATION,
+                name="Presentation",
+                file_ids=presentation_files,
+                depends_on=[_LAYER_DATA] if data_files else [],
+                confidence=1.0,
+                evidence=[f"imports a known web/API/CLI framework ({len(presentation_files)} file(s))"],
+            ))
         return layers
-
-    def _infer_layer_name(self, layer_num: int, file_ids: list, file_map: dict) -> str:
-        """Infer layer name from semantic keywords in file paths.
-
-        Layer *numbers* come from topological depth in the import graph --
-        a purely structural signal that says nothing about what a layer is
-        for. Naming layers 0/1/2 "Data"/"Business"/"Presentation"
-        unconditionally (regardless of whether any matching keyword is
-        actually present) asserts a specific 3-tier enterprise architecture
-        onto every codebase, including flat/ML/CLI repos that have no such
-        thing -- and downstream, guardrails reports disagreements with that
-        fabricated hierarchy as "layer_boundaries" errors. Only use a
-        semantic name when real keyword evidence supports it; otherwise
-        report the neutral, structural "Layer N" (see
-        docs/archive/PRODUCTION_AUDIT_2026-07-15.md for the false-positive
-        this caused on a real unseen repo).
-        """
-        for fid in file_ids:
-            path = file_map.get(fid, type('', (), {'rel_path': ''})()).rel_path.lower()
-            for keyword in self.SEMANTIC_KEYWORDS.get(layer_num, []):
-                if keyword in path:
-                    return keyword.capitalize()
-
-        return f"Layer {layer_num}"

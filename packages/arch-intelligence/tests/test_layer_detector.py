@@ -22,7 +22,8 @@ class TestLayerDetectionBasics:
         assert isinstance(result, list)
 
     def test_layered_fixture_extracts_layers(self, layer_detector):
-        """3-layer fixture should extract multiple layers."""
+        """3-file fixture with real persistence/framework evidence should
+        extract Data + Presentation layers."""
         import_graph = [
             ImportEdge(importer_file_id="b.py", imported_file_id="a.py"),
             ImportEdge(importer_file_id="c.py", imported_file_id="b.py"),
@@ -32,8 +33,9 @@ class TestLayerDetectionBasics:
             File(id="b.py", rel_path="service/logic.py"),
             File(id="c.py", rel_path="api/handler.py"),
         ]
-        
-        layers = layer_detector.extract_layers(import_graph, files)
+        external = {"a.py": {"sqlalchemy"}, "c.py": {"flask"}}
+
+        layers = layer_detector.extract_layers(import_graph, files, external)
         assert len(layers) >= 1
 
 
