@@ -18,22 +18,18 @@ description = "Engineering Intelligence Platform"
 authors = ["Ortho Team <urbrain369@gmail.com>"]
 readme = "README.md"
 
-# Poetry workspaces — all 13 packages installed with one command
-packages = [
-    { include = "shared/storage", from = "." },
-    { include = "packages/repo-intelligence", from = "." },
-    { include = "packages/context-hub", from = "." },
-    { include = "packages/arch-intelligence", from = "." },
-    { include = "packages/impact-analysis", from = "." },
-    { include = "packages/change-planner", from = "." },
-    { include = "packages/feature-planner", from = "." },
-    { include = "packages/refactoring-advisor", from = "." },
-    { include = "packages/arch-guardrails", from = "." },
-    { include = "packages/decision-engine", from = "." },
-    { include = "packages/cli-commands", from = "." },
-    { include = "packages/token-optimizer", from = "." },
-    { include = "packages/orchestration", from = "." },
-]
+# NOTE: this package intentionally does NOT bundle the 13 workspace
+# packages' source via `packages = [...]` (removed 2026-07-16). Every real
+# install path (install.sh/install.bat/install.ps1) already installs each
+# workspace package separately and editable via its own `-e packages/X`
+# flag -- that is the actual, working mechanism (see install.sh's own
+# comment: "Root `pip install -e .` alone does NOT install the 13
+# workspace packages"). Bundling the same source a second time here made
+# pip's resolver see two different installs of the same package (e.g.
+# context-hub bundled into root AND separately editable-installed) and
+# fail with a self-referential ResolutionImpossible on a genuinely clean
+# install -- reproduced and root-caused via a real install.ps1 test run
+# against an environment with no prior Ortho packages installed.
 
 [tool.poetry.dependencies]
 python = "^3.11"
