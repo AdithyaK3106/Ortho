@@ -1,5 +1,13 @@
 [tool.poetry]
-name = "context-hub"
+# Matches the ortho- prefix convention used by sibling packages that are
+# depended on by path elsewhere (ortho-orchestration, ortho-storage,
+# ortho-repo-intelligence, ortho-arch-intelligence). Previously plain
+# "context-hub" -- token-optimizer's pyproject.toml already (correctly)
+# declared its path dependency as "ortho-context-hub", anticipating this
+# convention, so a genuinely clean `pip install -e .` failed with
+# "No matching distribution found for ortho-context-hub" since the name
+# this package actually registered under didn't match.
+name = "ortho-context-hub"
 version = "0.1.0"
 description = "ContextHub: Pillar 2 — Persistent knowledge layer for Ortho"
 authors = ["Ortho Team"]
