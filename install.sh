@@ -50,10 +50,17 @@ if [ ! -f "$ORTHO_BIN" ]; then
 fi
 
 # Step 3: Ask for repo
+# `read` here would hang or read garbage under `curl ... | bash` (stdin is
+# the piped script, not a terminal) -- only prompt in a real interactive
+# terminal, default to the current directory otherwise. Same class of fix
+# as install.ps1's Read-Host guard.
 echo ""
-echo "📁 Which repository do you want to scan?"
-read -p "   Enter path (default: current directory): " REPO_PATH
-REPO_PATH=${REPO_PATH:-.}
+REPO_PATH="."
+if [ -t 0 ]; then
+  echo "📁 Which repository do you want to scan?"
+  read -p "   Enter path (default: current directory): " REPO_PATH
+  REPO_PATH=${REPO_PATH:-.}
+fi
 
 # Step 4: Scan
 echo "🔍 Scanning $REPO_PATH..."

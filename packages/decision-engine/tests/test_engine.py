@@ -353,3 +353,148 @@ class TestAccuracy:
         assert result.recommended_option is not None
         assert result.reasoning != ""
         assert 0.0 <= result.confidence <= 1.0
+
+
+class TestGitHistorySource:
+    """task-025 part 2: git_history commit-evidence source."""
+
+    def test_single_git_history_recommendation(self, engine: DecisionEngine) -> None:
+        sources = {
+            "change_planner": [],
+            "feature_planner": [],
+            "refactoring_advisor": [],
+            "arch_guardrails": [],
+            "git_history": [
+                Mock(
+                    title="fix auth token bug",
+                    description="fix auth token bug\n\nRoot cause was X.",
+                    commit_hash="abc123def456",
+                    author="Jane",
+                    commit_date="2026-01-01T00:00:00+00:00",
+                    confidence=0.75,
+                )
+            ],
+        }
+
+        result = engine.decide("auth token", sources)
+
+        assert len(result.options) == 1
+        rec = result.options[0]
+        assert rec.source == "git_history"
+        assert rec.title == "Prior commit: fix auth token bug"
+        assert rec.confidence == 0.75
+        assert "abc123de" in rec.evidence[0]  # truncated to 8 chars
+        assert "Jane" in rec.evidence[0]
+
+    def test_confidence_at_upper_bound_does_not_raise(self, engine: DecisionEngine) -> None:
+        """CommitEvidence.confidence can legitimately be exactly 1.0 (full
+        word overlap) -- Recommendation.__post_init__ must accept the
+        boundary, not just values strictly less than 1.0."""
+        sources = {
+            "change_planner": [],
+            "feature_planner": [],
+            "refactoring_advisor": [],
+            "arch_guardrails": [],
+            "git_history": [
+                Mock(
+                    title="t",
+                    description="t",
+                    commit_hash="0000000000000000",
+                    author="A",
+                    commit_date="2026-01-01T00:00:00+00:00",
+                    confidence=1.0,
+                )
+            ],
+        }
+        result = engine.decide("t", sources)
+        assert result.options[0].confidence == 1.0
+
+    def test_short_commit_hash_does_not_crash_truncation(self, engine: DecisionEngine) -> None:
+        """commit_hash[:8] on a hash shorter than 8 chars must not raise --
+        Python slicing tolerates this, but a caller changing to indexing
+        would break; this pins the current safe behavior."""
+        sources = {
+            "change_planner": [],
+            "feature_planner": [],
+            "refactoring_advisor": [],
+            "arch_guardrails": [],
+            "git_history": [
+                Mock(
+                    title="t",
+                    description="t",
+                    commit_hash="ab",
+                    author="A",
+                    commit_date="2026-01-01T00:00:00+00:00",
+                    confidence=0.5,
+                )
+            ],
+        }
+        result = engine.decide("t", sources)
+        assert "ab" in result.options[0].evidence[0]
+
+    def test_missing_attribute_on_item_returns_none_not_raise(self, engine: DecisionEngine) -> None:
+        """A malformed git_history item missing `commit_hash` must be
+        silently dropped (via the existing AttributeError/TypeError catch),
+        not crash decide() for the whole request."""
+        broken = Mock(spec=["title", "description", "author", "commit_date", "confidence"])
+        broken.title = "t"
+        broken.description = "t"
+        broken.author = "A"
+        broken.commit_date = "2026-01-01T00:00:00+00:00"
+        broken.confidence = 0.5
+
+        sources = {
+            "change_planner": [],
+            "feature_planner": [],
+            "refactoring_advisor": [],
+            "arch_guardrails": [],
+            "git_history": [broken],
+        }
+
+        result = engine.decide("t", sources)
+        # Falls through to the "no recommendations" path since the only
+        # source item was unconvertible.
+        assert result.recommended_option.title == "No recommendations"
+
+    def test_git_history_mixed_with_other_sources_ranks_by_score(self, engine: DecisionEngine) -> None:
+        """A high-confidence arch_guardrails violation must still outrank a
+        low-confidence git_history commit for the same intent -- git_history
+        must not get special-cased ranking treatment."""
+        sources = {
+            "change_planner": [],
+            "feature_planner": [],
+            "refactoring_advisor": [],
+            "arch_guardrails": [
+                Mock(
+                    rule_id="layer_boundaries",
+                    message="Layer violation in auth module",
+                    suggested_fix="Move the import",
+                    evidence=["auth.py -> db.py"],
+                )
+            ],
+            "git_history": [
+                Mock(
+                    title="minor auth typo fix",
+                    description="minor auth typo fix",
+                    commit_hash="deadbeef",
+                    author="A",
+                    commit_date="2026-01-01T00:00:00+00:00",
+                    confidence=0.2,
+                )
+            ],
+        }
+
+        result = engine.decide("auth", sources)
+
+        assert result.recommended_option.source == "arch_guardrails"
+
+    def test_empty_git_history_list_is_graceful(self, engine: DecisionEngine) -> None:
+        sources = {
+            "change_planner": [],
+            "feature_planner": [],
+            "refactoring_advisor": [],
+            "arch_guardrails": [],
+            "git_history": [],
+        }
+        result = engine.decide("anything", sources)
+        assert result.recommended_option.title == "No recommendations"

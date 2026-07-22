@@ -57,6 +57,58 @@ class TestRealMatch:
         assert result.answered is True
         assert any("charge_card() called by: checkout_flow" in e for e in result.evidence)
 
+    def test_falls_back_to_shorter_word_when_longest_word_has_no_match(self):
+        """Regression: "how does application context work" previously
+        extracted only "application" (11 chars, beats "context" at 7) and
+        answered from that alone -- on a real repo with no "application"
+        symbol but a real AppContext class, the answer was near-empty even
+        though "context" would have matched plenty. The longest candidate
+        with no matches must fall back to the next-longest, not give up."""
+        file_to_module = {"/repo/src/ctx.py": "src.ctx"}
+        symbols_by_file = {"/repo/src/ctx.py": [_FakeSymbol("AppContext")]}
+        gq = _FakeGraphQueries()
+
+        result = answer_question(
+            "how does application context work", file_to_module, symbols_by_file, gq
+        )
+
+        assert result.answered is True
+        assert result.keyword == "context"
+        assert "/repo/src/ctx.py" in result.matched_files
+
+    def test_prefers_the_candidate_with_more_matches_not_just_the_first_hit(self):
+        """Regression, exact real-repo case: "how does application context
+        work in this codebase" on Flask. "application" (11 chars) is tried
+        before "context" (7 chars) and finds one incidental match
+        (test_session_using_application_root), which a first-match-wins
+        fallback would accept and stop there -- even though "context"
+        matches many real, relevant symbols (AppContext,
+        teardown_appcontext, etc.) in the same repo. The candidate with
+        the most matches must win, not merely the first one with any."""
+        file_to_module = {
+            "/repo/tests/test_basic.py": "tests.test_basic",
+            "/repo/src/ctx.py": "src.ctx",
+            "/repo/src/app.py": "src.app",
+        }
+        symbols_by_file = {
+            "/repo/tests/test_basic.py": [_FakeSymbol("test_session_using_application_root")],
+            "/repo/src/ctx.py": [_FakeSymbol("AppContext")],
+            "/repo/src/app.py": [_FakeSymbol("teardown_appcontext")],
+        }
+        gq = _FakeGraphQueries()
+
+        result = answer_question(
+            "how does application context work in this codebase",
+            file_to_module,
+            symbols_by_file,
+            gq,
+        )
+
+        assert result.answered is True
+        assert result.keyword == "context"
+        assert "/repo/src/ctx.py" in result.matched_files
+        assert "/repo/src/app.py" in result.matched_files
+
     def test_evidence_resolves_importers_to_module_names_not_raw_paths(self):
         """Regression: find_importers returns raw file paths, not module
         names -- evidence must resolve through file_to_module, not leak

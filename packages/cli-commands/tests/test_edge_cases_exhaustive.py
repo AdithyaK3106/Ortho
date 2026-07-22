@@ -106,8 +106,16 @@ class TestBoundaryConditions:
         assert result is not None
 
     def test_guardrails_with_path(self, commands: CliCommands) -> None:
-        """Guardrails check with a nonexistent path fails cleanly"""
-        result = commands.guardrails("src/")
+        """Guardrails check with a nonexistent path fails cleanly.
+
+        Regression: a bare "src/" is a path that happens to genuinely
+        exist relative to this package's own cwd during a pytest run
+        (packages/cli-commands/src/), so guardrails() correctly scanned it
+        and succeeded -- the opposite of what this test asserts. A path
+        guaranteed not to exist under any cwd is required to actually test
+        the "nonexistent path" case.
+        """
+        result = commands.guardrails("definitely/not/a/real/path/xyz")
         assert result is not None
         assert result.success is False
 

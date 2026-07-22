@@ -4,12 +4,12 @@ import logging
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 try:
     import git
 except ImportError:
-    git = None
+    git = None  # type: ignore[assignment]
 
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,16 @@ class GitMetadataStore:
         self.repo_id = repo_id
         self.git_repo = self._init_git_repo()
 
-    def _init_git_repo(self):
-        """Initialize git repository if available."""
+    def _init_git_repo(self) -> Any:
+        """Initialize git repository if available.
+
+        Return type is Any, not the real git.Repo: `git` itself is
+        typed Any here (an optional dependency imported under try/except,
+        so mypy --strict can't see through to GitPython's stubs even when
+        the package is installed), and a return annotation more specific
+        than the thing actually being returned would just be an
+        unenforced claim.
+        """
         if not git or self.repo_root is None:
             return None
 
@@ -50,6 +58,12 @@ class GitMetadataStore:
         Query git log for file, store in git_history table.
 
         Non-blocking: failures logged but not raised.
+
+        commit_date is second-precision (git's own resolution), so commits
+        made in rapid succession can share an identical timestamp -- any
+        consumer that needs a strict chronological order (e.g. "most recent
+        commit wins a tie") must not rely on ORDER BY commit_date alone and
+        should break remaining ties on rowid/insertion order instead.
         """
         if not self.git_repo:
             return

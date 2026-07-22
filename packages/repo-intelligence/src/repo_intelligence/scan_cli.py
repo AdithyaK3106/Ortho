@@ -9,15 +9,18 @@ from pathlib import Path
 # (ARCHITECT mandate, task-011; same idiom as arch-intelligence graph_utils).
 _PROJECT_ROOT = Path(__file__).resolve().parents[4]
 for _p in (_PROJECT_ROOT / "shared" / "storage" / "src",
-           _PROJECT_ROOT / "packages" / "repo-intelligence" / "src"):
+           _PROJECT_ROOT / "packages" / "repo-intelligence" / "src",
+           _PROJECT_ROOT / "packages" / "context-hub" / "src"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
 from storage import OrthoDatabase
 
-from repo_intelligence.indexer import Indexer
+from repo_intelligence.indexer import Indexer, IndexResult
 from repo_intelligence.incremental_indexer import IncrementalIndexer
-from repo_intelligence.index_store import IndexStore, mint_repo_id
+from repo_intelligence.index_store import IndexStore, mint_repo_id, _mint
+from repo_intelligence.file_discoverer import FileDiscoverer
+from context_hub import GitMetadataStore
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -35,7 +38,7 @@ def setup_logging(verbose: bool = False) -> None:
     )
 
 
-def format_summary(result) -> str:
+def format_summary(result: IndexResult) -> str:
     """Format indexing result as human-readable summary."""
     return (
         f"\n✓ Scan complete:\n"
@@ -121,6 +124,9 @@ def main() -> int:
             return 1
 
         print(format_summary(result))
+
+        _load_git_history(db, store.repo_id, repo_root, args.verbose)
+
         return 0
 
     except Exception as e:
@@ -129,6 +135,32 @@ def main() -> int:
             import traceback
             traceback.print_exc()
         return 1
+
+
+def _load_git_history(db: OrthoDatabase, repo_id: str, repo_root: Path, verbose: bool) -> None:
+    """Populate git_history for every scanned file (task-025 part 1).
+
+    Best-effort: GitMetadataStore already treats a missing/non-git repo as a
+    silent no-op per file, so failures here must never fail the scan itself —
+    a git-history gap is strictly less severe than losing the symbol index.
+    """
+    try:
+        conn = db.connection()
+        try:
+            git_store = GitMetadataStore(conn, repo_root, repo_id)
+            if git_store.git_repo is None:
+                return
+            for file_path in FileDiscoverer(repo_root).find_python_files():
+                rel_path = str(file_path.relative_to(repo_root)).replace("\\", "/")
+                file_id = _mint(repo_id, rel_path)
+                git_store.load_git_history(file_id, rel_path)
+        finally:
+            conn.close()
+    except Exception as e:
+        logging.getLogger(__name__).warning(f"Git history load skipped: {e}")
+        if verbose:
+            import traceback
+            traceback.print_exc()
 
 
 if __name__ == '__main__':

@@ -134,6 +134,28 @@ class TestEndToEndSuccess:
         assert "Refactoring" in refactor_ok.stdout
 
 
+class TestGuardrailsAgainstBranch:
+    """task-025 part 4: `guardrails --against-branch <name>` bridge wiring."""
+
+    def test_diff_against_own_head_exits_zero_with_no_violations(self):
+        """Diffing HEAD against itself yields zero changed files -- a valid,
+        cheap real-repo case: the report must still succeed, just report
+        nothing in scope, not error out on an empty change set."""
+        result = _run(
+            "guardrails", "--path", str(_FIXTURE_REPO), "--against-branch", "main",
+        )
+        assert result.returncode == 0, result.stderr
+        assert "main" in result.stdout
+
+    def test_nonexistent_branch_exits_one_with_message(self):
+        result = _run(
+            "guardrails", "--path", str(_FIXTURE_REPO), "--against-branch", "definitely-not-a-real-branch",
+            timeout=_FAST_TIMEOUT,
+        )
+        assert result.returncode == 1
+        assert "definitely-not-a-real-branch" in result.stdout
+
+
 class TestExitCodeMapping:
     """Exit code 0 iff report.success, else 1 — and the failure report is
     still printed to stdout BEFORE the nonzero exit (architecture-review.md)."""

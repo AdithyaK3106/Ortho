@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from arch_guardrails.enforcer import ArchitectureEnforcer
 from arch_intelligence.model_adapter import ArchModelAdapter
@@ -14,7 +14,7 @@ from cli_commands.dependency_graph_adapter import DependencyGraphAdapter
 from cli_commands.feature_plan_adapter import FeaturePlannerArchModelAdapter
 from cli_commands.feedback import lookup_feedback, record_feedback
 from cli_commands.refactor_adapter import CodeRepositoryAdapter
-from cli_commands.repo_qa import answer_question
+from cli_commands.repo_qa import answer_question, find_existing_symbols
 from cli_commands.repo_scanner import ScanResult, scan_repository
 from cli_commands.test_recommender import TestRecommendation, recommend_tests
 from cli_commands.types import CliReport
@@ -70,6 +70,80 @@ def _citations_for(target: str, finding_keys: list[str]) -> list[str]:
     return lines
 
 
+class BranchNotFoundError(Exception):
+    """Raised when --against-branch names a ref that doesn't exist locally."""
+
+
+def _changed_modules_against_branch(target: str, against_branch: str) -> set[str]:
+    """Dotted module names for every file that differs between HEAD and
+    `against_branch`, using the same path_to_module() mapping guardrails()
+    already builds file_to_module with (so results line up with
+    GuardrailViolation.location's module-name strings, not raw paths).
+
+    Raises BranchNotFoundError if the ref doesn't exist locally -- distinct
+    from every other git failure in this file, which degrade silently to []
+    or "no evidence found"; a --against-branch typo is a user input error
+    the caller asked to be told about, not a signal to fall back to an
+    unfiltered scan.
+    """
+    import git
+
+    from cli_commands.module_mapping import path_to_module
+
+    repo_root = Path(target).resolve()
+    try:
+        repo = git.Repo(repo_root, search_parent_directories=True)
+        diff_output = repo.git.diff("--name-only", against_branch)
+    except git.GitCommandError as e:
+        raise BranchNotFoundError(f"Branch '{against_branch}' not found locally. Fetch it first.") from e
+    except git.InvalidGitRepositoryError as e:
+        raise BranchNotFoundError(f"'{target}' is not a git repository.") from e
+
+    changed_files = [line for line in diff_output.splitlines() if line.strip()]
+    modules: set[str] = set()
+    for rel_path in changed_files:
+        if not rel_path.endswith(".py"):
+            continue
+        abs_path = repo_root / rel_path
+        modules.add(path_to_module(abs_path, repo_root))
+    return modules
+
+
+def _git_history_evidence_for(target: str, query: str) -> "list[Any]":
+    """Commit messages relevant to `query` as decision-engine evidence
+    (task-025 part 2). Best-effort: no .ortho/ortho.db, no git_history rows,
+    or any DB error must degrade to an empty list -- decide() must not fail
+    just because a repo hasn't been scanned yet or has no git history.
+
+    Returns list[Any] (mirroring DecisionEngine.decide's own
+    sources: dict[str, list[Any]] signature) rather than
+    list[CommitEvidence]: importing CommitEvidence here would require it
+    at module scope for the annotation to resolve under mypy, while every
+    other cross-package dependency in this function is intentionally a
+    deferred, in-function import (matching this file's existing style for
+    optional/heavy package boundaries).
+    """
+    try:
+        from repo_intelligence.index_store import mint_repo_id
+        from storage import OrthoDatabase
+        from context_hub import find_relevant_commits
+
+        resolved_root = Path(target).resolve()
+        if not (resolved_root / ".ortho" / "ortho.db").exists():
+            return []
+
+        db = OrthoDatabase(resolved_root)
+        repo_id = mint_repo_id(resolved_root)
+        conn = db.connection()
+        try:
+            result: list[Any] = list(find_relevant_commits(conn, repo_id, query, limit=5))
+            return result
+        finally:
+            conn.close()
+    except Exception:
+        return []
+
+
 def _format_test_recommendations(recommendations: list[TestRecommendation]) -> str:
     """Test Intelligence output: which real tests exist for the affected
     modules, and which modules have none -- a coverage gap the reviewer
@@ -106,7 +180,7 @@ class _CallGraphView:
         self._queries = RepoGraphQueries(scan.call_edges, scan.import_edges_by_file)
 
     def find_callers(self, symbol: str, depth: int = 1) -> list[str]:
-        return self._queries.find_callers(symbol, depth)  # type: ignore[no-any-return]
+        return self._queries.find_callers(symbol, depth)
 
 
 class _ImportGraphView:
@@ -118,8 +192,15 @@ class _ImportGraphView:
         self._queries = RepoGraphQueries(scan.call_edges, scan.import_edges_by_file)
 
     def find_importers(self, file_path: str, include_type: bool = False) -> list[tuple[str, str]]:
+        # find_importers' real return type is a union keyed on include_type
+        # (list[tuple[str,str]] when True, list[str] when False) rather
+        # than a true @overload, so mypy sees the union regardless of the
+        # literal True passed here even though include_type=True always
+        # yields the tuple form at runtime. cast documents that contract
+        # at the one call site that relies on it, instead of loosening
+        # this method's own return type to match the union.
         result = self._queries.find_importers(file_path, include_type=True)
-        return result  # type: ignore[no-any-return]
+        return cast("list[tuple[str, str]]", result)
 
 
 class _SymbolRegistryView:
@@ -129,7 +210,7 @@ class _SymbolRegistryView:
         self._index = SymbolIndex(scan.symbols_by_file)
 
     def symbols_in_file(self, file_path: str) -> list[str]:
-        return self._index.symbols_in_file(file_path)  # type: ignore[no-any-return]
+        return self._index.symbols_in_file(file_path)
 
 
 class CliCommands:
@@ -163,6 +244,23 @@ class CliCommands:
         plan = FeaturePlanner(adapter).plan_feature(intent)
 
         lines = [f"Feature type: {plan.feature_type}", ""]
+
+        # FeaturePlanner's classifier has no repo awareness at all -- it
+        # picks a template from six fixed keyword buckets on the intent
+        # text alone, so "add streaming response support" to Flask (which
+        # already has flask.helpers.stream_with_context) produced a
+        # generic infrastructure template with no idea the feature exists.
+        # This doesn't fix the classifier -- it's a cheap, honest,
+        # evidence-based pre-check surfaced alongside the generated plan,
+        # same substring-match discipline ortho_ask uses (no vector
+        # search, no guessing).
+        existing = find_existing_symbols(intent, scan.file_to_module, scan.symbols_by_file)
+        if existing:
+            lines.append("Possibly already implemented -- check before building:")
+            for match in existing:
+                lines.append(f"  - {match.module}.{match.symbol_name} (matches '{match.keyword}')")
+            lines.append("")
+
         for path in plan.paths:
             lines.append(
                 f"- {path.name} (effort={path.effort}, risk={path.risk}): "
@@ -218,11 +316,25 @@ class CliCommands:
         return report
 
     def guardrails(self, path: str | None = None, **kwargs: Any) -> CliReport:
-        """ortho guardrails check [path]"""
+        """ortho guardrails check [path] [--against-branch <name>]"""
         target = path or "."
         severity_filter = kwargs.get("severity_filter")
         if severity_filter is not None and severity_filter not in ("error", "warning"):
             raise ValueError(f"severity_filter must be 'error' or 'warning', got '{severity_filter}'")
+
+        against_branch = kwargs.get("against_branch")
+        changed_modules: set[str] | None = None
+        if against_branch is not None:
+            try:
+                changed_modules = _changed_modules_against_branch(target, against_branch)
+            except BranchNotFoundError as e:
+                report = CliReport(
+                    title=f"Guardrails (vs {against_branch}): {target}",
+                    content=str(e),
+                    success=False,
+                )
+                capture_workflow_run(target, "guardrails", target, report)
+                return report
 
         try:
             scan = scan_repository(target)
@@ -259,8 +371,35 @@ class CliCommands:
             filtered_violations = [v for v in violations if v.severity == severity_filter]
             filter_count = len(violations) - len(filtered_violations)
 
+        # Restrict to changed files vs. --against-branch: GuardrailViolation
+        # has no raw file path, only a module name (or "source → target" for
+        # dependency-direction findings) in `location` -- a violation counts
+        # as "in scope" if any changed module's name appears in it, since
+        # that also surfaces cross-module violations where the *other* side
+        # of the edge is what actually changed.
+        branch_filter_count = 0
+        if changed_modules is not None:
+            before_count = len(filtered_violations)
+            filtered_violations = [
+                v for v in filtered_violations
+                if any(m in v.location for m in changed_modules)
+            ]
+            branch_filter_count = before_count - len(filtered_violations)
+
+        title = (
+            f"Guardrails (vs {against_branch}): {target}"
+            if against_branch is not None
+            else f"Architecture Check: {target}"
+        )
+
         if not filtered_violations:
-            content = f"Scanned {len(scan.file_to_module)} file(s). No violations found."
+            if against_branch is not None:
+                content = (
+                    f"{len(changed_modules or ())} changed file(s) vs {against_branch}. "
+                    f"No violations found."
+                )
+            else:
+                content = f"Scanned {len(scan.file_to_module)} file(s). No violations found."
         else:
             lines = []
             for v in filtered_violations:
@@ -269,7 +408,12 @@ class CliCommands:
                 if evidence_block:
                     lines.append(evidence_block)
             content = "\n".join(lines)
-            if filter_count > 0:
+            if against_branch is not None:
+                content = (
+                    f"{len(changed_modules or ())} changed file(s) vs {against_branch}. "
+                    f"{len(filtered_violations)} violation(s) found.\n\n" + content
+                )
+            elif filter_count > 0:
                 content += f"\n\n(Scanned {len(scan.file_to_module)} file(s). {len(filtered_violations)} violation(s) found ({filter_count} filtered by severity).)"
             else:
                 content = f"Scanned {len(scan.file_to_module)} file(s). {len(filtered_violations)} violation(s) found.\n\n" + content
@@ -284,7 +428,7 @@ class CliCommands:
                 content += "\n\n" + "\n".join(citations)
 
         report = CliReport(
-            title=f"Architecture Check: {target}",
+            title=title,
             content=content,
             success=True,
             violations=filtered_violations,
@@ -480,6 +624,7 @@ class CliCommands:
             sources={
                 "arch_guardrails": violations,
                 "change_planner": impact_predictions,
+                "git_history": _git_history_evidence_for(scan_target, intent),
             },
         )
 
@@ -533,9 +678,12 @@ class CliCommands:
 
         finding_key should match the "{rule_id} {location}" text shown next
         to a finding in guardrails/decide/review output (e.g.
-        "layer_boundaries src.api.views -> src.data.repo"). Recorded so a
-        future run of the same finding cites the decision and reason
-        directly ("rejected before, here's why"), not just "seen before".
+        "layer_boundaries src.api.views -> src.data.repo"). "->" is
+        accepted and normalized to the "→" the location string actually
+        uses internally, so typing the ASCII arrow (the only kind a
+        keyboard produces) still matches. Recorded so a future run of the
+        same finding cites the decision and reason directly ("rejected
+        before, here's why"), not just "seen before".
         """
         if decision not in ("accept", "reject"):
             return CliReport(
@@ -596,7 +744,28 @@ class CliCommands:
 
         from repo_intelligence.graph_queries import RepoGraphQueries
 
-        graph_queries = RepoGraphQueries(scan.call_edges, scan.import_edges_by_file)
+        # answer_question's _GraphQueries Protocol declares
+        # find_importers(...) -> list[str] (all it ever calls, at the
+        # default include_type=False, which RepoGraphQueries genuinely
+        # returns) -- but RepoGraphQueries' own signature is a union over
+        # both include_type branches, so it doesn't structurally satisfy
+        # the narrower Protocol. _AskGraphQueriesView pins the call to the
+        # branch this module actually uses, same pattern as
+        # _ImportGraphView above for change_planner's protocol.
+        class _AskGraphQueriesView:
+            def __init__(self, queries: RepoGraphQueries) -> None:
+                self._queries = queries
+
+            def find_importers(self, file_path: str, include_type: bool = False) -> list[str]:
+                result = self._queries.find_importers(file_path, include_type=False)
+                return cast("list[str]", result)
+
+            def find_callers(self, symbol: str, depth: int = 1) -> list[str]:
+                return self._queries.find_callers(symbol, depth)
+
+        graph_queries = _AskGraphQueriesView(
+            RepoGraphQueries(scan.call_edges, scan.import_edges_by_file)
+        )
         result = answer_question(question, scan.file_to_module, scan.symbols_by_file, graph_queries)
 
         if not result.answered:

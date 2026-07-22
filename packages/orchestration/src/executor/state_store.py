@@ -5,7 +5,16 @@ import json
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Any
+from typing import TYPE_CHECKING, Optional, Any
+
+if TYPE_CHECKING:
+    # Real imports only for the type checker -- a real module-level import
+    # here would risk the same circular-import selector.engine <-> executor
+    # relationship _deserialize_plan's own lazy import already works around
+    # (see its docstring). TYPE_CHECKING-guarded imports are invisible at
+    # runtime, so they can't reintroduce that cycle.
+    from selector.engine import ExecutionPlan
+    from .evidence_collector import Evidence
 
 
 @dataclass
@@ -18,9 +27,9 @@ class WorkflowRun:
     status: str  # pending, running, awaiting_approval, rejected, complete, failed
     started_at: str
     completed_at: Optional[str] = None
-    evidence: list = None
+    evidence: Optional[list[Any]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.evidence is None:
             self.evidence = []
 
@@ -31,6 +40,13 @@ class WorkflowStateStore:
     def __init__(self, db: Any):  # OrthoDatabase
         self.db = db
         self._ensure_schema()
+        # Real ArtifactStore, set by the caller (see workflow_cli.py's
+        # cmd_run) when real context assembly is wanted. None means
+        # workflow_executor.execute()'s hasattr(store, "artifact_store")
+        # check still behaves exactly as before this was a declared
+        # attribute -- callers that never set it get context_package=None,
+        # same as when the attribute didn't exist on the class at all.
+        self.artifact_store: Optional[Any] = None
 
     def _ensure_schema(self) -> None:
         """Ensure Migration 003 schema exists (idempotent)."""
@@ -246,7 +262,7 @@ class WorkflowStateStore:
         return runs
 
     @staticmethod
-    def _serialize_plan(plan: Any) -> dict:  # ExecutionPlan
+    def _serialize_plan(plan: Any) -> dict[str, Any]:  # ExecutionPlan
         """Serialize ExecutionPlan to JSON-compatible dict."""
         return {
             "intent_class": plan.intent_class,
@@ -267,12 +283,23 @@ class WorkflowStateStore:
         }
 
     @staticmethod
-    def _deserialize_plan(data: dict) -> Any:  # ExecutionPlan
-        """Deserialize JSON dict to ExecutionPlan."""
+    def _deserialize_plan(data: dict[str, Any]) -> "ExecutionPlan":
+        """Deserialize JSON dict to ExecutionPlan.
+
+        ExecutionStep/ExecutionPlan live in src/selector/engine.py, not in
+        the separate src/orchestration/selector/ sub-package (which only
+        holds agent_registry.py/skill_registry.py) -- "orchestration.
+        selector.engine" was importing the wrong tree and 404ing the
+        moment src/ was on sys.path but packages.orchestration.src.
+        orchestration had already been imported under its dotted name
+        elsewhere in the process (e.g. workflow_cli.py's own imports),
+        which is exactly the case right after an approval-gate rejection
+        calls get_run() to print the final state.
+        """
         import sys
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).parent.parent))
-        from orchestration.selector.engine import ExecutionStep, ExecutionPlan
+        from selector.engine import ExecutionStep, ExecutionPlan
 
         steps = [
             ExecutionStep(
@@ -295,7 +322,7 @@ class WorkflowStateStore:
         )
 
     @staticmethod
-    def _serialize_evidence(evidence: Any) -> dict:  # Evidence
+    def _serialize_evidence(evidence: Any) -> dict[str, Any]:  # Evidence
         """Serialize Evidence to JSON-compatible dict."""
         return {
             "step_id": evidence.step_id,
@@ -317,7 +344,7 @@ class WorkflowStateStore:
         }
 
     @staticmethod
-    def _deserialize_evidence(data: dict) -> Any:  # Evidence
+    def _deserialize_evidence(data: dict[str, Any]) -> "Evidence":
         """Deserialize JSON dict to Evidence dataclass per spec.md §3.3.
 
         Ensures Evidence is always deserialized into Evidence dataclass instances,
@@ -334,7 +361,17 @@ class WorkflowStateStore:
             # Fallback to AGENT_EXECUTION if unrecognized
             evidence_type = EvidenceType.AGENT_EXECUTION
 
-        return Evidence(
+        # Evidence is imported locally (circular-import avoidance, same
+        # pattern as _deserialize_plan's ExecutionPlan import), which mypy
+        # cannot resolve to the same module identity as the TYPE_CHECKING
+        # import above -- the same executor/selector/orchestration
+        # multi-path naming ambiguity documented on _deserialize_plan,
+        # here surfacing as an unresolvable Any instead of a runtime
+        # crash. The constructor genuinely returns a real Evidence at
+        # runtime (exercised by test_evidence.py and this file's own
+        # round-trip tests); this silences the resulting false positive
+        # rather than a real return-type problem.
+        return Evidence(  # type: ignore[no-any-return]
             step_id=data.get("step_id", ""),
             step_name=data.get("step_name", ""),
             evidence_type=evidence_type,

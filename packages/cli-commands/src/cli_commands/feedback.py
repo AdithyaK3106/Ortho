@@ -22,6 +22,17 @@ _logger = logging.getLogger(__name__)
 _VALID_DECISIONS = ("accept", "reject")
 
 
+def _normalize_finding_key(finding_key: str) -> str:
+    """"->" and " -> " are what a keyboard types; enforcer.py's cycle
+    locations are joined with the Unicode arrow "→". Without this, a
+    finding_key typed with ASCII arrows (as the CLI's own --help example
+    shows) never matches the location string it's meant to reference, so
+    record_feedback silently stores an orphan record and lookup_feedback
+    never finds it -- no error, just a citation that quietly never appears.
+    """
+    return finding_key.replace("->", "→")
+
+
 def record_feedback(
     repo_path: str,
     finding_key: str,
@@ -43,6 +54,8 @@ def record_feedback(
         raise ValueError(f"decision must be one of {_VALID_DECISIONS}, got {decision!r}")
     if not finding_key or not finding_key.strip():
         raise ValueError("finding_key cannot be empty")
+
+    finding_key = _normalize_finding_key(finding_key)
 
     try:
         resolved_root = Path(repo_path).resolve()
@@ -88,6 +101,8 @@ def lookup_feedback(repo_path: str, finding_key: str) -> str | None:
     """
     if not finding_key or not finding_key.strip():
         return None
+
+    finding_key = _normalize_finding_key(finding_key)
 
     try:
         resolved_root = Path(repo_path).resolve()

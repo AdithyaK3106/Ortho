@@ -44,6 +44,7 @@ def _main() -> None:
     guardrails_parser = subparsers.add_parser("guardrails", help="Architecture violation check")
     guardrails_parser.add_argument("--path", required=True, help="Directory to scan")
     guardrails_parser.add_argument("--severity", choices=["error", "warning"], help="Filter violations by severity")
+    guardrails_parser.add_argument("--against-branch", help="Restrict violations to files changed vs. this local branch")
 
     decide_parser = subparsers.add_parser("decide", help="Decision support")
     decide_parser.add_argument("intent", help="Free-text intent or a file path")
@@ -89,6 +90,8 @@ def _main() -> None:
         kwargs = {}
         if hasattr(args, "severity") and args.severity:
             kwargs["severity_filter"] = args.severity
+        if hasattr(args, "against_branch") and args.against_branch:
+            kwargs["against_branch"] = args.against_branch
         report = commands.guardrails(args.path, **kwargs)
     elif args.action == "decide":
         kwargs = {"scan_path": args.scan_path}

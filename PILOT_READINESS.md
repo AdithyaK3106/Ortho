@@ -158,6 +158,45 @@ work is tempted to sell "memory" as a headline feature, it should instead
 name the customer-facing outcome memory produces. Section 4 below is
 written that way deliberately.
 
+### 3.1 repowise — a named competitor that weakens the local-first wedge (added 2026-07-22)
+
+**repowise** (AGPL-3.0, self-hosted, `pip install repowise`) is close enough to
+Ortho's own shape that it has to be named here rather than left implicit.
+It builds a dependency graph, git-history intelligence (hotspots, ownership,
+co-change), a generated wiki, architectural-decision mining, a 25-marker
+code-health score calibrated against a real defect corpus, and a 10-tool MCP
+server — overlapping almost every capability row in Sections 1 and 4. It is
+more mature on nearly every shared axis: 16 languages parsed to AST (Ortho is
+Python-only), a real web dashboard (Ortho has none), a defect-corpus-validated
+health score with head-to-head benchmarks published against CodeScene, a VS
+Code extension, and a hosted commercial tier already live.
+
+**Why this specifically matters to Section 3's hypothesis:** the ICP argument
+above rests on local-first being a structural moat competitors can't cross —
+"none of whom can be local-first the way Ortho structurally already is."
+repowise **is** local-first, self-hostable, and requires no API key to index
+a repo. That sentence is no longer true. A compliance-motivated buyer in the
+chosen ICP (Section 2.1) now has a more mature, free, open-source option that
+satisfies the same "no vendor touches our source" requirement and does more.
+
+**What still differs, and is where Ortho's remaining case has to live:**
+- Ortho's `feedback` loop cites *rejected* recommendations with the original
+  reason back to the user, verified end-to-end (Section 5) — a sharper claim
+  than repowise's transcript-mined decisions, if it holds up under real usage.
+- Ortho is a prescriptive workflow engine (ASES: PLANNER → ARCHITECT →
+  BUILDER → TEST-DESIGNER → VERIFIER → REVIEWER via `ortho orchestrate`), not
+  just an intelligence/context layer. repowise does not attempt to gate or
+  sequence changes through a workflow — it surfaces information for whatever
+  agent or human is doing the work.
+
+**What this changes:** local-first alone is no longer a sufficient answer to
+"why Ortho and not a competitor" in Section 2.1's ICP table — it should be
+treated as necessary but not differentiating. The pilot should explicitly
+test whether the reject-reason memory and the workflow-gating model, not
+local-first by itself, are what a real buyer says they'd pay for. If neither
+survives contact with a pilot customer, Section 2's ICP needs revisiting, not
+just this section's wording.
+
 ---
 
 ## 4. Customer outcomes, not features

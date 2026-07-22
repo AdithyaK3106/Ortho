@@ -1,12 +1,18 @@
 """Adapts real scan data to refactoring_advisor's CodeRepository Protocol.
 
-get_duplications() and get_high_churn_modules() return [] unconditionally:
-no code-similarity detector or git-history integration exists in this
-codebase yet (see task-019 plan.md "Out of Scope"). This is a documented
-gap, not fabricated data.
+get_duplications() returns [] unconditionally: no code-similarity detector
+exists in this codebase yet (see task-019 plan.md "Out of Scope"). This is
+a documented gap, not fabricated data.
+
+get_high_churn_modules() (task-025 part 3) reads git_history from
+.ortho/ortho.db when present -- best-effort, since scan_repository() always
+runs an in-memory scan regardless of whether `ortho scan` has ever been run
+against this repo, so a git-history-backed answer may not be available.
 """
 
 from __future__ import annotations
+
+from pathlib import Path
 
 from impact_analysis.dependency_health import DependencyHealthAnalyzer
 from impact_analysis.types import ImportEdge as HealthImportEdge
@@ -15,6 +21,28 @@ from cli_commands.repo_scanner import ScanResult
 
 _BLOAT_LINES_THRESHOLD = 300
 _BLOAT_FUNCTIONS_THRESHOLD = 20
+
+# A module needs more than a handful of commits to be meaningfully "high
+# churn" rather than just recently created; flat threshold, not a
+# configurable curve (ponytail: revisit only if a pilot shows this is wrong).
+_HIGH_CHURN_COMMIT_THRESHOLD = 20
+
+
+def _is_test_module(module: str) -> bool:
+    """True if the dotted module name matches pytest/unittest's own
+    discovery convention (a "tests" package segment, or a leaf named
+    test_*/​*_test) -- not a new heuristic, the same rule the ecosystem's
+    own tooling already treats as authoritative. A 384-line file with 47
+    test functions doesn't carry the coupling/maintenance cost of 384
+    lines of production code the way app.py's 1625 lines do; flagging it
+    as "bloat: split into focused modules" recommends restructuring test
+    files for a cost they don't actually impose, and on any repo with a
+    substantial test suite it drowns the real findings in noise.
+    """
+    segments = module.split(".")
+    return any(s == "tests" or s == "test" for s in segments) or any(
+        s.startswith("test_") or s.endswith("_test") for s in segments
+    )
 
 
 def _resolve_target_file_id(
@@ -93,6 +121,8 @@ class CodeRepositoryAdapter:
         modules = set(self._scan.file_to_module.values())
         result: list[tuple[str, int, int]] = []
         for module in modules:
+            if _is_test_module(module):
+                continue
             lines = metrics.get_module_lines(module)
             functions = metrics.get_module_functions(module)
             if lines > _BLOAT_LINES_THRESHOLD or functions > _BLOAT_FUNCTIONS_THRESHOLD:
@@ -103,4 +133,39 @@ class CodeRepositoryAdapter:
         return []
 
     def get_high_churn_modules(self) -> list[str]:
-        return []
+        """Modules with more than _HIGH_CHURN_COMMIT_THRESHOLD commits in
+        git_history. Best-effort: no .ortho/ortho.db (repo never scanned),
+        no git repo, or any DB error all degrade to an empty list -- a
+        missing churn signal must never fail the whole refactor report.
+        """
+        try:
+            from repo_intelligence.index_store import mint_repo_id, _mint
+            from storage import OrthoDatabase
+            from context_hub import GitMetadataStore
+
+            repo_root = self._scan.repo_root
+            if not (repo_root / ".ortho" / "ortho.db").exists():
+                return []
+
+            db = OrthoDatabase(repo_root)
+            repo_id = mint_repo_id(repo_root)
+            conn = db.connection()
+            try:
+                git_store = GitMetadataStore(conn, repo_root, repo_id)
+                result: list[str] = []
+                for file_key, module in self._scan.file_to_module.items():
+                    if _is_test_module(module):
+                        continue
+                    try:
+                        rel_path = str(Path(file_key).relative_to(repo_root)).replace("\\", "/")
+                    except ValueError:
+                        continue
+                    file_id = _mint(repo_id, rel_path)
+                    churn = git_store.get_file_churn(file_id)
+                    if churn.commit_count > _HIGH_CHURN_COMMIT_THRESHOLD:
+                        result.append(module)
+                return result
+            finally:
+                conn.close()
+        except Exception:
+            return []

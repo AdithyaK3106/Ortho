@@ -1,5 +1,6 @@
 """ContextHub: Pillar 2 — Persistent knowledge layer."""
 
+from .commit_evidence import CommitEvidence, find_relevant_commits
 from .embedding import EmbeddingProvider, NullEmbedding
 from .git_metadata import FileChurnMetadata, GitMetadataStore
 from .ingestion import ArtifactIngestionRequest, ValidationResult, validate_ingestion
@@ -25,4 +26,6 @@ __all__ = [
     "StalenessReport",
     "EmbeddingProvider",
     "NullEmbedding",
+    "CommitEvidence",
+    "find_relevant_commits",
 ]

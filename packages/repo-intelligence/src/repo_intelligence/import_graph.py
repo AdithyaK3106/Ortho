@@ -74,6 +74,18 @@ class ImportGraphBuilder:
         """
         Recursively walk AST and extract import statements.
 
+        Does not descend into function_definition bodies: an import inside
+        a function only executes when that function runs, not at module
+        load time, so it can't participate in a load-time circular-import
+        failure the way a module-level import can. Counting it the same as
+        a top-level import produces false-positive cycles -- e.g. Django's
+        django/contrib/auth/__init__.py deliberately imports
+        `.models.AnonymousUser` inside get_user()/aget_user() specifically
+        to avoid a real cycle with auth.models, which imports auth
+        top-level. Treating that deferred import as a top-level edge
+        reports the exact cycle Django engineered around as if it still
+        existed.
+
         Args:
             node: Current tree-sitter node
             edges: Accumulator list of import edges
@@ -83,6 +95,9 @@ class ImportGraphBuilder:
 
         elif node.type == "import_from_statement":
             self._process_import_from_statement(node, edges)
+
+        if node.type == "function_definition":
+            return
 
         # Continue walking children
         for child in node.children:
@@ -149,24 +164,24 @@ class ImportGraphBuilder:
                 # Structure: dotted_name/identifier as alias
                 for subchild in child.children:
                     if subchild.type == "dotted_name":
-                        return subchild.text.decode("utf-8")
+                        return str(subchild.text.decode("utf-8"))
                     elif subchild.type == "identifier":
                         # Check if this is before 'as'
                         idx = child.children.index(subchild)
                         if idx + 1 < len(child.children) and child.children[idx + 1].type == "as":
-                            return subchild.text.decode("utf-8")
+                            return str(subchild.text.decode("utf-8"))
                         elif idx + 1 >= len(child.children):
                             # Last child, no 'as' after
-                            return subchild.text.decode("utf-8")
+                            return str(subchild.text.decode("utf-8"))
             elif child.type == "dotted_name":
-                return child.text.decode("utf-8")
+                return str(child.text.decode("utf-8"))
             elif child.type == "identifier":
                 # Check if next is "as"
                 idx = node.children.index(child)
                 if idx + 1 < len(node.children) and node.children[idx + 1].type == "as":
-                    return child.text.decode("utf-8")
+                    return str(child.text.decode("utf-8"))
                 elif idx + 1 >= len(node.children):
-                    return child.text.decode("utf-8")
+                    return str(child.text.decode("utf-8"))
         return None
 
     def _extract_from_import_name(self, node: Any) -> Optional[str]:
@@ -186,8 +201,8 @@ class ImportGraphBuilder:
             elif from_seen and (
                 child.type == "dotted_name" or child.type == "identifier"
             ):
-                if child.text.decode("utf-8") not in ("import", "."):
-                    return child.text.decode("utf-8")
+                if str(child.text.decode("utf-8")) not in ("import", "."):
+                    return str(child.text.decode("utf-8"))
         return None
 
     def _is_relative_import(self, node: Any) -> bool:
@@ -200,5 +215,5 @@ class ImportGraphBuilder:
         Returns:
             True if relative import, False otherwise
         """
-        text = node.text.decode("utf-8")
+        text = str(node.text.decode("utf-8"))
         return text.lstrip().startswith("from .")

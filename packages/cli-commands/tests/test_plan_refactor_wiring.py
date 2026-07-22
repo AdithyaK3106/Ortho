@@ -19,6 +19,7 @@ from cli_commands.types import CliReport
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _CLICK = str(_REPO_ROOT / "repos" / "click")
 _REQUESTS = str(_REPO_ROOT / "repos" / "requests")
+_FLASK = str(_REPO_ROOT / "repos" / "flask")
 
 
 @pytest.fixture
@@ -71,13 +72,12 @@ class TestRefactorCommand:
         assert result.success is True
         assert "bloat" in result.content.lower()
 
-    def test_refactor_no_fabricated_duplication_or_churn(self, commands: CliCommands) -> None:
-        """No duplication-detection or churn-analysis signal exists in this
-        codebase yet (spec.md non-goal) — the rendered report must not
-        claim to have found either, on any real repo."""
+    def test_refactor_no_fabricated_duplication(self, commands: CliCommands) -> None:
+        """No duplication-detection signal exists in this codebase yet
+        (spec.md non-goal) — the rendered report must not claim to have
+        found any, on any real repo."""
         result = commands.refactor(_CLICK)
         assert "duplication" not in result.content.lower()
-        assert "debt" not in result.content.lower()  # 'debt' == high-churn issue_type
 
     def test_refactor_clean_small_repo_reports_no_issues_not_error(
         self, tmp_path: Path
@@ -105,8 +105,11 @@ class TestCodeRepositoryAdapter:
         adapter = CodeRepositoryAdapter(scan)
         assert adapter.get_duplications() == []
 
-    def test_get_high_churn_modules_always_empty(self) -> None:
-        scan = scan_repository(_CLICK)
+    def test_get_high_churn_modules_empty_when_never_scanned(self, tmp_path: Path) -> None:
+        """A repo with no .ortho/ortho.db (never run through `ortho scan`)
+        has no git_history to read -- must degrade to [], not raise."""
+        (tmp_path / "a.py").write_text("x = 1\n", encoding="utf-8")
+        scan = scan_repository(str(tmp_path))
         adapter = CodeRepositoryAdapter(scan)
         assert adapter.get_high_churn_modules() == []
 
@@ -120,6 +123,27 @@ class TestCodeRepositoryAdapter:
         assert len(bloated) > 0
         for module, lines, functions in bloated:
             assert lines > 300 or functions > 20
+
+    def test_get_bloated_modules_excludes_test_modules(self) -> None:
+        """Regression: on Flask, get_bloated_modules() previously flagged
+        tests.test_json (346 lines/38 functions), tests.test_views (272/44),
+        tests.test_appctx, tests.test_signals, etc. as 'bloat: split into
+        focused modules' alongside real production findings like
+        src.flask.helpers. Test-file line/function count doesn't carry the
+        same coupling or maintenance cost as production code, so this both
+        recommends a pointless split and drowns real findings in an
+        overgrown-test-suite repo. Test modules (a 'tests'/'test' package
+        segment, or a test_*/​*_test leaf, matching pytest's own discovery
+        convention) must never appear in the result, even if they
+        genuinely exceed the line/function thresholds."""
+        scan = scan_repository(_FLASK)
+        adapter = CodeRepositoryAdapter(scan)
+        bloated = adapter.get_bloated_modules()
+        assert len(bloated) > 0  # Flask has real production bloat (app.py etc.)
+        for module, _lines, _functions in bloated:
+            segments = module.split(".")
+            assert "tests" not in segments and "test" not in segments
+            assert not any(s.startswith("test_") or s.endswith("_test") for s in segments)
 
     def test_get_tight_couplings_returns_deduplicated_pairs(self) -> None:
         """A cycle A->B->A must appear once as (A, B), not once as (A, B)

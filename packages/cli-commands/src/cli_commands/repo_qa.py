@@ -64,20 +64,72 @@ class QAResult:
     answered: bool = False
 
 
-def _extract_keyword(question: str) -> str | None:
-    """Pull the most specific real word out of a question. Picks the
-    longest non-stopword token -- a cheap, honest heuristic (no NLU), since
-    the longest word in a question like "how does auth work" is usually
-    the actual subject ("auth")."""
+def _extract_keywords(question: str) -> list[str]:
+    """Pull candidate real words out of a question, longest first -- a
+    cheap, honest heuristic (no NLU), since the longest word in a question
+    like "how does auth work" is usually the actual subject ("auth").
+
+    Returns every candidate, not just the longest: a question like "how
+    does application context work" has "application" (11 chars) beat
+    "context" (7 chars) under a single-keyword rule, discarding the actual
+    subject entirely and answering from an unrelated word. Trying
+    candidates in length order and falling back when the top one has no
+    real matches recovers "context" without abandoning the "longest word
+    first" heuristic for the common single-subject case.
+    """
     tokens = re.findall(r"[a-zA-Z_][a-zA-Z0-9_]*", question.lower())
     # len >= 3: a 2-char token is too generic to be a meaningful subject and
     # will almost always false-positive as a substring inside unrelated
     # longer identifiers (e.g. "it" inside "init", "commit", "unit").
     candidates = [t for t in tokens if t not in _STOPWORDS and len(t) >= 3]
-    if not candidates:
-        return None
-    longest: str = max(candidates, key=len)
-    return longest
+    # Stable sort by descending length preserves original left-to-right
+    # order among same-length candidates, so results stay deterministic.
+    return sorted(dict.fromkeys(candidates), key=len, reverse=True)
+
+
+@dataclass
+class ExistingSymbolMatch:
+    keyword: str
+    symbol_name: str
+    module: str
+
+
+def find_existing_symbols(
+    intent: str,
+    file_to_module: dict[str, str],
+    symbols_by_file: dict[str, list["Symbol"]],
+    limit: int = 5,
+) -> list[ExistingSymbolMatch]:
+    """Check whether symbols matching the intent's keywords already exist
+    in the scanned repo -- same mechanical substring-match discipline as
+    answer_question (no vector search, no NLU), reused for a different
+    purpose: feature_planner's classifier has no repo awareness at all
+    (see planner.py's _classify_feature_type), so "add streaming response
+    support" to Flask produced a generic infrastructure template with no
+    idea that flask.helpers.stream_with_context already exists. This
+    doesn't replace that classifier -- it's a cheap, honest pre-check a
+    caller can surface alongside the generated plan ("this may already
+    exist, check before implementing"), using only evidence the scan
+    already produced.
+    """
+    keywords = _extract_keywords(intent)
+    matches: list[ExistingSymbolMatch] = []
+    seen: set[tuple[str, str]] = set()
+    for keyword in keywords:
+        for file_path, symbols in symbols_by_file.items():
+            module = file_to_module.get(file_path, file_path)
+            for symbol in symbols:
+                if keyword in symbol.name.lower():
+                    key = (module, symbol.name)
+                    if key not in seen:
+                        seen.add(key)
+                        matches.append(ExistingSymbolMatch(keyword=keyword, symbol_name=symbol.name, module=module))
+        if matches:
+            # Same keyword-fallback discipline as answer_question: stop at
+            # the first candidate that actually finds something, rather
+            # than pooling weaker matches from every candidate word.
+            break
+    return matches[:limit]
 
 
 def answer_question(
@@ -95,25 +147,46 @@ def answer_question(
     if not question or not question.strip():
         return QAResult(question=question, keyword=None, answered=False)
 
-    keyword = _extract_keyword(question)
-    if keyword is None:
+    candidates = _extract_keywords(question)
+    if not candidates:
         return QAResult(question=question, keyword=None, answered=False)
 
+    # Try every candidate and keep the one with the most matches, not just
+    # the first (longest) candidate with at least one: "how does
+    # application context work" previously stopped at "application" the
+    # moment it found a single incidental test-name match
+    # (test_session_using_application_root), even though "context" matches
+    # dozens of real symbols (AppContext, teardown_appcontext, etc.) in the
+    # same repo. One weak match shouldn't beat many strong ones just for
+    # being checked first.
+    keyword = candidates[0]
     matched_files: list[str] = []
     match_reasons: dict[str, str] = {}
-    for file_path, module in file_to_module.items():
-        if keyword in module.lower() or keyword in file_path.lower():
-            matched_files.append(file_path)
-            match_reasons[file_path] = f"module/path contains '{keyword}'"
-            continue
-        for symbol in symbols_by_file.get(file_path, []):
-            if keyword in symbol.name.lower():
-                matched_files.append(file_path)
-                match_reasons[file_path] = f"defines symbol '{symbol.name}' matching '{keyword}'"
-                break
+    best_count = -1
+    for candidate in candidates:
+        candidate_matches: list[str] = []
+        candidate_reasons: dict[str, str] = {}
+        for file_path, module in file_to_module.items():
+            if candidate in module.lower() or candidate in file_path.lower():
+                candidate_matches.append(file_path)
+                candidate_reasons[file_path] = f"module/path contains '{candidate}'"
+                continue
+            for symbol in symbols_by_file.get(file_path, []):
+                if candidate in symbol.name.lower():
+                    candidate_matches.append(file_path)
+                    candidate_reasons[file_path] = f"defines symbol '{symbol.name}' matching '{candidate}'"
+                    break
+        if len(candidate_matches) > best_count:
+            best_count = len(candidate_matches)
+            keyword = candidate
+            matched_files = candidate_matches
+            match_reasons = candidate_reasons
 
     if not matched_files:
-        return QAResult(question=question, keyword=keyword, answered=False)
+        # None of the candidates matched -- report the longest (what a
+        # single-keyword extractor would have tried) so the "no evidence
+        # found" message still names a concrete word, not silence.
+        return QAResult(question=question, keyword=candidates[0], answered=False)
 
     matched_files = matched_files[:_MAX_MATCHED_FILES]
     truncated = len(matched_files) == _MAX_MATCHED_FILES

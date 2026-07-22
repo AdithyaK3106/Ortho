@@ -183,6 +183,82 @@ def test_approval_gate_rejection_terminal(executor):
         executor._transition_state(run, "rejected", "running")
 
 
+# ============================================================================
+# Regression: execute() must inspect step_result.status, not only exceptions
+# ============================================================================
+
+def test_execute_marks_run_failed_when_a_step_reports_error_status(monkeypatch):
+    """Regression: run_step() catches its own LLM/timeout errors internally
+    and returns StepResult(status="error", ...) rather than raising --
+    invisible with the stub LLM client (which never errors), but a live LLM
+    client surfaced it immediately: a real run had 2 of 3 steps genuinely
+    fail (provider timeout), correctly recorded as real error evidence, and
+    the workflow still finished as "complete" because execute()'s except
+    block only reacts to a raised exception, never to step_result.status.
+    """
+    from executor.workflow_executor import WorkflowExecutor
+    from selector.engine import ExecutionPlan, ExecutionStep
+    from executor.step_runner import StepResult
+    from executor.evidence_collector import Evidence, EvidenceType
+
+    class MockStateStore:
+        def __init__(self):
+            self.statuses = []
+            self.evidence = []
+
+        def create_run(self, repo_id, intent, plan, run_id=None):
+            return MockWorkflowRun(id=run_id or "test-run")
+
+        def get_run(self, run_id):
+            return MockWorkflowRun(id=run_id)
+
+        def update_run_status(self, run_id, status):
+            self.statuses.append(status)
+
+        def append_evidence(self, run_id, step_id, evidence):
+            self.evidence.append((step_id, evidence))
+
+    plan = ExecutionPlan(
+        intent_class="refactor",
+        steps=[
+            ExecutionStep(step_id="step-1", agent_name="architect", skill_names=[], approval_gate=False),
+            ExecutionStep(step_id="step-2", agent_name="coder", skill_names=[], approval_gate=False),
+        ],
+    )
+
+    def fake_run_step(**kwargs):
+        # First step "fails" the way a real timed-out LLM call does: no
+        # exception raised, just an error-status StepResult.
+        return StepResult(
+            agent_output="",
+            evidence=Evidence(
+                step_id=kwargs["step"].step_id,
+                step_name=kwargs["step"].agent_name,
+                evidence_type=EvidenceType.ERROR,
+                status="error",
+                error_message="LLM endpoint returned HTTP 429: rate limited",
+            ),
+            status="error",
+            error_message="LLM endpoint returned HTTP 429: rate limited",
+        )
+
+    import executor.step_runner as step_runner_module
+    monkeypatch.setattr(step_runner_module, "run_step", fake_run_step)
+
+    state_store = MockStateStore()
+    ex = WorkflowExecutor(
+        state_store=state_store,
+        llm_client=object(),  # never actually called, fake_run_step ignores it
+        agent_registry=type("R", (), {"get_agent": staticmethod(lambda name: object())})(),
+        skill_registry=type("R", (), {"get_skill": staticmethod(lambda name: object())})(),
+    )
+
+    result = ex.execute(plan, repo_id="test-repo", on_approval_gate=lambda run: True)
+
+    assert result.status == "failed"
+    assert "failed" in state_store.statuses
+
+
 def test_multiple_approval_gates_supported(executor):
     """Test that multiple approval gates are supported in a workflow."""
     # Simulate workflow with 2 gates (architect → coder → reviewer)

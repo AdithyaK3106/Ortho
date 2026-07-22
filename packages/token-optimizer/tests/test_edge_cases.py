@@ -108,7 +108,7 @@ class TestAssemblerEdgeCases:
             query="test",
             repo_id="test-repo",
             artifact_store=MockArtifactStore([
-                MockArtifact(id="a1", estimated_tokens=1, relevance_score=0.9, content="test")
+                MockArtifact(artifact_id="a1", estimated_tokens=1, relevance_score=0.9, content="test")
             ]),
             budget=budget,
             step_id="step1",
@@ -125,7 +125,7 @@ class TestAssemblerEdgeCases:
         from tests.conftest import MockArtifactStore, MockArtifact
 
         store = MockArtifactStore([
-            MockArtifact(id="fit_exactly", content="content",
+            MockArtifact(artifact_id="fit_exactly", content="content",
                          estimated_tokens=100, relevance_score=0.9)
         ])
         budget = TokenBudget(total=100, used=0, model="claude")
@@ -149,7 +149,7 @@ class TestAssemblerEdgeCases:
         from tests.conftest import MockArtifactStore, MockArtifact
 
         store = MockArtifactStore([
-            MockArtifact(id="oversized", content="x" * 10000,
+            MockArtifact(artifact_id="oversized", content="x" * 10000,
                          estimated_tokens=5000, relevance_score=0.9)
         ])
         budget = TokenBudget(total=100, used=0, model="claude")

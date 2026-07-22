@@ -39,6 +39,8 @@ class WorkflowExecutor:
         plan: Any,  # ExecutionPlan
         repo_id: str,
         on_approval_gate: Callable[[Any], bool],  # Returns: approved (True) or rejected (False)
+        intent_text: str = "",
+        repo_root: Any = None,  # pathlib.Path -- enables real tool execution
     ) -> Any:  # WorkflowRun
         """Execute plan step by step per spec.md §3.2.
 
@@ -54,6 +56,18 @@ class WorkflowExecutor:
             plan: ExecutionPlan to execute
             repo_id: Repository ID (for persistence)
             on_approval_gate: Callback for approval decision (blocks until human decides)
+            intent_text: The user's original request text. plan.intent_class
+                is only the classified category ("refactor", "analysis",
+                ...); without the raw text, run_step()'s no-context fallback
+                could only tell an agent its step_id, never what the user
+                actually asked for. Defaults to "" so existing callers/tests
+                are unaffected.
+            repo_root: Real filesystem path to the repo (not repo_id, which
+                is a content hash/mint string with no filesystem meaning).
+                Passed through to run_step() so agents get real read-only
+                tools when the LLM client supports them. None (default)
+                preserves existing behavior for callers/tests that don't
+                pass it.
 
         Returns:
             WorkflowRun (status, evidence, completed_at)
@@ -112,17 +126,29 @@ class WorkflowExecutor:
 
                 # Execute step
                 try:
-                    # Assemble context for step (task-014: token optimizer)
+                    # Assemble context for step (task-014: token optimizer).
+                    # query was step.step_id ("step-1") -- a search query
+                    # that can never match real repo content, since nothing
+                    # in a scanned repo's artifacts is titled "step-1". The
+                    # user's actual intent_text is what real context
+                    # retrieval needs to search for.
+                    # getattr(..., None), not hasattr(): WorkflowStateStore
+                    # now always declares .artifact_store (defaulting to
+                    # None when the caller never sets one), so hasattr()
+                    # alone would always be True and call assemble_context()
+                    # with artifact_store=None, which crashes the moment it
+                    # calls artifact_store.search(...) on a None.
+                    real_artifact_store = getattr(self.state_store, "artifact_store", None)
                     budget = TokenBudget(total=8192, used=0, model="claude")
                     context_package = assemble_context(
-                        query=step.step_id,  # Use step_id as search query
+                        query=intent_text or step.step_id,
                         repo_id=repo_id,
-                        artifact_store=self.state_store.artifact_store if hasattr(self.state_store, 'artifact_store') else None,
+                        artifact_store=real_artifact_store,
                         budget=budget,
                         step_id=step.step_id,
                         workflow_run_id=run_id,
                         model="claude",
-                    ) if hasattr(self.state_store, 'artifact_store') else None
+                    ) if real_artifact_store is not None else None
 
                     step_result = run_step(
                         step=step,
@@ -130,10 +156,30 @@ class WorkflowExecutor:
                         skills=[self.skill_registry.get_skill(name) for name in step.skill_names],
                         context_package=context_package,
                         llm_client=self.llm_client,
+                        intent_text=intent_text,
+                        repo_root=repo_root,
                     )
 
                     # Collect evidence
                     self.state_store.append_evidence(run_id, step.step_id, step_result.evidence)
+
+                    # run_step() catches its own LLM/timeout errors internally
+                    # and returns StepResult(status="error", ...) rather than
+                    # raising -- this except block only ever sees an exception
+                    # from context assembly or evidence persistence above, not
+                    # a real agent-step failure. Invisible with the stub LLM
+                    # client (which never errors), but a live LLM client
+                    # surfaced it immediately: 2 of 3 steps in a real run
+                    # timed out against a free-tier provider, were correctly
+                    # recorded as real error evidence, and the workflow still
+                    # finished as "complete" because nothing here ever
+                    # inspected step_result.status.
+                    if step_result.status != "success":
+                        self._transition_state(workflow_run, "running", "failed")
+                        workflow_run.status = "failed"
+                        workflow_run.completed_at = datetime.utcnow().isoformat()
+                        self.state_store.update_run_status(run_id, "failed")
+                        return workflow_run
 
                 except Exception as e:
                     # Step error: running → failed

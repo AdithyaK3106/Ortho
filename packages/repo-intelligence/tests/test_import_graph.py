@@ -236,3 +236,28 @@ class TestCircularImports:
 
         assert len(edges_a) > 0
         assert len(edges_b) > 0
+
+    def test_function_local_import_excluded(self, builder, tmp_path):
+        """A deferred import inside a function body only executes when that
+        function runs, not at module load time -- so it can't cause a real
+        load-time circular-import failure the way a top-level import can.
+        Regression test for Django's actual auth/__init__.py pattern: a
+        module-level `import inner` alongside a same-target import deferred
+        inside a function specifically to break what would otherwise be a
+        genuine cycle. Counting the deferred one as a real edge reports a
+        cycle that doesn't exist."""
+        file_path = tmp_path / "lazy_import.py"
+        file_path.write_text('''
+import top_level_module
+
+def deferred():
+    import function_local_module
+    from another_pkg import thing
+    return function_local_module
+''')
+        edges = builder.extract_imports(str(file_path))
+        targets = [e.target_module for e in edges]
+
+        assert "top_level_module" in targets
+        assert "function_local_module" not in targets
+        assert "another_pkg" not in targets

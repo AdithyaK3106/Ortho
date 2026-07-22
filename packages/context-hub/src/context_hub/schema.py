@@ -93,7 +93,8 @@ def init_git_history_schema(db: sqlite3.Connection) -> None:
             commit_date TEXT NOT NULL,
             message TEXT,
             diff_lines_added INTEGER,
-            diff_lines_removed INTEGER
+            diff_lines_removed INTEGER,
+            UNIQUE(file_id, commit_hash)
         )
     """)
 

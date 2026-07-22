@@ -165,6 +165,36 @@ class TestAssemblePromptFormat:
 
         assert user_msg == ""
 
+    def test_assemble_prompt_falls_back_to_intent_text_when_no_chunks_included(
+        self, mock_agent, mock_skills
+    ):
+        """Regression: a real ArtifactStore with nothing ingested yet for a
+        repo returns a real (truthy) ContextPackage with zero included
+        chunks -- indistinguishable, before this fix, from "context
+        assembly worked but found nothing", so the agent got a genuinely
+        empty user message and could only ask what it was reviewing. When
+        intent_text is given, it must be used instead of an empty string."""
+        now = datetime.utcnow().isoformat()
+        chunks = [
+            ContextChunk(
+                id="ch1", source_type="artifact", source_id="s1",
+                content="content", relevance_score=0.9,
+                token_count=10, included=False
+            ),
+        ]
+        budget = TokenBudget(total=100, used=0, model="claude")
+        pkg = ContextPackage(
+            id="pkg1", workflow_run_id="run1", step_id="step1",
+            chunks=chunks, budget=budget, assembled_at=now
+        )
+
+        _, user_msg = assemble_prompt(
+            pkg, step=None, agent=mock_agent, skills=[],
+            intent_text="refactor flask/app.py to split it into smaller modules",
+        )
+
+        assert user_msg == "Original request: refactor flask/app.py to split it into smaller modules"
+
 
 class TestAssemblePromptDuplicateHandling:
     """Tests for duplicate source_id handling."""

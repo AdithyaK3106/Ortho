@@ -1,6 +1,17 @@
+import re
 from typing import Any
 
 from decision_engine.types import Decision, Recommendation
+
+_WORD_RE = re.compile(r"[a-z0-9_]+")
+
+
+def _words(text: str) -> set[str]:
+    """Lowercased word tokens, splitting on anything that isn't
+    alnum/underscore -- so "auth)?" and "base_user" both yield "auth" /
+    "base_user" instead of carrying along stray punctuation that would
+    never match the same token in another string."""
+    return set(_WORD_RE.findall(text.lower()))
 
 
 class DecisionEngine:
@@ -114,23 +125,63 @@ class DecisionEngine:
                     suggested_fix=str(item.suggested_fix),
                     evidence=list(item.evidence) if hasattr(item, 'evidence') and item.evidence else [],
                 )
+            elif source == "git_history":
+                return Recommendation(
+                    title=f"Prior commit: {item.title}",
+                    description=item.description,
+                    source="git_history",
+                    effort="low",
+                    risk="low",
+                    confidence=item.confidence,
+                    suggested_fix="Review this commit for prior context before proceeding.",
+                    evidence=[f"{item.commit_hash[:8]} by {item.author} on {item.commit_date}"],
+                )
         except (AttributeError, TypeError):
             return None
 
         return None
 
+    def _dedup_text(self, option: Recommendation) -> str:
+        """Text used to detect near-duplicate recommendations.
+
+        Title alone is not enough: arch_guardrails builds every option's
+        title as f"Violation: {rule_id}" (see _convert_to_recommendation),
+        so two distinct dependency_direction cycles have byte-identical
+        titles and only differ in `description` (the actual violation
+        message, which names the specific modules/cycle). Combining title
+        with description keeps genuine near-duplicates ("Extract interface"
+        / "Extract interface pattern", same source, same/no description)
+        mergeable while stopping same-rule-different-location findings
+        from colliding just because their titles match.
+        """
+        return f"{option.title} {option.description}"
+
     def _deduplicate(self, options: list[Recommendation]) -> list[Recommendation]:
-        """Merge similar recommendations (Jaccard > 0.8)"""
-        seen: dict[str, Recommendation] = {}
+        """Merge recommendations that are near-duplicates (Jaccard > 0.8 over
+        title+description words). A 20-char title prefix was the previous
+        key: two distinct "Violation: dependency_direction" findings for
+        different cycles both collapsed to "violation: dependenc" and
+        silently dropped one, regardless of which cycle the caller's intent
+        actually asked about.
+        """
+        kept: list[Recommendation] = []
 
         for option in options:
-            key = option.title.lower()[:20]
-            if key not in seen:
-                seen[key] = option
-            elif option.confidence > seen[key].confidence:
-                seen[key] = option
+            words = _words(self._dedup_text(option))
+            merged = False
+            for i, existing in enumerate(kept):
+                existing_words = _words(self._dedup_text(existing))
+                union = words | existing_words
+                jaccard = len(words & existing_words) / len(union) if union else 0.0
+                if jaccard > 0.8:
+                    if option.confidence > existing.confidence:
+                        kept[i] = option
+                    merged = True
+                    break
+            if not merged:
+                kept.append(option)
 
-        return list(seen.values())
+        return kept
 
     def _rank_options(
         self, options: list[Recommendation], intent: str
@@ -144,11 +195,27 @@ class DecisionEngine:
         return [option for option, _ in scored]
 
     def _score_option(self, option: Recommendation, intent: str) -> float:
-        """Score option: confidence × fit_to_intent"""
+        """Score option: confidence(0.7) x fit(0.3).
+
+        fit previously ignored `intent` entirely (a constant from
+        effort/risk only), so every arch_guardrails violation -- same
+        confidence=1.0, same effort/risk -- scored identically and ranking
+        fell back to insertion order. An intent naming one specific cycle
+        (e.g. "the auth cycle") would then get whichever violation
+        check_violations() happened to find first, not the one asked about.
+        fit now also rewards word overlap between the intent text and the
+        option's title/description/evidence, so a specific intent surfaces
+        the matching finding instead of an arbitrary same-scored one.
+        """
         effort_bonus = {"low": 0.1, "medium": 0.0, "high": -0.1}[option.effort]
         risk_penalty = {"low": 0.0, "medium": -0.05, "high": -0.1}[option.risk]
 
-        return (option.confidence * 0.7) + (0.3 * (0.5 + effort_bonus + risk_penalty))
+        intent_words = _words(intent)
+        option_words = _words(" ".join([option.title, option.description, *option.evidence]))
+        overlap = len(intent_words & option_words) / len(intent_words) if intent_words else 0.0
+
+        fit = 0.5 + effort_bonus + risk_penalty + (0.5 * overlap)
+        return (option.confidence * 0.7) + (0.3 * fit)
 
     def _generate_reasoning(self, ranked: list[Recommendation]) -> str:
         """Generate explanation of top recommendation"""

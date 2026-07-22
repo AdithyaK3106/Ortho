@@ -2,6 +2,8 @@
 
 import uuid
 from datetime import datetime
+from typing import Any
+
 from .budget import TokenBudget
 from .types import ContextChunk, ContextPackage
 
@@ -9,7 +11,7 @@ from .types import ContextChunk, ContextPackage
 def assemble_context(
     query: str,
     repo_id: str,
-    artifact_store,  # ArtifactStore
+    artifact_store: Any,  # ArtifactStore
     budget: TokenBudget,
     step_id: str,
     workflow_run_id: str,
@@ -44,19 +46,41 @@ def assemble_context(
         - Increments budget.used for each included chunk
         - No other mutations
     """
-    # Search for candidate artifacts
-    artifacts = artifact_store.search(query, repo_id=repo_id)
+    # Search for candidate artifacts. ArtifactStore's repo scope is bound at
+    # construction (ArtifactStore(db, repo_id)), not passed per-call --
+    # search()'s real signature is (query, artifact_type=None, limit=50).
+    # This call site was unreachable before wiring artifact_store into
+    # WorkflowStateStore (hasattr() gated it to always skip), so the
+    # mismatch never actually executed in production until now.
+    artifacts = artifact_store.search(query)
 
-    # Convert each artifact to ContextChunk
+    # Convert each real SearchResult to a ContextChunk. SearchResult (see
+    # context_hub/search/result.py) has no "id" field -- its identity field
+    # is "artifact_id" -- and no token estimate; this conversion previously
+    # read .id/.estimated_tokens, attributes that don't exist on the real
+    # object ArtifactStore.search() returns, and crashed with
+    # "'SearchResult' object has no attribute 'id'" the moment a real
+    # artifact_store (rather than the always-empty one before this
+    # session's wiring) returned any real result.
     chunks = []
     for artifact in artifacts:
+        content = artifact.content if hasattr(artifact, "content") else ""
+        # SearchResult has no token estimate; a conservative chars/4
+        # estimate (the same heuristic StubLLMClient uses for its own
+        # token counts) keeps budget accounting meaningful for a real
+        # search result. estimated_tokens is honored when present (test
+        # doubles set it explicitly for deterministic tie-breaking
+        # fixtures) so this stays backward compatible with those tests.
+        token_count = getattr(artifact, "estimated_tokens", None)
+        if token_count is None:
+            token_count = len(content) // 4
         chunk = ContextChunk(
-            id=str(artifact.id),
+            id=str(artifact.artifact_id),
             source_type="artifact",
-            source_id=str(artifact.id),
-            content=artifact.content if hasattr(artifact, 'content') else "",
-            relevance_score=getattr(artifact, 'relevance_score', 0.0),
-            token_count=artifact.estimated_tokens if hasattr(artifact, 'estimated_tokens') else 0,
+            source_id=str(artifact.artifact_id),
+            content=content,
+            relevance_score=getattr(artifact, "relevance_score", 0.0),
+            token_count=token_count,
             included=False,  # Will be set to True if included in budget
         )
         chunks.append(chunk)

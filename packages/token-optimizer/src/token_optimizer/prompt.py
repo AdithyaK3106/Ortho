@@ -1,13 +1,16 @@
 """Prompt assembler: Deterministic formatting per spec.md AC4."""
 
+from typing import Any, Optional
+
 from .types import ContextPackage
 
 
 def assemble_prompt(
     context_package: ContextPackage,
-    step,  # ExecutionStep
-    agent,  # AgentManifest
-    skills: list = None,
+    step: Any,  # ExecutionStep
+    agent: Any,  # AgentManifest
+    skills: Optional[list[Any]] = None,
+    intent_text: str = "",
 ) -> tuple[str, str]:
     """Assemble system prompt and user message from context.
 
@@ -20,7 +23,12 @@ def assemble_prompt(
     - Chunks ordered by chunk.id ascending (lexicographic, deterministic)
     - Format: "\\n\\n--- [{source_type}:{source_id}] ---\\n{content}\\n" per chunk
     - Fixed delimiter, content verbatim, no escaping or truncation
-    - Empty string if no chunks included
+    - When no chunks are included, falls back to "Original request: {intent_text}"
+      rather than an empty string: a real ArtifactStore with nothing ingested
+      yet for this repo returns a real (truthy) ContextPackage with zero
+      chunks -- indistinguishable from "context assembly worked but found
+      nothing" without this fallback, an agent received a genuinely empty
+      user message and could only ask "what am I reviewing?"
 
     Determinism Guarantee:
     Identical input → identical prompt text (chunk order and format deterministic).
@@ -30,6 +38,8 @@ def assemble_prompt(
         step: ExecutionStep (unused; for future extensibility)
         agent: AgentManifest (has system_prompt)
         skills: list[SkillManifest] (each has content or system_prompt)
+        intent_text: the user's original request text, used as a fallback
+            when no context chunks were included
 
     Returns:
         (system_prompt: str, user_message: str) tuple
@@ -59,6 +69,11 @@ def assemble_prompt(
         formatted = f"\n\n--- [{chunk.source_type}:{chunk.source_id}] ---\n{chunk.content}\n"
         user_message_parts.append(formatted)
 
-    user_message = "".join(user_message_parts) if user_message_parts else ""
+    if user_message_parts:
+        user_message = "".join(user_message_parts)
+    elif intent_text:
+        user_message = f"Original request: {intent_text}"
+    else:
+        user_message = ""
 
     return system_prompt, user_message

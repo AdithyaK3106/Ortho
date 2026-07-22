@@ -230,3 +230,86 @@ class TestAssembleContextChunkConversion:
 
         for chunk in pkg.chunks:
             assert chunk.source_type == "artifact"
+
+
+class TestAssembleContextRealArtifactStore:
+    """Regression: assemble_context() against a real context_hub.store.ArtifactStore,
+    not the looser MockArtifactStore (whose search() accepts an optional
+    repo_id= kwarg the real ArtifactStore.search() does not have -- repo
+    scope is bound at ArtifactStore construction, not passed per-call).
+    This call path was unreachable in production until orchestration's
+    WorkflowStateStore actually got a real artifact_store attached; the
+    mock's looser signature meant no test ever caught the mismatch.
+    """
+
+    def test_assemble_context_against_real_artifact_store_does_not_raise(self, tmp_path):
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent / "context-hub" / "src"))
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "shared" / "storage" / "src"))
+        from context_hub.store import ArtifactStore
+        from storage import OrthoDatabase
+
+        db = OrthoDatabase(tmp_path)
+        db.migrate()
+        repo_id = "test-repo-real-store"
+        store = ArtifactStore(db, repo_id)
+
+        budget = TokenBudget(total=500, used=0, model="claude")
+        pkg = assemble_context(
+            query="refactor app.py",
+            repo_id=repo_id,
+            artifact_store=store,
+            budget=budget,
+            step_id="step1",
+            workflow_run_id="run1",
+        )
+
+        # No artifacts ingested yet -- an empty result is the correct,
+        # honest outcome, not a crash. The regression is specifically that
+        # this call used to raise TypeError before search()'s call site
+        # was fixed to match ArtifactStore's real signature.
+        assert pkg.chunks == []
+
+    def test_assemble_context_converts_real_nonempty_search_result(self, tmp_path):
+        """Regression: with a real (non-empty) ArtifactStore.search() result,
+        assemble_context crashed with "'SearchResult' object has no
+        attribute 'id'" -- the conversion loop read .id/.estimated_tokens,
+        attributes real context_hub.search.result.SearchResult doesn't
+        have (its identity field is .artifact_id; it has no token
+        estimate at all). Invisible in every other test here because they
+        all use MockArtifactStore, or an ArtifactStore with nothing
+        ingested, so the conversion loop's body never actually ran against
+        a real SearchResult until a live ASES workflow run hit it.
+        """
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent / "context-hub" / "src"))
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "shared" / "storage" / "src"))
+        from context_hub.ingestion import ArtifactIngestionRequest
+        from context_hub.store import ArtifactStore
+        from storage import OrthoDatabase
+
+        db = OrthoDatabase(tmp_path)
+        db.migrate()
+        repo_id = "test-repo-real-nonempty"
+        store = ArtifactStore(db, repo_id)
+        store.ingest_artifact(
+            ArtifactIngestionRequest(
+                type="decision",
+                title="refactor app.py",
+                content="app.py should be split into smaller modules",
+                source="test",
+                relevance_scope="project",
+                tags=["refactor"],
+            )
+        )
+
+        budget = TokenBudget(total=500, used=0, model="claude")
+        pkg = assemble_context(
+            query="refactor app.py",
+            repo_id=repo_id,
+            artifact_store=store,
+            budget=budget,
+            step_id="step1",
+            workflow_run_id="run1",
+        )
+
+        assert len(pkg.chunks) > 0
+        assert "split into smaller modules" in pkg.chunks[0].content
